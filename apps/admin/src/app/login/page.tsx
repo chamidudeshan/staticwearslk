@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { supabase } from '@static-wears/shared';
+import { supabase } from '@/lib/supabase-client';
 
 export default function AdminLoginPage() {
   const router = useRouter();

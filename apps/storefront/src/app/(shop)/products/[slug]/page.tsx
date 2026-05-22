@@ -3,11 +3,7 @@ import { getProductBySlug, getProducts } from '@static-wears/product-service';
 import { ProductDetailClient } from './product-detail-client';
 
 export const revalidate = 60;
-
-export async function generateStaticParams() {
-  const products = await getProducts({ limit: 50 });
-  return products.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export default async function ProductDetailPage({
   params,

@@ -60,7 +60,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const secondImage = product.images?.[1];
   const isLowStock = product.variants?.some((v) => v.stock_qty > 0 && v.stock_qty <= 3);
   const isOutOfStock = product.variants?.every((v) => v.stock_qty === 0);
-  const uniqueColors = [...new Set(product.variants?.map((v) => v.color) ?? [])];
+  const uniqueColors = Array.from(new Set(product.variants?.map((v) => v.color) ?? []));
 
   function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const rect = cardRef.current?.getBoundingClientRect();
@@ -236,7 +236,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           {/* Sizes preview */}
           {product.variants && product.variants.length > 0 && (
             <div className="flex gap-1 flex-wrap">
-              {[...new Set(product.variants.map((v) => v.size))].slice(0, 5).map((size) => (
+              {Array.from(new Set(product.variants.map((v) => v.size))).slice(0, 5).map((size) => (
                 <span key={size} className="font-mono text-[9px] text-[#444] uppercase tracking-wider">
                   {size}
                 </span>

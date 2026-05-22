@@ -42,8 +42,8 @@ export function ProductDetailClient({ product, related }: Props) {
     ? product.images
     : [{ id: 'demo', image_path: 'demo/1', is_main: true, sort_order: 0, product_id: product.id, created_at: '' }];
 
-  const uniqueColors = [...new Set(product.variants?.map((v) => v.color) ?? [])];
-  const uniqueSizes = [...new Set(product.variants?.map((v) => v.size) ?? [])];
+  const uniqueColors = Array.from(new Set(product.variants?.map((v) => v.color) ?? []));
+  const uniqueSizes = Array.from(new Set(product.variants?.map((v) => v.size) ?? []));
 
   const variantForSelection = product.variants?.find(
     (v) => v.color === selectedColor && v.id === selectedVariant?.id

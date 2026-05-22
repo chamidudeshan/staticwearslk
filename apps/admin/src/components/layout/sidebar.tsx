@@ -12,7 +12,7 @@ import {
   LogOut,
   ExternalLink,
 } from 'lucide-react';
-import { supabase } from '@static-wears/shared';
+import { supabase } from '@/lib/supabase-client';
 import { useRouter } from 'next/navigation';
 
 const navItems = [

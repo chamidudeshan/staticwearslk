@@ -1,4 +1,4 @@
-import { supabase } from '@static-wears/shared';
+import { supabase } from '@/lib/supabase-client';
 
 export function subscribeToOrder(
   orderId: string,
@@ -10,7 +10,7 @@ export function subscribeToOrder(
       'postgres_changes',
       {
         event: 'UPDATE',
-        schema: 'order_svc',
+        schema: 'public',
         table: 'orders',
         filter: `id=eq.${orderId}`,
       },
@@ -33,7 +33,7 @@ export function subscribeToProductStock(
       'postgres_changes',
       {
         event: 'UPDATE',
-        schema: 'product_svc',
+        schema: 'public',
         table: 'product_variants',
         filter: `product_id=eq.${productId}`,
       },
