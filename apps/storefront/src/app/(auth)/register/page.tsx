@@ -49,7 +49,7 @@ export default function RegisterPage() {
         <p className="font-mono text-sm text-[#555] mb-8">
           We sent a confirmation link to <span className="text-[#f0f0f0]">{email}</span>
         </p>
-        <Link href="/auth/login" className="font-mono text-sm text-[#ff6b35] hover:underline">
+        <Link href="/login" className="font-mono text-sm text-[#ff6b35] hover:underline">
           Back to sign in
         </Link>
       </motion.div>
@@ -116,7 +116,7 @@ export default function RegisterPage() {
 
       <p className="font-mono text-xs text-[#555] mt-8 text-center">
         Already have an account?{' '}
-        <Link href="/auth/login" className="text-[#ff6b35] hover:underline">
+        <Link href="/login" className="text-[#ff6b35] hover:underline">
           Sign in
         </Link>
       </p>

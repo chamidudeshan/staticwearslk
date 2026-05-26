@@ -20,7 +20,7 @@ const STATUS_VARIANT: Record<OrderStatus, 'default' | 'success' | 'warning' | 'd
 export default async function OrdersPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/auth/login?redirect=/orders');
+  if (!user) redirect('/login?redirect=/orders');
 
   const orders = await getOrdersByCustomer(user.id);
 

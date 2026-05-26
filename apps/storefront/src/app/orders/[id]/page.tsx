@@ -35,7 +35,7 @@ export default async function OrderDetailPage({
 }) {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/auth/login');
+  if (!user) redirect('/login');
 
   const order = await getOrderById(params.id);
   if (!order || order.customer_id !== user.id) notFound();

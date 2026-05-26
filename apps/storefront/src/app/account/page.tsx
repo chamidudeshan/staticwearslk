@@ -9,7 +9,7 @@ import { formatDate } from '@/lib/utils';
 export default async function AccountPage() {
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/auth/login?redirect=/account');
+  if (!user) redirect('/login?redirect=/account');
 
   const profile = await getProfile(user.id);
 
