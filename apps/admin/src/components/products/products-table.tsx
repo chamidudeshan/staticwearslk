@@ -50,7 +50,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
           />
         </div>
         <a
-          href="/api/admin/products/new"
+          href="/products/new"
           className="flex items-center gap-2 bg-[#ff6b35] text-black font-mono text-xs uppercase tracking-widest px-4 py-2.5 hover:bg-[#e8ff59] transition-colors"
         >
           <Plus size={14} />
