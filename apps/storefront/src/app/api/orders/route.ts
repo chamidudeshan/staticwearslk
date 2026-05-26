@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseServerClient } from '@static-wears/shared';
 import { createOrder, getOrdersByCustomer } from '@static-wears/order-service';
+import { sendOrderConfirmation } from '@static-wears/email-service';
 
 export async function GET() {
   const supabase = await createSupabaseServerClient();
@@ -25,5 +26,22 @@ export async function POST(req: NextRequest) {
   });
 
   if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
-  return NextResponse.json({ order: result.order });
+
+  const order = result.order!;
+  if (user.email) {
+    sendOrderConfirmation({
+      to: user.email,
+      customerName: body.shipping?.name ?? 'Customer',
+      orderId: order.id,
+      items: body.items.map((i: { product_name: string; quantity: number; unit_price: number }) => ({
+        name: i.product_name,
+        quantity: i.quantity,
+        price: i.unit_price,
+      })),
+      total: body.items.reduce((s: number, i: { unit_price: number; quantity: number }) => s + i.unit_price * i.quantity, 0),
+      shippingAddress: `${body.shipping?.address ?? ''}`,
+    }).catch(() => {});
+  }
+
+  return NextResponse.json({ order });
 }

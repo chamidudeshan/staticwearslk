@@ -125,6 +125,12 @@ export function ProductsTable({ products }: { products: Product[] }) {
                         >
                           <Eye size={14} />
                         </a>
+                        <a
+                          href={`/products/${product.id}/edit`}
+                          className="w-7 h-7 flex items-center justify-center text-[#444] hover:text-[#ff6b35] transition-colors"
+                        >
+                          <Edit size={14} />
+                        </a>
                         <button
                           onClick={() => handleDelete(product.id, product.name)}
                           disabled={deleting === product.id}

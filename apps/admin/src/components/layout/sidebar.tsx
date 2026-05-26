@@ -8,7 +8,9 @@ import {
   Package,
   ShoppingBag,
   Users,
-  BarChart3,
+  Tag,
+  Award,
+  Settings,
   LogOut,
   ExternalLink,
 } from 'lucide-react';
@@ -20,6 +22,9 @@ const navItems = [
   { href: '/products', label: 'Products', icon: Package },
   { href: '/orders', label: 'Orders', icon: ShoppingBag },
   { href: '/users', label: 'Customers', icon: Users },
+  { href: '/categories', label: 'Categories', icon: Tag },
+  { href: '/brands', label: 'Brands', icon: Award },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
 export function Sidebar() {

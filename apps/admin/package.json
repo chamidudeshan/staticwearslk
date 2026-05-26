@@ -14,6 +14,7 @@
     "@static-wears/user-service": "workspace:*",
     "@static-wears/product-service": "workspace:*",
     "@static-wears/order-service": "workspace:*",
+    "@static-wears/email-service": "workspace:*",
     "@supabase/supabase-js": "^2.43.0",
     "@supabase/ssr": "^0.4.0",
     "framer-motion": "^11.2.0",
