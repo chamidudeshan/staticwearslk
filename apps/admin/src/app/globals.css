@@ -12,6 +12,11 @@
   --admin-accent: #ff6b35;
 }
 
+html, body {
+  background-color: #060608;
+  color: #e8e8f0;
+}
+
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #0e0e12; }
 ::-webkit-scrollbar-thumb { background: #ff6b35; border-radius: 2px; }

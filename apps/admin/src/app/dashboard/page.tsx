@@ -7,7 +7,8 @@ import { RecentOrders } from '@/components/dashboard/recent-orders';
 import { TopProducts } from '@/components/dashboard/top-products';
 import { Header } from '@/components/layout/header';
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function DashboardPage() {
   const [orders, users, products] = await Promise.all([

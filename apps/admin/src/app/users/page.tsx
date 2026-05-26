@@ -2,7 +2,8 @@ import { getAllUsers } from '@static-wears/user-service';
 import { Header } from '@/components/layout/header';
 import { UsersTable } from '@/components/users/users-table';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function UsersPage() {
   const users = await getAllUsers();
