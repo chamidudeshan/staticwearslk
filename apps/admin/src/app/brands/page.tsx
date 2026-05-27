@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Trash2, Pencil, Check, X, Award } from 'lucide-react';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
@@ -69,9 +68,8 @@ export default function BrandsPage() {
         </button>
       </div>
 
-      <AnimatePresence>
-        {showForm && (
-          <motion.form initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+      {showForm && (
+          <form
             onSubmit={handleAdd} className="bg-[#0e0e12] border border-[#ff6b35]/30 rounded-xl p-6 space-y-4">
             <h3 className="font-mono text-xs uppercase tracking-widest text-[#ff6b35]">New Brand</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -86,9 +84,8 @@ export default function BrandsPage() {
               </button>
               <button type="button" onClick={() => setShowForm(false)} className="font-mono text-xs text-[#444] hover:text-[#888] transition-colors px-4">Cancel</button>
             </div>
-          </motion.form>
-        )}
-      </AnimatePresence>
+          </form>
+      )}
 
       <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl overflow-hidden">
         {loading ? (
@@ -108,8 +105,8 @@ export default function BrandsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-[#12121a]">
-              {brands.map((brand, i) => (
-                <motion.tr key={brand.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }} className="hover:bg-[#12121a] transition-colors">
+              {brands.map((brand) => (
+                <tr key={brand.id} className="hover:bg-[#12121a] transition-colors">
                   <td className="px-5 py-4">
                     {editId === brand.id ? (
                       <input value={editName} onChange={(e) => setEditName(e.target.value)}
@@ -143,7 +140,7 @@ export default function BrandsPage() {
                       )}
                     </div>
                   </td>
-                </motion.tr>
+                </tr>
               ))}
             </tbody>
           </table>

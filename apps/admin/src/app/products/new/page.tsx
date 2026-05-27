@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -15,6 +14,8 @@ interface Variant {
   price_adj: number;
 }
 
+interface Option { id: string; name: string }
+
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const COLORS = ['Black', 'White', 'Navy', 'Grey', 'Khaki', 'Olive', 'Red', 'Blue'];
 
@@ -25,10 +26,25 @@ export default function NewProductPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState('');
-  const [status] = useState('active');
+  const [brandId, setBrandId] = useState('');
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [variants, setVariants] = useState<Variant[]>([
     { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0 },
   ]);
+
+  const [brands, setBrands] = useState<Option[]>([]);
+  const [categories, setCategories] = useState<Option[]>([]);
+
+  useEffect(() => {
+    fetch('/api/admin/brands').then((r) => r.json()).then((d) => Array.isArray(d) && setBrands(d));
+    fetch('/api/admin/categories').then((r) => r.json()).then((d) => Array.isArray(d) && setCategories(d));
+  }, []);
+
+  function toggleCategory(id: string) {
+    setCategoryIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
+    );
+  }
 
   function addVariant() {
     setVariants((v) => [...v, { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0 }]);
@@ -54,6 +70,8 @@ export default function NewProductPage() {
           name: name.trim(),
           description: description.trim() || undefined,
           base_price: parseFloat(basePrice),
+          brand_id: brandId || undefined,
+          category_ids: categoryIds,
           variants: variants.map((v) => ({
             ...v,
             stock_qty: Number(v.stock_qty),
@@ -79,30 +97,19 @@ export default function NewProductPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-4">
-        <Link
-          href="/products"
-          className="text-[#444] hover:text-[#ff6b35] transition-colors"
-        >
+        <Link href="/products" className="text-[#444] hover:text-[#ff6b35] transition-colors">
           <ArrowLeft size={18} />
         </Link>
         <Header title="Add Product" subtitle="Create a new product listing" />
       </div>
 
-      <motion.form
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        onSubmit={handleSubmit}
-        className="space-y-6 max-w-2xl"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         {/* Basic Info */}
         <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6 space-y-5">
           <h2 className="font-mono text-xs uppercase tracking-widest text-[#555]">Basic Info</h2>
 
           <div className="space-y-1.5">
-            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">
-              Product Name *
-            </label>
+            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Product Name *</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -113,9 +120,7 @@ export default function NewProductPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">
-              Description
-            </label>
+            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Description</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -125,20 +130,58 @@ export default function NewProductPage() {
             />
           </div>
 
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Base Price (LKR) *</label>
+              <input
+                type="number"
+                value={basePrice}
+                onChange={(e) => setBasePrice(e.target.value)}
+                placeholder="2500"
+                min="0"
+                step="0.01"
+                required
+                className="w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] placeholder:text-[#333] focus:outline-none focus:border-[#ff6b35] transition-colors"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Brand</label>
+              <select
+                value={brandId}
+                onChange={(e) => setBrandId(e.target.value)}
+                className="w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+              >
+                <option value="">— No brand —</option>
+                {brands.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
           <div className="space-y-1.5">
-            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">
-              Base Price (LKR) *
-            </label>
-            <input
-              type="number"
-              value={basePrice}
-              onChange={(e) => setBasePrice(e.target.value)}
-              placeholder="2500"
-              min="0"
-              step="0.01"
-              required
-              className="w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] placeholder:text-[#333] focus:outline-none focus:border-[#ff6b35] transition-colors"
-            />
+            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Categories</label>
+            {categories.length === 0 ? (
+              <p className="font-mono text-xs text-[#333]">No categories yet — add some in the Categories section.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => toggleCategory(cat.id)}
+                    className={`font-mono text-xs px-3 py-1.5 border transition-colors ${
+                      categoryIds.includes(cat.id)
+                        ? 'bg-[#ff6b35]/10 border-[#ff6b35] text-[#ff6b35]'
+                        : 'bg-[#12121a] border-[#1e1e28] text-[#555] hover:border-[#ff6b35]/50'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -160,10 +203,7 @@ export default function NewProductPage() {
 
           <div className="space-y-3">
             {variants.map((variant, i) => (
-              <div
-                key={i}
-                className="grid grid-cols-[1fr_1fr_90px_90px_36px] gap-2 items-center"
-              >
+              <div key={i} className="grid grid-cols-[1fr_1fr_90px_90px_36px] gap-2 items-center">
                 <select
                   value={variant.size}
                   onChange={(e) => updateVariant(i, 'size', e.target.value)}
@@ -205,9 +245,7 @@ export default function NewProductPage() {
               </div>
             ))}
           </div>
-          <p className="font-mono text-[10px] text-[#333]">
-            Size · Color · Stock Qty · Price Adjustment (LKR)
-          </p>
+          <p className="font-mono text-[10px] text-[#333]">Size · Color · Stock Qty · Price Adjustment (LKR)</p>
         </div>
 
         {/* Actions */}
@@ -226,7 +264,7 @@ export default function NewProductPage() {
             Cancel
           </Link>
         </div>
-      </motion.form>
+      </form>
     </div>
   );
 }

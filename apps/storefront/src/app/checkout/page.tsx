@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '@/context/cart-context';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -234,13 +233,7 @@ export default function CheckoutPage() {
       <Navbar />
       <main className="min-h-screen pt-24 pb-20">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="font-display text-6xl text-white mb-10"
-          >
-            CHECKOUT
-          </motion.h1>
+          <h1 className="font-display text-6xl text-white mb-10">CHECKOUT</h1>
 
           <form onSubmit={activeForm ?? ((e) => e.preventDefault())}>
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
@@ -299,47 +292,28 @@ export default function CheckoutPage() {
                     ))}
                   </div>
 
-                  <AnimatePresence mode="wait">
-                    {payMethod === 'paypal' && (
-                      <motion.div
-                        key="paypal"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                      >
-                        <div
-                          id="paypal-button-container"
-                          ref={paypalRef}
-                          className="pt-2 min-h-[50px]"
-                        />
-                        <p className="font-mono text-[10px] text-[#444] text-center mt-2">
-                          You will be redirected to PayPal to complete payment.
-                        </p>
-                      </motion.div>
-                    )}
-                    {payMethod === 'stripe' && (
-                      <motion.p
-                        key="stripe"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="font-mono text-[10px] text-[#444]"
-                      >
-                        Test card: 4242 4242 4242 4242 · any future date · any CVC
-                      </motion.p>
-                    )}
-                    {payMethod === 'payhere' && (
-                      <motion.p
-                        key="payhere"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="font-mono text-[10px] text-[#444]"
-                      >
-                        You will be redirected to PayHere to complete payment securely.
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
+                  {payMethod === 'paypal' && (
+                    <div>
+                      <div
+                        id="paypal-button-container"
+                        ref={paypalRef}
+                        className="pt-2 min-h-[50px]"
+                      />
+                      <p className="font-mono text-[10px] text-[#444] text-center mt-2">
+                        You will be redirected to PayPal to complete payment.
+                      </p>
+                    </div>
+                  )}
+                  {payMethod === 'stripe' && (
+                    <p className="font-mono text-[10px] text-[#444]">
+                      Test card: 4242 4242 4242 4242 · any future date · any CVC
+                    </p>
+                  )}
+                  {payMethod === 'payhere' && (
+                    <p className="font-mono text-[10px] text-[#444]">
+                      You will be redirected to PayHere to complete payment securely.
+                    </p>
+                  )}
                 </div>
               </div>
 

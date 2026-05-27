@@ -1,7 +1,4 @@
-'use client';
-
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import type { Category } from '@static-wears/shared';
 
 const CATEGORY_ICONS: Record<string, string> = {
@@ -24,24 +21,18 @@ export function CategoryBar({ categories }: { categories: Category[] }) {
         >
           All
         </Link>
-        {categories.map((cat, i) => (
-          <motion.div
+        {categories.map((cat) => (
+          <Link
             key={cat.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: i * 0.05 }}
+            href={`/shop?category=${cat.slug}`}
+            className="font-mono text-xs uppercase tracking-widest px-5 py-2.5
+                       border border-[#2a2a2a] text-[#888]
+                       hover:border-[#ff6b35] hover:text-[#ff6b35]
+                       transition-all duration-200 flex items-center gap-2"
           >
-            <Link
-              href={`/shop?category=${cat.slug}`}
-              className="font-mono text-xs uppercase tracking-widest px-5 py-2.5
-                         border border-[#2a2a2a] text-[#888]
-                         hover:border-[#ff6b35] hover:text-[#ff6b35]
-                         transition-all duration-200 flex items-center gap-2"
-            >
-              <span>{CATEGORY_ICONS[cat.slug] ?? '•'}</span>
-              {cat.name}
-            </Link>
-          </motion.div>
+            <span>{CATEGORY_ICONS[cat.slug] ?? '•'}</span>
+            {cat.name}
+          </Link>
         ))}
       </div>
     </section>

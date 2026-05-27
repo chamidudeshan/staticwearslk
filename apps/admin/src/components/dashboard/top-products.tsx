@@ -1,7 +1,6 @@
 'use client';
 
 import { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import type { Order, Product } from '@static-wears/shared';
 import { formatPrice } from '@/lib/utils';
 
@@ -38,12 +37,7 @@ export function TopProducts({
   }, [orders]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6"
-    >
+    <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6">
       <h2 className="font-bold text-[#e8e8f0] mb-6">Top Products</h2>
       {topProducts.length === 0 ? (
         <p className="font-mono text-xs text-[#444] text-center py-8">
@@ -77,6 +71,6 @@ export function TopProducts({
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

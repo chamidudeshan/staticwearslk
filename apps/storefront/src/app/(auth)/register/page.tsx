@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useSignUp } from '@clerk/nextjs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -67,11 +66,7 @@ export default function RegisterPage() {
 
   if (pendingVerification) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm"
-      >
+      <div className="w-full max-w-sm">
         <div className="mb-10">
           <h1 className="font-display text-5xl text-white mb-2">VERIFY EMAIL</h1>
           <p className="font-mono text-sm text-[#555]">
@@ -102,17 +97,12 @@ export default function RegisterPage() {
             {loading ? 'Verifying...' : 'Verify & Continue'}
           </Button>
         </form>
-      </motion.div>
+      </div>
     );
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="w-full max-w-sm"
-    >
+    <div className="w-full max-w-sm">
       <div className="mb-10">
         <h1 className="font-display text-5xl text-white mb-2">CREATE ACCOUNT</h1>
         <p className="font-mono text-sm text-[#555]">Join the movement.</p>
@@ -170,6 +160,6 @@ export default function RegisterPage() {
           Sign in
         </Link>
       </p>
-    </motion.div>
+    </div>
   );
 }

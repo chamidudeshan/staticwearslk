@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Edit, Trash2, Eye, Plus, Search } from 'lucide-react';
 import type { Product } from '@static-wears/shared';
 import { formatPrice } from '@/lib/utils';
@@ -82,12 +81,9 @@ export function ProductsTable({ products }: { products: Product[] }) {
                   </td>
                 </tr>
               ) : (
-                filtered.map((product, i) => (
-                  <motion.tr
+                filtered.map((product) => (
+                  <tr
                     key={product.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
                     className="hover:bg-[#12121a] transition-colors"
                   >
                     <td className="px-5 py-4">
@@ -140,7 +136,7 @@ export function ProductsTable({ products }: { products: Product[] }) {
                         </button>
                       </div>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>

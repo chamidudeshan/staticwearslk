@@ -11,7 +11,6 @@ import {
   CartesianGrid,
 } from 'recharts';
 import type { Order } from '@static-wears/shared';
-import { motion } from 'framer-motion';
 
 export function RevenueChart({ orders }: { orders: Order[] }) {
   const data = useMemo(() => {
@@ -43,12 +42,7 @@ export function RevenueChart({ orders }: { orders: Order[] }) {
   const totalRevenue = data.reduce((s, d) => s + d.revenue, 0);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.4, duration: 0.5 }}
-      className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6"
-    >
+    <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6">
       <div className="flex items-start justify-between mb-6">
         <div>
           <h2 className="font-bold text-[#e8e8f0]">Revenue — Last 30 Days</h2>
@@ -104,6 +98,6 @@ export function RevenueChart({ orders }: { orders: Order[] }) {
           />
         </AreaChart>
       </ResponsiveContainer>
-    </motion.div>
+    </div>
   );
 }

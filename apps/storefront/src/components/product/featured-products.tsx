@@ -1,6 +1,3 @@
-'use client';
-
-import { motion } from 'framer-motion';
 import type { Product } from '@static-wears/shared';
 import { ProductCard } from './product-card';
 import Link from 'next/link';
@@ -8,14 +5,7 @@ import Link from 'next/link';
 export function FeaturedProducts({ products }: { products: Product[] }) {
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 py-20">
-      {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="flex items-end justify-between mb-12 gap-4"
-      >
+      <div className="flex items-end justify-between mb-12 gap-4">
         <div>
           <span className="font-mono text-[10px] text-[#ff6b35] uppercase tracking-[0.5em] block mb-3">
             Just Dropped
@@ -26,19 +16,11 @@ export function FeaturedProducts({ products }: { products: Product[] }) {
         </div>
         <Link
           href="/shop"
-          className="group flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.3em]
-                     text-[#555] hover:text-[#ff6b35] transition-colors shrink-0 pb-1"
+          className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#555] hover:text-[#ff6b35] transition-colors shrink-0 pb-1"
         >
-          View All
-          <motion.span
-            className="inline-block"
-            animate={{ x: [0, 4, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            →
-          </motion.span>
+          View All →
         </Link>
-      </motion.div>
+      </div>
 
       {products.length === 0 ? (
         <div className="text-center py-24 border border-dashed border-[#1a1a1a]">
@@ -54,15 +36,8 @@ export function FeaturedProducts({ products }: { products: Product[] }) {
         </div>
       )}
 
-      {/* Bottom CTA */}
       {products.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="text-center mt-14"
-        >
+        <div className="text-center mt-14">
           <Link
             href="/shop"
             className="inline-flex items-center gap-3 font-mono text-xs uppercase tracking-[0.3em]
@@ -71,7 +46,7 @@ export function FeaturedProducts({ products }: { products: Product[] }) {
           >
             All {products.length}+ Products →
           </Link>
-        </motion.div>
+        </div>
       )}
     </section>
   );

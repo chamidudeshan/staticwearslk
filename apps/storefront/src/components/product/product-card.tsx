@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ShoppingBag, Eye } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Product } from '@static-wears/shared';
@@ -49,31 +48,12 @@ interface ProductCardProps {
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
   const { dispatch } = useCart();
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
-  const rotateX = useSpring(useTransform(mouseY, [-150, 150], [4, -4]), { stiffness: 200, damping: 25 });
-  const rotateY = useSpring(useTransform(mouseX, [-150, 150], [-4, 4]), { stiffness: 200, damping: 25 });
 
   const mainImage = product.images?.find((i) => i.is_main) ?? product.images?.[0];
   const secondImage = product.images?.[1];
   const isLowStock = product.variants?.some((v) => v.stock_qty > 0 && v.stock_qty <= 3);
   const isOutOfStock = product.variants?.every((v) => v.stock_qty === 0);
   const uniqueColors = Array.from(new Set(product.variants?.map((v) => v.color) ?? []));
-
-  function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = cardRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    mouseX.set(e.clientX - rect.left - rect.width / 2);
-    mouseY.set(e.clientY - rect.top - rect.height / 2);
-  }
-
-  function onMouseLeave() {
-    mouseX.set(0);
-    mouseY.set(0);
-    setHovered(false);
-  }
 
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
@@ -97,42 +77,33 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   }
 
   return (
-    <motion.div
-      ref={cardRef}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-40px' }}
-      transition={{ delay: index * 0.06, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
-      style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
-      onMouseMove={onMouseMove}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={onMouseLeave}
+    <div
       className="group relative"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <Link href={`/products/${product.slug}`}>
         {/* Image container */}
         <div className="relative aspect-[3/4] overflow-hidden bg-[#111] mb-4">
           {/* Main image */}
-          <motion.div
-            className="absolute inset-0"
-            animate={{ opacity: hovered && secondImage ? 0 : 1, scale: hovered ? 1.05 : 1 }}
-            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          <div
+            className="absolute inset-0 transition-opacity duration-500"
+            style={{ opacity: hovered && secondImage ? 0 : 1 }}
           >
             <Image
               src={getImageSrc(mainImage?.image_path ?? '', index)}
               alt={product.name}
               fill
-              className="object-cover"
+              className={`object-cover transition-transform duration-700 ${hovered ? 'scale-105' : 'scale-100'}`}
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
-          </motion.div>
+          </div>
 
           {/* Hover image */}
           {secondImage && (
-            <motion.div
-              className="absolute inset-0"
-              animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 1.05 }}
-              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            <div
+              className="absolute inset-0 transition-opacity duration-500"
+              style={{ opacity: hovered ? 1 : 0 }}
             >
               <Image
                 src={getImageSrc(secondImage.image_path, index + 1)}
@@ -141,19 +112,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
                 className="object-cover"
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
-            </motion.div>
+            </div>
           )}
-
-          {/* Orange shimmer on hover */}
-          <motion.div
-            className="absolute inset-0 pointer-events-none"
-            animate={{
-              background: hovered
-                ? 'linear-gradient(135deg, rgba(255,107,53,0.08) 0%, transparent 60%)'
-                : 'linear-gradient(135deg, transparent 0%, transparent 60%)',
-            }}
-            transition={{ duration: 0.4 }}
-          />
 
           {/* Sold out */}
           {isOutOfStock && (
@@ -179,25 +139,19 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           </div>
 
           {/* Action buttons */}
-          <div className="absolute bottom-0 left-0 right-0 flex">
-            <motion.button
+          <div className="absolute bottom-0 left-0 right-0 flex translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+            <button
               className="flex-1 bg-[#ff6b35] text-black font-mono font-bold text-[10px]
                          tracking-widest uppercase py-3 flex items-center justify-center gap-1.5"
-              animate={{ y: hovered ? 0 : '100%' }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
               onClick={handleQuickAdd}
               disabled={isOutOfStock}
             >
               <ShoppingBag size={11} />
               Quick Add
-            </motion.button>
-            <motion.div
-              className="w-12 bg-[#1a1a1a] border-l border-[#ff6b35]/30 flex items-center justify-center shrink-0"
-              animate={{ y: hovered ? 0 : '100%' }}
-              transition={{ duration: 0.3, delay: 0.04, ease: [0.16, 1, 0.3, 1] }}
-            >
+            </button>
+            <div className="w-12 bg-[#1a1a1a] border-l border-[#ff6b35]/30 flex items-center justify-center shrink-0">
               <Eye size={13} className="text-[#888]" />
-            </motion.div>
+            </div>
           </div>
         </div>
 
@@ -249,6 +203,6 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
           )}
         </div>
       </Link>
-    </motion.div>
+    </div>
   );
 }

@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider signInUrl="/login" signUpUrl="/register">
       <html
         lang="en"
         className={`${bebasNeue.variable} ${spaceMono.variable}`}

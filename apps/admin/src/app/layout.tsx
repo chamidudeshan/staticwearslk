@@ -27,7 +27,7 @@ export default function AdminRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider signInUrl="/login" signUpUrl="/login">
       <html lang="en" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
         <body className="bg-[#060608] text-[#e8e8f0] antialiased font-sans">
           {children}

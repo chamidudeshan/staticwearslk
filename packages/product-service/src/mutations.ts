@@ -59,15 +59,30 @@ export async function updateProduct(
     name: string;
     description: string;
     base_price: number;
+    brand_id: string | null;
+    category_ids: string[];
     status: 'active' | 'inactive' | 'draft';
   }>
 ): Promise<{ error: string | null }> {
   const supabase = createSupabaseAdminClient();
+
+  const { category_ids, ...fields } = data;
   const { error } = await supabase
     .from('products')
-    .update({ ...data, updated_at: new Date().toISOString() })
+    .update({ ...fields, updated_at: new Date().toISOString() })
     .eq('id', id);
-  return { error: error?.message ?? null };
+  if (error) return { error: error.message };
+
+  if (category_ids !== undefined) {
+    await supabase.from('product_categories').delete().eq('product_id', id);
+    if (category_ids.length > 0) {
+      await supabase
+        .from('product_categories')
+        .insert(category_ids.map((cid) => ({ product_id: id, category_id: cid })));
+    }
+  }
+
+  return { error: null };
 }
 
 export async function deleteProduct(id: string): Promise<{ error: string | null }> {

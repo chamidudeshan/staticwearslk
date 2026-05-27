@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
   Package,
@@ -14,8 +13,7 @@ import {
   LogOut,
   ExternalLink,
 } from 'lucide-react';
-import { supabase } from '@/lib/supabase-client';
-import { useRouter } from 'next/navigation';
+import { useClerk } from '@clerk/nextjs';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -30,11 +28,11 @@ const navItems = [
 export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { signOut } = useClerk();
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    await signOut();
     router.push('/login');
-    router.refresh();
   }
 
   return (
@@ -65,10 +63,7 @@ export function Sidebar() {
               }`}
             >
               {isActive && (
-                <motion.div
-                  layoutId="sidebar-indicator"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#ff6b35] rounded-full"
-                />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#ff6b35] rounded-full" />
               )}
               <Icon size={16} />
               {item.label}

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Order, OrderStatus } from '@static-wears/shared';
@@ -105,12 +104,9 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                   </td>
                 </tr>
               ) : (
-                filtered.map((order, i) => (
-                  <motion.tr
+                filtered.map((order) => (
+                  <tr
                     key={order.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: i * 0.03 }}
                     className="hover:bg-[#12121a] transition-colors"
                   >
                     <td className="px-5 py-4">
@@ -157,7 +153,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
                         ))}
                       </select>
                     </td>
-                  </motion.tr>
+                  </tr>
                 ))
               )}
             </tbody>

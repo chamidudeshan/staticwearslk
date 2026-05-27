@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -16,6 +15,8 @@ interface Variant {
   price_adj: number;
   _deleted?: boolean;
 }
+
+interface Option { id: string; name: string }
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const COLORS = ['Black', 'White', 'Navy', 'Grey', 'Khaki', 'Olive', 'Red', 'Blue'];
@@ -32,22 +33,55 @@ export default function EditProductPage() {
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState('');
   const [status, setStatus] = useState<'active' | 'inactive' | 'draft'>('active');
+  const [brandId, setBrandId] = useState('');
+  const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [variants, setVariants] = useState<Variant[]>([]);
+
+  const [brands, setBrands] = useState<Option[]>([]);
+  const [categories, setCategories] = useState<Option[]>([]);
 
   useEffect(() => {
     async function load() {
-      const res = await fetch(`/api/admin/products/${id}`);
-      if (!res.ok) { toast.error('Product not found'); router.push('/products'); return; }
-      const product = await res.json();
+      const [productRes, brandsRes, catsRes] = await Promise.all([
+        fetch(`/api/admin/products/${id}`),
+        fetch('/api/admin/brands'),
+        fetch('/api/admin/categories'),
+      ]);
+
+      if (!productRes.ok) {
+        toast.error('Product not found');
+        router.push('/products');
+        return;
+      }
+
+      const product = await productRes.json();
+      const brandsData = await brandsRes.json();
+      const catsData = await catsRes.json();
+
       setName(product.name);
       setDescription(product.description ?? '');
       setBasePrice(String(product.base_price));
       setStatus(product.status);
+      setBrandId(product.brand_id ?? '');
       setVariants(product.variants ?? []);
+
+      if (Array.isArray(brandsData)) setBrands(brandsData);
+      if (Array.isArray(catsData)) setCategories(catsData);
+
+      if (Array.isArray(product.product_categories)) {
+        setCategoryIds(product.product_categories.map((pc: { category_id: string }) => pc.category_id));
+      }
+
       setLoading(false);
     }
     load();
   }, [id, router]);
+
+  function toggleCategory(catId: string) {
+    setCategoryIds((prev) =>
+      prev.includes(catId) ? prev.filter((c) => c !== catId) : [...prev, catId]
+    );
+  }
 
   function addVariant() {
     setVariants((v) => [...v, { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0 }]);
@@ -77,6 +111,8 @@ export default function EditProductPage() {
           name: name.trim(),
           description: description.trim() || undefined,
           base_price: parseFloat(basePrice),
+          brand_id: brandId || null,
+          category_ids: categoryIds,
           status,
           variants: variants.map((v) => ({
             id: v.id,
@@ -122,13 +158,7 @@ export default function EditProductPage() {
         <Header title="Edit Product" subtitle={name} />
       </div>
 
-      <motion.form
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        onSubmit={handleSubmit}
-        className="space-y-6 max-w-2xl"
-      >
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         {/* Basic Info */}
         <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6 space-y-5">
           <h2 className="font-mono text-xs uppercase tracking-widest text-[#555]">Basic Info</h2>
@@ -179,6 +209,44 @@ export default function EditProductPage() {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Brand</label>
+            <select
+              value={brandId}
+              onChange={(e) => setBrandId(e.target.value)}
+              className="w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+            >
+              <option value="">— No brand —</option>
+              {brands.map((b) => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Categories</label>
+            {categories.length === 0 ? (
+              <p className="font-mono text-xs text-[#333]">No categories yet — add some in the Categories section.</p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => toggleCategory(cat.id)}
+                    className={`font-mono text-xs px-3 py-1.5 border transition-colors ${
+                      categoryIds.includes(cat.id)
+                        ? 'bg-[#ff6b35]/10 border-[#ff6b35] text-[#ff6b35]'
+                        : 'bg-[#12121a] border-[#1e1e28] text-[#555] hover:border-[#ff6b35]/50'
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -260,7 +328,7 @@ export default function EditProductPage() {
             Cancel
           </Link>
         </div>
-      </motion.form>
+      </form>
     </div>
   );
 }

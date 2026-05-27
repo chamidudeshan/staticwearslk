@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { CartItemRow } from '@/components/cart/cart-item-row';
@@ -18,13 +17,9 @@ export default function CartPage() {
       <Navbar />
       <main className="min-h-screen pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-10"
-          >
+          <div className="mb-10">
             <h1 className="font-display text-6xl text-white">YOUR CART</h1>
-          </motion.div>
+          </div>
 
           {cart.items.length === 0 ? (
             <div className="text-center py-24 space-y-6">

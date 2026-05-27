@@ -1,7 +1,6 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { TrendingUp, ShoppingBag, Users, Package, Clock, TrendingDown } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, Package, Clock } from 'lucide-react';
 
 const statConfig = [
   { key: 'totalRevenue', label: 'Total Revenue', icon: TrendingUp, format: 'currency', color: '#ff6b35' },
@@ -23,11 +22,8 @@ export function DashboardStats({ stats }: { stats: Record<string, number> }) {
             : value.toLocaleString();
 
         return (
-          <motion.div
+          <div
             key={stat.key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-5 relative overflow-hidden"
           >
             <div
@@ -51,7 +47,7 @@ export function DashboardStats({ stats }: { stats: Record<string, number> }) {
                 {formatted}
               </div>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

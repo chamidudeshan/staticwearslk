@@ -22,6 +22,22 @@ export async function getProducts(filters?: {
     `)
     .eq('status', 'active');
 
+  if (filters?.category) {
+    const { data: cats } = await supabase
+      .from('categories')
+      .select('id')
+      .eq('slug', filters.category)
+      .single();
+    if (cats) {
+      const { data: joins } = await supabase
+        .from('product_categories')
+        .select('product_id')
+        .eq('category_id', cats.id);
+      const ids = (joins ?? []).map((j: { product_id: string }) => j.product_id);
+      if (ids.length === 0) return [];
+      query = query.in('id', ids);
+    }
+  }
   if (filters?.search) {
     query = query.ilike('name', `%${filters.search}%`);
   }
@@ -87,7 +103,8 @@ export async function getProductById(id: string): Promise<Product | null> {
       *,
       brand:brands(*),
       variants:product_variants(*),
-      images:product_images(*)
+      images:product_images(*),
+      product_categories(category_id)
     `)
     .eq('id', id)
     .single();

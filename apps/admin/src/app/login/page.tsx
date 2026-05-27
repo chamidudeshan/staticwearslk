@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { useSignIn } from '@clerk/nextjs';
 
 export default function AdminLoginPage() {
@@ -41,12 +40,7 @@ export default function AdminLoginPage() {
 
   return (
     <div className="min-h-screen bg-[#060608] flex flex-col items-center justify-center px-4">
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-sm"
-      >
+      <div className="w-full max-w-sm">
         <div className="text-center mb-10">
           <div className="font-mono text-xs text-[#ff6b35] uppercase tracking-widest mb-3">
             Admin Portal
@@ -98,7 +92,7 @@ export default function AdminLoginPage() {
             </button>
           </form>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

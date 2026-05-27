@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import type { Order, OrderStatus } from '@static-wears/shared';
 import { formatPrice, formatDate } from '@/lib/utils';
@@ -16,12 +15,7 @@ const STATUS_COLORS: Record<OrderStatus, string> = {
 
 export function RecentOrders({ orders }: { orders: Order[] }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.6 }}
-      className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl overflow-hidden"
-    >
+    <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl overflow-hidden">
       <div className="flex items-center justify-between p-6 border-b border-[#1e1e28]">
         <h2 className="font-bold text-[#e8e8f0]">Recent Orders</h2>
         <Link
@@ -68,6 +62,6 @@ export function RecentOrders({ orders }: { orders: Order[] }) {
           ))}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }

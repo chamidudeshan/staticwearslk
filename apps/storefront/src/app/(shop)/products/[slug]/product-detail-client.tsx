@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
 import { ShoppingBag, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -73,11 +72,7 @@ export function ProductDetailClient({ product, related }: Props) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="min-h-screen pt-20 pb-20"
-    >
+    <div className="min-h-screen pt-20 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         {/* Breadcrumb */}
         <div className="py-6">
@@ -263,6 +258,6 @@ export function ProductDetailClient({ product, related }: Props) {
           </section>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
