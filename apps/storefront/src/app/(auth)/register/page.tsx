@@ -4,54 +4,104 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabase-client';
+import { useSignUp } from '@clerk/nextjs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 export default function RegisterPage() {
   const router = useRouter();
+  const { signUp, isLoaded, setActive } = useSignUp();
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [pendingVerification, setPendingVerification] = useState(false);
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    if (!isLoaded) return;
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
+    const [firstName, ...rest] = fullName.trim().split(' ');
+    const lastName = rest.join(' ');
 
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess(true);
+    try {
+      await signUp.create({
+        firstName,
+        lastName: lastName || undefined,
+        emailAddress: email,
+        password,
+      });
+      await signUp.prepareEmailAddressVerification({ strategy: 'email_code' });
+      setPendingVerification(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Registration failed. Please try again.';
+      setError(msg);
     }
     setLoading(false);
   }
 
-  if (success) {
+  async function handleVerify(e: React.FormEvent) {
+    e.preventDefault();
+    if (!isLoaded) return;
+    setLoading(true);
+    setError('');
+
+    try {
+      const result = await signUp.attemptEmailAddressVerification({ code });
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        router.push('/');
+        router.refresh();
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid verification code.';
+      setError(msg);
+    }
+    setLoading(false);
+  }
+
+  if (pendingVerification) {
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm text-center"
+        className="w-full max-w-sm"
       >
-        <div className="text-5xl mb-6">🎉</div>
-        <h2 className="font-display text-4xl text-white mb-3">CHECK YOUR EMAIL</h2>
-        <p className="font-mono text-sm text-[#555] mb-8">
-          We sent a confirmation link to <span className="text-[#f0f0f0]">{email}</span>
-        </p>
-        <Link href="/login" className="font-mono text-sm text-[#ff6b35] hover:underline">
-          Back to sign in
-        </Link>
+        <div className="mb-10">
+          <h1 className="font-display text-5xl text-white mb-2">VERIFY EMAIL</h1>
+          <p className="font-mono text-sm text-[#555]">
+            Enter the code we sent to{' '}
+            <span className="text-[#f0f0f0]">{email}</span>
+          </p>
+        </div>
+
+        <form onSubmit={handleVerify} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="code">Verification Code</Label>
+            <Input
+              id="code"
+              placeholder="6-digit code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              required
+            />
+          </div>
+
+          {error && (
+            <p className="font-mono text-xs text-red-400 border border-red-500/30 bg-red-500/10 px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <Button type="submit" className="w-full h-12" disabled={loading}>
+            {loading ? 'Verifying...' : 'Verify & Continue'}
+          </Button>
+        </form>
       </motion.div>
     );
   }
@@ -109,7 +159,7 @@ export default function RegisterPage() {
           </p>
         )}
 
-        <Button type="submit" className="w-full h-12" disabled={loading}>
+        <Button type="submit" className="w-full h-12" disabled={loading || !isLoaded}>
           {loading ? 'Creating account...' : 'Create Account'}
         </Button>
       </form>

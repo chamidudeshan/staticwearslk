@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import { createCheckoutSession } from '@static-wears/payment-service';
 
 export async function POST(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const user = await currentUser();
+  const customerEmail = user?.emailAddresses[0]?.emailAddress ?? '';
 
   const { orderId, items } = await req.json();
 
@@ -13,7 +16,7 @@ export async function POST(req: NextRequest) {
   const session = await createCheckoutSession({
     orderId,
     items,
-    customerEmail: user.email!,
+    customerEmail,
     successUrl: `${appUrl}/orders/${orderId}?success=true`,
     cancelUrl: `${appUrl}/checkout?cancelled=true`,
   });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
+import { auth } from '@clerk/nextjs/server';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId = process.env.PAYPAL_CLIENT_ID!;
@@ -19,9 +20,8 @@ async function getPayPalAccessToken(): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { orderId, amount } = await req.json();
   if (!orderId || !amount) return NextResponse.json({ error: 'Missing orderId or amount' }, { status: 400 });
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
           reference_id: orderId,
           amount: {
             currency_code: 'USD',
-            value: (amount / 320).toFixed(2), // rough LKR→USD; adjust per live rate
+            value: (amount / 320).toFixed(2),
           },
         }],
       }),

@@ -1,42 +1,16 @@
-import { type NextRequest, NextResponse } from 'next/server';
-import { createServerClient } from '@supabase/ssr';
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+const isProtected = createRouteMatcher([
+  '/account(.*)',
+  '/orders(.*)',
+  '/checkout(.*)',
+]);
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return request.cookies.getAll(); },
-        setAll(cookiesToSet: { name: string; value: string; options?: Record<string, unknown> }[]) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options as Parameters<typeof supabaseResponse.cookies.set>[2])
-          );
-        },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  const url = request.nextUrl.clone();
-  const isProtected =
-    url.pathname.startsWith('/account') ||
-    url.pathname.startsWith('/orders') ||
-    url.pathname.startsWith('/checkout');
-
-  if (!user && isProtected) {
-    url.pathname = '/login';
-    url.searchParams.set('redirect', request.nextUrl.pathname);
-    return NextResponse.redirect(url);
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtected(req)) {
+    await auth.protect();
   }
-
-  return supabaseResponse;
-}
+});
 
 export const config = {
   matcher: [

@@ -7,6 +7,8 @@ networks:
 volumes:
   postgres-data:
   storage-data:
+  zookeeper-data:
+  kafka-data:
 
 services:
 
@@ -189,6 +191,52 @@ services:
       DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
     volumes:
       - ./volumes/api/kong.yml:/var/lib/kong/kong.yml:ro
+
+  # ─── KAFKA (EVENT BUS) ────────────────────────────────────────────────────
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    restart: unless-stopped
+    networks: [static-wears]
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    volumes:
+      - zookeeper-data:/bitnami/zookeeper
+
+  kafka:
+    image: bitnami/kafka:3.6
+    restart: unless-stopped
+    networks: [static-wears]
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka-data:/bitnami/kafka
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ─── EMAIL CONSUMER (Kafka → Resend) ──────────────────────────────────────
+  email-consumer:
+    build:
+      context: .
+      dockerfile: packages/kafka/Dockerfile
+    restart: unless-stopped
+    networks: [static-wears]
+    depends_on:
+      kafka:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKERS: kafka:9092
+      RESEND_API_KEY: ${RESEND_API_KEY}
 
   # ─── STOREFRONT ────────────────────────────────────────────────────────────
   storefront:

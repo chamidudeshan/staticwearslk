@@ -1,25 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
-import { getProfile } from '@static-wears/user-service';
+import { clerkClient } from '@clerk/nextjs/server';
+import { requireAdmin } from '@/lib/require-admin';
 import { updateOrderStatus, getOrderByIdAdmin } from '@static-wears/order-service';
-import { sendShippingUpdate } from '@static-wears/email-service';
+import { publishEvent, TOPICS } from '@static-wears/kafka';
 import type { OrderStatus } from '@static-wears/shared';
-
-async function requireAdmin(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const profile = await getProfile(user.id);
-  if (profile?.role !== 'admin') return null;
-  return user;
-}
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const adminUser = await requireAdmin(req);
-  if (!adminUser) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  const adminId = await requireAdmin();
+  if (!adminId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const { status } = await req.json();
   const result = await updateOrderStatus(params.id, status as OrderStatus);
@@ -27,17 +18,21 @@ export async function PATCH(
 
   const order = await getOrderByIdAdmin(params.id);
   if (order) {
-    const supabase = createSupabaseAdminClient();
-    const { data: authUser } = await supabase.auth.admin.getUserById(order.customer_id);
-    const email = authUser?.user?.email;
-    const { data: profileData } = await supabase.from('profiles').select('full_name').eq('id', order.customer_id).single();
-    if (email) {
-      sendShippingUpdate({
-        to: email,
-        customerName: profileData?.full_name ?? 'Customer',
-        orderId: order.id,
-        status: status.charAt(0).toUpperCase() + status.slice(1),
-      }).catch(() => {});
+    try {
+      const client = await clerkClient();
+      const clerkUser = await client.users.getUser(order.customer_id);
+      const email = clerkUser.emailAddresses[0]?.emailAddress;
+      const customerName = clerkUser.fullName ?? clerkUser.firstName ?? 'Customer';
+      if (email) {
+        publishEvent(TOPICS.ORDER_STATUS_CHANGED, {
+          orderId: order.id,
+          to: email,
+          customerName,
+          status: status.charAt(0).toUpperCase() + status.slice(1),
+        }).catch((err) => console.error('[admin/orders] Kafka publish failed:', err));
+      }
+    } catch (err) {
+      console.error('[admin/orders] Clerk user lookup failed:', err);
     }
   }
 

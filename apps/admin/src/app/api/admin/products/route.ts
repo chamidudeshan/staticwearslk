@@ -1,18 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient } from '@static-wears/shared';
+import { requireAdmin } from '@/lib/require-admin';
 import { createProduct } from '@static-wears/product-service';
 
-async function requireAdmin() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return null;
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
-  return profile?.role === 'admin' ? user : null;
-}
-
 export async function POST(req: NextRequest) {
-  const admin = await requireAdmin();
-  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const adminId = await requireAdmin();
+  if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json();
   const { name, description, base_price, brand_id, category_ids, variants } = body;

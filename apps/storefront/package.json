@@ -16,6 +16,8 @@
     "@static-wears/order-service": "workspace:*",
     "@static-wears/payment-service": "workspace:*",
     "@static-wears/email-service": "workspace:*",
+    "@static-wears/kafka": "workspace:*",
+    "@clerk/nextjs": "^6.0.0",
     "@supabase/supabase-js": "^2.43.0",
     "@supabase/ssr": "^0.4.0",
     "@stripe/stripe-js": "^4.0.0",

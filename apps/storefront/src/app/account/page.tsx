@@ -1,4 +1,5 @@
-import { createSupabaseServerClient } from '@static-wears/shared';
+import { currentUser } from '@clerk/nextjs/server';
+import { SignOutButton } from '@clerk/nextjs';
 import { getProfile } from '@static-wears/user-service';
 import { redirect } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
@@ -7,18 +8,14 @@ import Link from 'next/link';
 import { formatDate } from '@/lib/utils';
 
 export default async function AccountPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await currentUser();
   if (!user) redirect('/login?redirect=/account');
 
-  const profile = await getProfile(user.id);
+  const email = user.emailAddresses[0]?.emailAddress ?? '';
+  const displayName = user.fullName ?? user.firstName ?? 'Customer';
+  const isAdmin = user.publicMetadata?.role === 'admin';
 
-  async function signOut() {
-    'use server';
-    const supabase = await createSupabaseServerClient();
-    await supabase.auth.signOut();
-    redirect('/');
-  }
+  const profile = await getProfile(user.id);
 
   return (
     <>
@@ -32,15 +29,13 @@ export default async function AccountPage() {
             <div className="flex items-center gap-4 mb-6">
               <div className="w-14 h-14 bg-[#ff6b35]/20 border border-[#ff6b35]/30 flex items-center justify-center">
                 <span className="font-display text-2xl text-[#ff6b35]">
-                  {(profile?.full_name ?? user.email ?? 'U')[0].toUpperCase()}
+                  {displayName[0].toUpperCase()}
                 </span>
               </div>
               <div>
-                <p className="font-mono font-bold text-[#f0f0f0]">
-                  {profile?.full_name ?? 'Customer'}
-                </p>
-                <p className="font-mono text-xs text-[#555]">{user.email}</p>
-                {profile?.role === 'admin' && (
+                <p className="font-mono font-bold text-[#f0f0f0]">{displayName}</p>
+                <p className="font-mono text-xs text-[#555]">{email}</p>
+                {isAdmin && (
                   <span className="font-mono text-[10px] bg-[#ff6b35] text-black px-2 py-0.5 mt-1 inline-block uppercase tracking-widest">
                     Admin
                   </span>
@@ -70,9 +65,9 @@ export default async function AccountPage() {
               <p className="font-mono font-bold text-sm text-[#f0f0f0] uppercase tracking-wide mb-1">
                 My Orders
               </p>
-              <p className="font-mono text-xs text-[#555]">Track & manage orders</p>
+              <p className="font-mono text-xs text-[#555]">Track &amp; manage orders</p>
             </Link>
-            {profile?.role === 'admin' && (
+            {isAdmin && (
               <a
                 href={process.env.NEXT_PUBLIC_ADMIN_URL ?? 'http://localhost:3001'}
                 className="bg-[#ff6b35]/10 border border-[#ff6b35]/30 p-5 hover:border-[#ff6b35] transition-colors"
@@ -86,14 +81,11 @@ export default async function AccountPage() {
           </div>
 
           {/* Sign out */}
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-red-500 transition-colors border border-[#2a2a2a] px-6 py-3"
-            >
+          <SignOutButton redirectUrl="/">
+            <button className="font-mono text-xs uppercase tracking-widest text-[#555] hover:text-red-500 transition-colors border border-[#2a2a2a] px-6 py-3">
               Sign Out
             </button>
-          </form>
+          </SignOutButton>
         </div>
       </main>
       <Footer />

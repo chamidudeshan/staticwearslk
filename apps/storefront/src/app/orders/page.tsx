@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@static-wears/shared';
+import { auth } from '@clerk/nextjs/server';
 import { getOrdersByCustomer } from '@static-wears/order-service';
 import { redirect } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
@@ -18,11 +18,10 @@ const STATUS_VARIANT: Record<OrderStatus, 'default' | 'success' | 'warning' | 'd
 };
 
 export default async function OrdersPage() {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login?redirect=/orders');
+  const { userId } = await auth();
+  if (!userId) redirect('/login?redirect=/orders');
 
-  const orders = await getOrdersByCustomer(user.id);
+  const orders = await getOrdersByCustomer(userId);
 
   return (
     <>

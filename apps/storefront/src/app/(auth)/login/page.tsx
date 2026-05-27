@@ -4,13 +4,14 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabase-client';
+import { useSignIn } from '@clerk/nextjs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { signIn, isLoaded, setActive } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,16 +19,26 @@ export default function LoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    if (!isLoaded) return;
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const result = await signIn.create({
+        identifier: email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push('/');
-      router.refresh();
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        router.push('/');
+        router.refresh();
+      } else {
+        setError('Sign-in incomplete. Please try again.');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid email or password.';
+      setError(msg);
     }
     setLoading(false);
   }
@@ -74,7 +85,7 @@ export default function LoginPage() {
           </p>
         )}
 
-        <Button type="submit" className="w-full h-12" disabled={loading}>
+        <Button type="submit" className="w-full h-12" disabled={loading || !isLoaded}>
           {loading ? 'Signing in...' : 'Sign In'}
         </Button>
       </form>

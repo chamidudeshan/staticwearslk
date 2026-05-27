@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from '@static-wears/shared';
+import { auth } from '@clerk/nextjs/server';
 import { getOrderById } from '@static-wears/order-service';
 import { notFound, redirect } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
@@ -33,12 +33,11 @@ export default async function OrderDetailPage({
   params: { id: string };
   searchParams: { success?: string };
 }) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  const { userId } = await auth();
+  if (!userId) redirect('/login');
 
   const order = await getOrderById(params.id);
-  if (!order || order.customer_id !== user.id) notFound();
+  if (!order || order.customer_id !== userId) notFound();
 
   const currentStep = STATUS_STEPS.indexOf(order.status as OrderStatus);
 
@@ -58,7 +57,7 @@ export default async function OrderDetailPage({
           {searchParams.success && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 mb-8">
               <p className="font-mono text-sm text-emerald-400">
-                🎉 Payment confirmed! Your order is being processed.
+                Payment confirmed! Your order is being processed.
               </p>
             </div>
           )}

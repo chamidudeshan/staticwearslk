@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
+import { auth } from '@clerk/nextjs/server';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import { updateOrderStatus } from '@static-wears/order-service';
 
 async function getPayPalAccessToken(): Promise<string> {
@@ -19,9 +20,8 @@ async function getPayPalAccessToken(): Promise<string> {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { userId } = await auth();
+  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { paypalOrderId, orderId } = await req.json();
 

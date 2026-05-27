@@ -3,10 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { supabase } from '@/lib/supabase-client';
+import { useSignIn } from '@clerk/nextjs';
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { signIn, isLoaded, setActive } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -14,15 +15,26 @@ export default function AdminLoginPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    if (!isLoaded) return;
     setLoading(true);
     setError('');
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
-    } else {
-      router.push('/dashboard');
-      router.refresh();
+    try {
+      const result = await signIn.create({
+        identifier: email,
+        password,
+      });
+
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId });
+        router.push('/dashboard');
+        router.refresh();
+      } else {
+        setError('Sign-in incomplete. Please try again.');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Invalid credentials.';
+      setError(msg);
     }
     setLoading(false);
   }
@@ -79,7 +91,7 @@ export default function AdminLoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || !isLoaded}
               className="w-full bg-[#ff6b35] text-black font-mono font-bold text-sm uppercase tracking-widest py-3.5 hover:bg-[#e8ff59] transition-colors disabled:opacity-50"
             >
               {loading ? 'Signing in...' : 'Sign In'}
