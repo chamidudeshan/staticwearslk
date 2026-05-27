@@ -54,7 +54,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const token = await client.signInTokens.createSignInToken({ userId: params.id, expiresInSeconds: 86400 });
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-    const link = `${appUrl}/login?__clerk_ticket=${token.token}`;
+    const link = `${appUrl}/set-password?__clerk_ticket=${token.token}`;
     return NextResponse.json({ reset_link: link, email });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to create reset link';
