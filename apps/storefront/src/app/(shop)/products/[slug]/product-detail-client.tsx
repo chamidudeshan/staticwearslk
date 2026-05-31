@@ -37,10 +37,20 @@ export function ProductDetailClient({ product, related }: Props) {
   const { dispatch } = useCart();
   const hasVariants = (product.variants?.length ?? 0) > 0;
 
-  const uniqueColors = Array.from(new Set(product.variants?.map((v) => v.color) ?? []));
+  // Normalise: DB can return null for color/size even though typed as string
+  const allVariants = (product.variants ?? []).map((v) => ({
+    ...v,
+    color: v.color ?? '',
+    size:  v.size  ?? '',
+  }));
+
+  // Only show color selector when at least one variant has a non-empty color
+  const uniqueColors = Array.from(new Set(allVariants.map((v) => v.color))).filter(Boolean);
+  const hasColors = uniqueColors.length > 0;
+
   const [selectedColor, setSelectedColor] = useState<string>(uniqueColors[0] ?? '');
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
-    product.variants?.[0] ?? null
+    allVariants[0] ?? null
   );
   const [qty, setQty] = useState(1);
 
@@ -66,8 +76,11 @@ export function ProductDetailClient({ product, related }: Props) {
 
   const [activeIdx, setActiveIdx] = useState(0);
 
-  // Sizes available for selected color
-  const sizesForColor = product.variants?.filter((v) => v.color === selectedColor) ?? [];
+  // When no colors used → show every variant as a size option
+  // When colors used → filter by selected colour
+  const sizesForColor = hasColors
+    ? allVariants.filter((v) => v.color === selectedColor)
+    : allVariants;
   const selectedSize = selectedVariant?.size ?? null;
 
   // Price
@@ -90,8 +103,8 @@ export function ProductDetailClient({ product, related }: Props) {
 
   function pickColor(color: string) {
     setSelectedColor(color);
-    const v = product.variants?.find((x) => x.color === color && x.size === selectedSize)
-      ?? product.variants?.find((x) => x.color === color);
+    const v = allVariants.find((x) => x.color === color && x.size === selectedSize)
+      ?? allVariants.find((x) => x.color === color);
     setSelectedVariant(v ?? null);
     if (v) jumpToVariantImg(v.id);
     else setActiveIdx(0);
@@ -228,26 +241,35 @@ export function ProductDetailClient({ product, related }: Props) {
 
             <div className="border-t border-[#1e1e1e]" />
 
-            {/* Color selector */}
-            {uniqueColors.length > 0 && (
+            {/* Color selector — only when colours are actually set */}
+            {hasColors && (
               <div className="space-y-3">
                 <p className="font-mono text-xs uppercase tracking-widest text-[#555]">
-                  Color: <span className="text-[#e8e8f0]">{selectedColor}</span>
+                  Colour: <span className="text-[#e8e8f0]">{selectedColor}</span>
                 </p>
                 <div className="flex gap-2 flex-wrap">
-                  {uniqueColors.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => pickColor(color)}
-                      title={color}
-                      className={`w-8 h-8 rounded-full border-2 transition-all ${
-                        selectedColor === color
-                          ? 'border-[#ff6b35] scale-110'
-                          : 'border-transparent ring-1 ring-[#2a2a2a] hover:ring-[#555]'
-                      }`}
-                      style={{ backgroundColor: COLOR_HEX[color.toLowerCase()] ?? color }}
-                    />
-                  ))}
+                  {uniqueColors.map((color) => {
+                    const hex = COLOR_HEX[color.toLowerCase()];
+                    return (
+                      <button
+                        key={color}
+                        onClick={() => pickColor(color)}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono text-xs uppercase tracking-wider transition-all ${
+                          selectedColor === color
+                            ? 'border-[#ff6b35] text-[#ff6b35] bg-[#ff6b35]/10'
+                            : 'border-[#2a2a2a] text-[#888] hover:border-[#ff6b35] hover:text-[#ff6b35]'
+                        }`}
+                      >
+                        {hex && (
+                          <span
+                            className="w-3 h-3 rounded-full border border-white/20 shrink-0"
+                            style={{ backgroundColor: hex }}
+                          />
+                        )}
+                        {color}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
