@@ -1,110 +1,133 @@
 import Link from 'next/link';
+import { Instagram, Facebook, Youtube } from 'lucide-react';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 
-export function Footer() {
+async function getSocialLinks() {
+  try {
+    const supabase = createSupabaseAdminClient();
+    const { data } = await supabase
+      .from('site_settings')
+      .select('key, value')
+      .in('key', ['social_instagram', 'social_tiktok', 'social_facebook', 'social_youtube']);
+    const map: Record<string, string> = {};
+    (data ?? []).forEach((r: { key: string; value: string }) => { map[r.key] = r.value; });
+    return map;
+  } catch {
+    return {};
+  }
+}
+
+const TikTokIcon = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+    <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.18 8.18 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z" />
+  </svg>
+);
+
+const shopLinks = [
+  { href: '/shop', label: 'All Products' },
+  { href: '/shop?category=t-shirts', label: 'T-Shirts' },
+  { href: '/shop?category=hoodies', label: 'Hoodies' },
+  { href: '/shop?category=caps', label: 'Caps' },
+  { href: '/shop?category=accessories', label: 'Accessories' },
+];
+
+const helpLinks = [
+  { href: '/account', label: 'My Account' },
+  { href: '/orders', label: 'Track Order' },
+  { href: '/size-guide', label: 'Size Guide' },
+  { href: '/returns', label: 'Returns & Exchanges' },
+  { href: '/contact', label: 'Contact Us' },
+];
+
+const legalLinks = [
+  { href: '/privacy', label: 'Privacy Policy' },
+  { href: '/terms', label: 'Terms of Service' },
+  { href: '/shipping', label: 'Shipping Info' },
+];
+
+export async function Footer() {
+  const social = await getSocialLinks();
+
+  const socialItems = [
+    { key: 'social_instagram', icon: <Instagram size={16} />, label: 'Instagram' },
+    { key: 'social_tiktok', icon: <TikTokIcon />, label: 'TikTok' },
+    { key: 'social_facebook', icon: <Facebook size={16} />, label: 'Facebook' },
+    { key: 'social_youtube', icon: <Youtube size={16} />, label: 'YouTube' },
+  ];
+
   return (
     <footer className="border-t border-[#1a1a1a] bg-[#060606] mt-24 relative overflow-hidden">
-      {/* Background text */}
       <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none overflow-hidden" aria-hidden>
-        <span className="font-display text-[22vw] text-[#0a0a0a] leading-none tracking-tight whitespace-nowrap">
-          SW
-        </span>
+        <span className="font-display text-[22vw] text-[#0a0a0a] leading-none tracking-tight whitespace-nowrap">SW</span>
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-16 pb-10">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 pt-14 pb-10">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-8 md:gap-12 mb-12">
+
           {/* Brand */}
-          <div className="md:col-span-5">
-            <Link href="/" className="font-display text-4xl text-white block mb-5">
+          <div className="col-span-2 md:col-span-4">
+            <Link href="/" className="font-display text-3xl sm:text-4xl text-white block mb-4">
               STATIC<span className="text-[#ff6b35]">WEARS</span>
             </Link>
-            <p className="font-mono text-xs text-[#444] leading-relaxed max-w-xs mb-8">
+            <p className="font-mono text-xs text-[#444] leading-relaxed mb-6 max-w-xs">
               Premium streetwear from the streets of Sri Lanka.
-              Built different. Worn bold. Every drop is limited — don&apos;t sleep.
+              Built different. Worn bold. Every drop is limited.
             </p>
-            <div className="flex gap-2">
-              {[
-                { label: 'IG', href: '#' },
-                { label: 'TT', href: '#' },
-                { label: 'FB', href: '#' },
-              ].map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  className="font-mono text-[10px] text-[#444] hover:text-[#ff6b35] hover:border-[#ff6b35]/50
-                             transition-all duration-200 border border-[#1a1a1a] px-4 py-2 tracking-widest"
-                >
-                  {s.label}
-                </a>
+            <div className="flex gap-2 flex-wrap">
+              {socialItems.map((s) => (
+                social[s.key] ? (
+                  <a key={s.key} href={social[s.key]} target="_blank" rel="noopener noreferrer" title={s.label}
+                    className="w-9 h-9 border border-[#1a1a1a] flex items-center justify-center text-[#444] hover:text-[#ff6b35] hover:border-[#ff6b35]/50 transition-all">
+                    {s.icon}
+                  </a>
+                ) : (
+                  <div key={s.key} className="w-9 h-9 border border-[#1e1e1e] flex items-center justify-center text-[#222]">
+                    {s.icon}
+                  </div>
+                )
               ))}
             </div>
           </div>
 
-          {/* Shop links */}
-          <div className="md:col-span-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-6">Shop</div>
+          {/* Shop */}
+          <div className="col-span-1 md:col-span-3">
+            <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-5">Shop</div>
             <div className="flex flex-col gap-3">
-              {[
-                { href: '/shop', label: 'All Products' },
-                { href: '/shop?category=t-shirts', label: 'T-Shirts' },
-                { href: '/shop?category=hoodies', label: 'Hoodies' },
-                { href: '/shop?category=caps', label: 'Caps' },
-                { href: '/shop?category=accessories', label: 'Accessories' },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors duration-200"
-                >
+              {shopLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors">
                   {link.label}
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Help links */}
-          <div className="md:col-span-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-6">Account & Help</div>
+          {/* Help */}
+          <div className="col-span-1 md:col-span-3">
+            <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-5">Help</div>
             <div className="flex flex-col gap-3">
-              {[
-                { href: '/account', label: 'My Account' },
-                { href: '/orders', label: 'Track Order' },
-                { href: '#', label: 'Size Guide' },
-                { href: '#', label: 'Returns & Exchanges' },
-                { href: '#', label: 'Contact Us' },
-              ].map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors duration-200"
-                >
+              {helpLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors">
                   {link.label}
                 </Link>
               ))}
             </div>
+          </div>
 
-            {/* Newsletter */}
-            <div className="mt-8">
-              <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-4">Stay in the loop</div>
-              <div className="flex gap-0">
-                <input
-                  type="email"
-                  placeholder="your@email.com"
-                  className="flex-1 bg-[#0e0e0e] border border-[#1a1a1a] text-[#888] font-mono text-xs px-3 py-2.5
-                             placeholder:text-[#333] focus:outline-none focus:border-[#ff6b35]/50 transition-colors"
-                />
-                <button className="bg-[#ff6b35] text-black font-mono text-[10px] tracking-widest uppercase px-4 py-2.5 hover:bg-[#e8ff59] transition-colors">
-                  →
-                </button>
-              </div>
+          {/* Legal */}
+          <div className="col-span-2 md:col-span-2">
+            <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-5">Legal</div>
+            <div className="flex flex-col gap-3">
+              {legalLinks.map((link) => (
+                <Link key={link.href} href={link.href} className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors">
+                  {link.label}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
         <div className="border-t border-[#111] pt-8 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <span className="font-mono text-[10px] text-[#333]">
-            © 2026 Static Wears · All rights reserved
-          </span>
+          <span className="font-mono text-[10px] text-[#333]">© 2026 Static Wears · All rights reserved</span>
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-[#333]">Made in Sri Lanka 🇱🇰</span>
             <span className="h-3 w-px bg-[#1a1a1a]" />
