@@ -48,11 +48,21 @@ export function ProductDetailClient({ product, related }: Props) {
     ? product.images
     : [{ id: 'demo', image_path: 'demo/1', is_main: true, sort_order: 0, product_id: product.id, created_at: '' }];
 
-  // Active image: prefer the selected variant's own photo, else product gallery
-  const variantImg = selectedVariant?.image_url ?? null;
-  const galleryImages = variantImg
-    ? [{ id: 'variant', image_path: variantImg, is_main: true, sort_order: -1, product_id: product.id, created_at: '' }, ...productImages]
-    : productImages;
+  // Build full gallery: all unique variant images first, then product images
+  type GalleryItem = { id: string; image_path: string; is_main: boolean; sort_order: number; product_id: string; created_at: string; variantId?: string };
+  const seenUrls = new Set<string>();
+  const variantGallery: GalleryItem[] = (product.variants ?? [])
+    .filter((v) => v.image_url)
+    .reduce<GalleryItem[]>((acc, v) => {
+      if (!seenUrls.has(v.image_url!)) {
+        seenUrls.add(v.image_url!);
+        acc.push({ id: `vimg-${v.id}`, image_path: v.image_url!, is_main: false, sort_order: -1, product_id: product.id, created_at: '', variantId: v.id });
+      }
+      return acc;
+    }, []);
+
+  const galleryImages: GalleryItem[] = [...variantGallery, ...productImages.filter((img) => !seenUrls.has(img.image_path))];
+  if (galleryImages.length === 0) galleryImages.push({ id: 'demo', image_path: 'demo/1', is_main: true, sort_order: 0, product_id: product.id, created_at: '' });
 
   const [activeIdx, setActiveIdx] = useState(0);
 
@@ -72,18 +82,25 @@ export function ProductDetailClient({ product, related }: Props) {
   const isOutOfStock = selectedVariant ? selectedVariant.stock_qty === 0 : false;
   const maxQty = selectedVariant?.stock_qty ?? 0;
 
+  function jumpToVariantImg(variantId: string) {
+    const idx = galleryImages.findIndex((img) => img.variantId === variantId);
+    if (idx !== -1) setActiveIdx(idx);
+    else setActiveIdx(0);
+  }
+
   function pickColor(color: string) {
     setSelectedColor(color);
-    setActiveIdx(0);
     const v = product.variants?.find((x) => x.color === color && x.size === selectedSize)
       ?? product.variants?.find((x) => x.color === color);
     setSelectedVariant(v ?? null);
+    if (v) jumpToVariantImg(v.id);
+    else setActiveIdx(0);
     setQty(1);
   }
 
   function pickSize(v: ProductVariant) {
     setSelectedVariant(v);
-    setActiveIdx(0);
+    jumpToVariantImg(v.id);
     setQty(1);
   }
 
@@ -124,17 +141,31 @@ export function ProductDetailClient({ product, related }: Props) {
             {/* Thumbnail strip */}
             {galleryImages.length > 1 && (
               <div className="flex flex-col gap-2 shrink-0">
-                {galleryImages.map((img, i) => (
-                  <button
-                    key={img.id}
-                    onClick={() => setActiveIdx(i)}
-                    className={`relative w-14 h-[72px] overflow-hidden border-2 shrink-0 transition-colors ${
-                      activeIdx === i ? 'border-[#ff6b35]' : 'border-[#2a2a2a] hover:border-[#555]'
-                    }`}
-                  >
-                    <Image src={imgSrc(img.image_path, i)} alt="" fill className="object-cover" sizes="56px" />
-                  </button>
-                ))}
+                {galleryImages.map((img, i) => {
+                  const isVariantThumb = !!img.variantId;
+                  const isActiveVariant = img.variantId && img.variantId === selectedVariant?.id;
+                  return (
+                    <button
+                      key={img.id}
+                      onClick={() => {
+                        setActiveIdx(i);
+                        if (img.variantId) {
+                          const v = product.variants?.find((x) => x.id === img.variantId);
+                          if (v) { setSelectedVariant(v); setSelectedColor(v.color); setQty(1); }
+                        }
+                      }}
+                      className={`relative w-14 h-[72px] overflow-hidden border-2 shrink-0 transition-colors ${
+                        activeIdx === i
+                          ? 'border-[#ff6b35]'
+                          : isVariantThumb && isActiveVariant
+                          ? 'border-[#ff6b35]/50'
+                          : 'border-[#2a2a2a] hover:border-[#555]'
+                      }`}
+                    >
+                      <Image src={imgSrc(img.image_path, i)} alt="" fill className="object-cover" sizes="56px" />
+                    </button>
+                  );
+                })}
               </div>
             )}
 
