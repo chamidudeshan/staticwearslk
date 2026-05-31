@@ -1,21 +1,8 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Instagram, Facebook, Youtube } from 'lucide-react';
-import { createSupabaseAdminClient } from '@static-wears/shared';
-
-async function getSocialLinks() {
-  try {
-    const supabase = createSupabaseAdminClient();
-    const { data } = await supabase
-      .from('site_settings')
-      .select('key, value')
-      .in('key', ['social_instagram', 'social_tiktok', 'social_facebook', 'social_youtube']);
-    const map: Record<string, string> = {};
-    (data ?? []).forEach((r: { key: string; value: string }) => { map[r.key] = r.value; });
-    return map;
-  } catch {
-    return {};
-  }
-}
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -45,15 +32,22 @@ const legalLinks = [
   { href: '/shipping', label: 'Shipping Info' },
 ];
 
-export async function Footer() {
-  const social = await getSocialLinks();
+const socialItems = [
+  { key: 'social_instagram', icon: <Instagram size={16} />, label: 'Instagram' },
+  { key: 'social_tiktok', icon: <TikTokIcon />, label: 'TikTok' },
+  { key: 'social_facebook', icon: <Facebook size={16} />, label: 'Facebook' },
+  { key: 'social_youtube', icon: <Youtube size={16} />, label: 'YouTube' },
+];
 
-  const socialItems = [
-    { key: 'social_instagram', icon: <Instagram size={16} />, label: 'Instagram' },
-    { key: 'social_tiktok', icon: <TikTokIcon />, label: 'TikTok' },
-    { key: 'social_facebook', icon: <Facebook size={16} />, label: 'Facebook' },
-    { key: 'social_youtube', icon: <Youtube size={16} />, label: 'YouTube' },
-  ];
+export function Footer() {
+  const [social, setSocial] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch('/api/settings')
+      .then((r) => r.json())
+      .then((d: Record<string, string>) => setSocial(d))
+      .catch(() => {});
+  }, []);
 
   return (
     <footer className="border-t border-[#1a1a1a] bg-[#060606] mt-24 relative overflow-hidden">
