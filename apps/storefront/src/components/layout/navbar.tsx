@@ -1,31 +1,22 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { ShoppingBag, User, Menu, X, Search } from 'lucide-react';
+import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { CartSheet } from '@/components/cart/cart-sheet';
 
 export function Navbar() {
   const { cart } = useCart();
-  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  useEffect(() => {
-    if (searchOpen) searchRef.current?.focus();
-  }, [searchOpen]);
 
   const totalItems = cart.items.reduce((s, i) => s + i.quantity, 0);
 
@@ -36,15 +27,6 @@ export function Navbar() {
     { href: '/shop?category=caps', label: 'Caps' },
     { href: '/shop?category=accessories', label: 'Accessories' },
   ];
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (!searchQuery.trim()) return;
-    setSearchOpen(false);
-    setMobileOpen(false);
-    router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
-    setSearchQuery('');
-  }
 
   return (
     <>
@@ -63,30 +45,6 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
-          </div>
-
-          {/* Search — expands inline on desktop */}
-          <div className={`hidden md:flex items-center transition-all duration-300 ${searchOpen ? 'flex-1 max-w-xs' : 'w-10'}`}>
-            {searchOpen ? (
-              <form onSubmit={handleSearch} className="flex items-center w-full border-b border-[#ff6b35]">
-                <input
-                  ref={searchRef}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="flex-1 bg-transparent font-mono text-sm text-[#f0f0f0] placeholder:text-[#444] focus:outline-none py-1 px-2"
-                  onKeyDown={(e) => e.key === 'Escape' && setSearchOpen(false)}
-                />
-                <button type="button" onClick={() => setSearchOpen(false)} className="text-[#555] hover:text-[#ff6b35] p-1">
-                  <X size={14} />
-                </button>
-              </form>
-            ) : (
-              <button onClick={() => setSearchOpen(true)}
-                className="w-10 h-10 flex items-center justify-center text-[#888] hover:text-[#ff6b35] transition-colors">
-                <Search size={18} />
-              </button>
-            )}
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
@@ -115,18 +73,6 @@ export function Navbar() {
       <div className={`fixed inset-0 z-40 bg-[#080808] flex flex-col pt-20 transition-transform duration-300 ${
         mobileOpen ? 'translate-x-0' : 'translate-x-full'
       }`}>
-        <div className="px-6 mb-8">
-          <form onSubmit={handleSearch} className="flex items-center border border-[#2a2a2a] px-4 py-3">
-            <Search size={14} className="text-[#444] shrink-0 mr-3" />
-            <input
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search products..."
-              className="flex-1 bg-transparent font-mono text-sm text-[#f0f0f0] placeholder:text-[#444] focus:outline-none"
-            />
-          </form>
-        </div>
-
         <div className="flex flex-col px-6 gap-5 overflow-y-auto pb-10">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
