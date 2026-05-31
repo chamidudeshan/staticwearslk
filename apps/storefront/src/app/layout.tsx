@@ -7,6 +7,7 @@ import { ClerkProvider } from '@clerk/nextjs';
 import { CartProvider } from '@/context/cart-context';
 import { Toaster } from '@/components/ui/sonner';
 import { CustomCursor } from '@/components/ui/cursor';
+import { BottomNav } from '@/components/layout/bottom-nav';
 
 const bebasNeue = Bebas_Neue({
   weight: '400',
@@ -42,7 +43,8 @@ export default function RootLayout({
           <CartProvider>
             <CustomCursor />
             {children}
-            <Toaster position="bottom-right" theme="dark" />
+            <BottomNav />
+            <Toaster position="top-right" theme="dark" />
           </CartProvider>
         </body>
       </html>

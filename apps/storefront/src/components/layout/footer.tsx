@@ -42,7 +42,7 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="border-t border-[#1a1a1a] bg-[#060606] mt-24 relative overflow-hidden">
+    <footer className="border-t border-[#1a1a1a] bg-[#060606] mt-24 relative overflow-hidden mb-16 md:mb-0">
       <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none overflow-hidden" aria-hidden>
         <span className="font-display text-[22vw] text-[#0a0a0a] leading-none tracking-tight whitespace-nowrap">SW</span>
       </div>
