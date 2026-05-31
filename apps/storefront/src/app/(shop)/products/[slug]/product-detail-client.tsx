@@ -209,6 +209,13 @@ export function ProductDetailClient({ product, related }: Props) {
               {product.name.toUpperCase()}
             </h1>
 
+            {/* Variant short description */}
+            {selectedVariant?.description && (
+              <p className="font-mono text-xs text-[#666] border-l-2 border-[#ff6b35]/30 pl-3 -mt-2">
+                {selectedVariant.description}
+              </p>
+            )}
+
             {/* Price */}
             <div className="flex items-baseline gap-2">
               {showFrom && (
@@ -349,13 +356,6 @@ export function ProductDetailClient({ product, related }: Props) {
                 <p className="font-mono text-xs uppercase tracking-widest text-[#555]">Description</p>
                 <p className="font-mono text-sm text-[#888] leading-relaxed">{product.description}</p>
               </div>
-            )}
-
-            {/* Variant description */}
-            {selectedVariant?.description && (
-              <p className="font-mono text-xs text-[#666] border-l-2 border-[#ff6b35]/30 pl-3">
-                {selectedVariant.description}
-              </p>
             )}
 
             {/* SKU */}
