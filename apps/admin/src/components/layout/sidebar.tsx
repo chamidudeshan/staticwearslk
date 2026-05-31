@@ -12,6 +12,7 @@ import {
   Settings,
   LogOut,
   ExternalLink,
+  Image,
 } from 'lucide-react';
 import { useClerk } from '@clerk/nextjs';
 
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/users', label: 'Customers', icon: Users },
   { href: '/categories', label: 'Categories', icon: Tag },
   { href: '/brands', label: 'Brands', icon: Award },
+  { href: '/banners', label: 'Banners', icon: Image },
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 

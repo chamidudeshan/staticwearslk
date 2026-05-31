@@ -1,20 +1,38 @@
 import { getProducts, getCategories } from '@static-wears/product-service';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import { HeroSection } from '@/components/layout/hero-section';
+import { BannerSlider, type SliderBanner } from '@/components/layout/banner-slider';
 import { MarqueeStrip } from '@/components/layout/marquee-strip';
 import { FeaturedProducts } from '@/components/product/featured-products';
 import { CategoryShowcase } from '@/components/product/category-showcase';
 
 export const revalidate = 60;
 
+async function getActiveBanners(): Promise<SliderBanner[]> {
+  try {
+    const supabase = createSupabaseAdminClient();
+    const { data } = await supabase
+      .from('banners')
+      .select('id, image_url, title, subtitle, cta_text, cta_link')
+      .eq('is_active', true)
+      .order('sort_order')
+      .order('created_at');
+    return (data ?? []) as SliderBanner[];
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage() {
-  const [products, categories] = await Promise.all([
+  const [products, categories, banners] = await Promise.all([
     getProducts({ limit: 8, sort: 'newest' }),
     getCategories(),
+    getActiveBanners(),
   ]);
 
   return (
     <>
-      <HeroSection />
+      {banners.length > 0 ? <BannerSlider banners={banners} /> : <HeroSection />}
       <MarqueeStrip />
       <FeaturedProducts products={products} />
       <CategoryShowcase categories={categories} />
