@@ -45,21 +45,32 @@ export async function PATCH(
 
   if (Array.isArray(variants)) {
     const supabase = createSupabaseAdminClient();
+
+    // Delete marked variants
     const toDelete = variants
       .filter((v: { id?: string; _deleted?: boolean }) => v.id && v._deleted)
       .map((v: { id: string }) => v.id);
-    const toUpsert = variants
-      .filter((v: { _deleted?: boolean }) => !v._deleted)
-      .map(({ _deleted, ...v }: { _deleted?: boolean; [k: string]: unknown }) => ({
-        ...v,
-        product_id: params.id,
-      }));
-
     if (toDelete.length) {
       await supabase.from('product_variants').delete().in('id', toDelete);
     }
-    if (toUpsert.length) {
-      await supabase.from('product_variants').upsert(toUpsert, { onConflict: 'id' });
+
+    const active = variants.filter((v: { _deleted?: boolean }) => !v._deleted);
+
+    // Existing variants (have id) → update individually
+    const existing = active.filter((v: { id?: string }) => v.id);
+    for (const v of existing) {
+      const { _deleted, id, ...fields } = v as { _deleted?: boolean; id: string; [k: string]: unknown };
+      await supabase.from('product_variants').update(fields).eq('id', id);
+    }
+
+    // New variants (no id) → insert individually so each is independent
+    const fresh = active.filter((v: { id?: string }) => !v.id);
+    for (const v of fresh) {
+      const { _deleted, id, ...fields } = v as { _deleted?: boolean; id?: string; [k: string]: unknown };
+      await supabase.from('product_variants').insert({
+        ...fields,
+        product_id: params.id,
+      });
     }
   }
 

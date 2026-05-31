@@ -48,9 +48,14 @@ export async function createProduct(data: {
   }
 
   if (data.variants?.length) {
-    await supabase
-      .from('product_variants')
-      .insert(data.variants.map((v) => ({ ...v, product_id: product.id })));
+    for (const v of data.variants) {
+      const { error: variantError } = await supabase
+        .from('product_variants')
+        .insert({ ...v, product_id: product.id });
+      if (variantError) {
+        console.error('Variant insert error:', variantError.message, v);
+      }
+    }
   }
 
   if (data.images?.length) {
