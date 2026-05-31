@@ -7,7 +7,6 @@ import { getOrdersByCustomer } from '@static-wears/order-service';
 import Link from 'next/link';
 import { formatPrice, formatDate } from '@/lib/utils';
 import { Package, ChevronRight, ExternalLink, ShoppingBag, User, Settings } from 'lucide-react';
-import Image from 'next/image';
 import type { OrderStatus } from '@static-wears/shared';
 
 const STATUS_COLOR: Record<OrderStatus, string> = {
@@ -57,18 +56,8 @@ export default async function AccountPage() {
           <div className="bg-[#111] border border-[#2a2a2a] p-6 sm:p-8 mb-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               <div className="relative shrink-0">
-                <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-[#2a2a2a] bg-[#1a1a1a] flex items-center justify-center">
-                  {user.imageUrl ? (
-                    <Image
-                      src={user.imageUrl}
-                      alt={displayName}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <User size={32} className="text-[#555]" />
-                  )}
+                <div className="w-20 h-20 rounded-full border-2 border-[#2a2a2a] bg-[#1a1a1a] flex items-center justify-center">
+                  <User size={32} className="text-[#555]" />
                 </div>
                 {isAdmin && (
                   <div className="absolute -bottom-1 -right-1 bg-[#ff6b35] text-black font-mono font-bold text-[8px] uppercase tracking-widest px-1.5 py-0.5 rounded">
