@@ -54,6 +54,11 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const isLowStock = product.variants?.some((v) => v.stock_qty > 0 && v.stock_qty <= 3);
   const isOutOfStock = product.variants?.every((v) => v.stock_qty === 0);
   const uniqueColors = Array.from(new Set(product.variants?.map((v) => v.color) ?? []));
+  const hasVariants = (product.variants?.length ?? 0) > 0;
+  const displayPrice = hasVariants
+    ? Math.min(...(product.variants!.map((v) => v.price_adj)))
+    : product.base_price;
+  const showFrom = hasVariants && product.variants!.some((v) => v.price_adj !== displayPrice);
 
   function handleQuickAdd(e: React.MouseEvent) {
     e.preventDefault();
@@ -67,7 +72,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         product_name: product.name,
         variant_desc: `${variant.size} / ${variant.color}`,
         image_path: mainImage?.image_path ?? '',
-        unit_price: product.base_price + variant.price_adj,
+        unit_price: hasVariants ? variant.price_adj : product.base_price,
         quantity: 1,
       },
     });
@@ -163,7 +168,8 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
             </h3>
             <div className="text-right shrink-0">
               <span className="font-mono text-[#ff6b35] text-xs font-bold">
-                {formatPrice(product.base_price)}
+                {showFrom && <span className="text-[#555] font-normal text-[9px] mr-0.5">From </span>}
+                {formatPrice(displayPrice)}
               </span>
             </div>
           </div>

@@ -122,6 +122,9 @@ export default function NewProductPage() {
         {/* Basic Info */}
         <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6 space-y-5">
           <h2 className="font-mono text-xs uppercase tracking-widest text-[#555]">Basic Info</h2>
+          <p className="font-mono text-[10px] text-[#444]">
+            Base price is used only when there are no variants. If you add variants, each variant&apos;s price is used instead.
+          </p>
 
           <div className="space-y-1.5">
             <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Product Name *</label>
@@ -276,12 +279,14 @@ export default function NewProductPage() {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">±Price</label>
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">Price (LKR)</label>
                     <input
                       type="number"
                       value={variant.price_adj}
                       onChange={(e) => updateVariant(i, 'price_adj', e.target.value)}
                       step="0.01"
+                      min="0"
+                      placeholder="2500"
                       className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
                     />
                   </div>
