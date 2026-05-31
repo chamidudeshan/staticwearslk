@@ -103,12 +103,6 @@ export function BannerSlider({ banners }: { banners: SliderBanner[] }) {
               <span className="relative z-10">{(banner.cta_text ?? 'SHOP NOW').toUpperCase()}</span>
               <span className="absolute inset-0 bg-[#e8ff59] translate-x-[-101%] group-hover:translate-x-0 transition-transform duration-300 ease-out" />
             </Link>
-            {banners.length > 1 && (
-              <span className="font-mono text-[10px] uppercase tracking-[0.2em] px-6 sm:px-8 py-3.5 sm:py-4
-                               border border-white/20 text-white/60 flex items-center">
-                {current + 1} / {banners.length}
-              </span>
-            )}
           </div>
         </div>
       </div>
