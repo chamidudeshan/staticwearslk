@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, Pencil, Trash2, KeyRound, X } from 'lucide-react';
+import { Search, Pencil, Trash2, KeyRound, X, FileSpreadsheet, Loader2 } from 'lucide-react';
 import type { Profile } from '@static-wears/shared';
 import { formatDate } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -20,6 +20,18 @@ interface ResetState {
   email: string;
 }
 
+async function downloadExport(url: string, filename: string) {
+  const res = await fetch(url);
+  if (!res.ok) { return false; }
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  return true;
+}
+
 export function UsersTable({ users: initial }: { users: Profile[] }) {
   const [users, setUsers] = useState(initial);
   const [search, setSearch] = useState('');
@@ -27,6 +39,20 @@ export function UsersTable({ users: initial }: { users: Profile[] }) {
   const [deleting, setDeleting] = useState<string | null>(null);
   const [resetInfo, setResetInfo] = useState<ResetState | null>(null);
   const [saving, setSaving] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const ok = await downloadExport('/api/admin/export/users', `staticwears-customers-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      if (ok) toast.success('Customers exported successfully');
+      else toast.error('Export failed');
+    } catch {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const filtered = users.filter(
     (u) =>
@@ -232,14 +258,27 @@ export function UsersTable({ users: initial }: { users: Profile[] }) {
         </div>
       )}
 
-      <div className="relative">
-        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#444]" />
-        <input
-          placeholder="Search customers..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="bg-[#0e0e12] border border-[#1e1e28] pl-9 pr-4 py-2.5 font-mono text-xs text-[#e8e8f0] placeholder:text-[#444] focus:outline-none focus:border-[#ff6b35] transition-colors w-72"
-        />
+      <div className="flex items-center gap-3 justify-between flex-wrap">
+        <div className="relative">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#444]" />
+          <input
+            placeholder="Search customers..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="bg-[#0e0e12] border border-[#1e1e28] pl-9 pr-4 py-2.5 font-mono text-xs text-[#e8e8f0] placeholder:text-[#444] focus:outline-none focus:border-[#ff6b35] transition-colors w-72"
+          />
+        </div>
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-mono font-bold text-xs uppercase tracking-widest transition-colors disabled:opacity-60 shrink-0"
+        >
+          {exporting ? (
+            <><Loader2 size={13} className="animate-spin" /> Generating...</>
+          ) : (
+            <><FileSpreadsheet size={13} /> Export Excel</>
+          )}
+        </button>
       </div>
 
       <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl overflow-hidden">

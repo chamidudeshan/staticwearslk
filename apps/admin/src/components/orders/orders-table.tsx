@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Order, OrderStatus } from '@static-wears/shared';
 import { formatPrice, formatDate } from '@/lib/utils';
@@ -19,10 +19,34 @@ const STATUS_OPTIONS: OrderStatus[] = [
   'pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled',
 ];
 
+async function downloadExport(url: string, filename: string) {
+  const res = await fetch(url);
+  if (!res.ok) { toast.error('Export failed'); return; }
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 export function OrdersTable({ orders }: { orders: Order[] }) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<OrderStatus | 'all'>('all');
   const [updating, setUpdating] = useState<string | null>(null);
+  const [exporting, setExporting] = useState(false);
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      await downloadExport('/api/admin/export/orders', `staticwears-orders-${new Date().toISOString().slice(0, 10)}.xlsx`);
+      toast.success('Orders exported successfully');
+    } catch {
+      toast.error('Export failed');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const filtered = orders.filter((o) => {
     const matchesSearch =
@@ -52,7 +76,8 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
+      {/* Filters + Export */}
+      <div className="flex flex-wrap items-center gap-3 justify-between">
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#444]" />
@@ -63,7 +88,7 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             className="bg-[#0e0e12] border border-[#1e1e28] pl-9 pr-4 py-2.5 font-mono text-xs text-[#e8e8f0] placeholder:text-[#444] focus:outline-none focus:border-[#ff6b35] transition-colors w-64"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {(['all', ...STATUS_OPTIONS] as const).map((s) => (
             <button
               key={s}
@@ -78,6 +103,20 @@ export function OrdersTable({ orders }: { orders: Order[] }) {
             </button>
           ))}
         </div>
+      </div>
+
+        {/* Export button */}
+        <button
+          onClick={handleExport}
+          disabled={exporting}
+          className="flex items-center gap-2 px-4 py-2.5 bg-[#16a34a] hover:bg-[#15803d] text-white font-mono font-bold text-xs uppercase tracking-widest transition-colors disabled:opacity-60 shrink-0"
+        >
+          {exporting ? (
+            <><Loader2 size={13} className="animate-spin" /> Generating...</>
+          ) : (
+            <><FileSpreadsheet size={13} /> Export Excel</>
+          )}
+        </button>
       </div>
 
       {/* Table */}
