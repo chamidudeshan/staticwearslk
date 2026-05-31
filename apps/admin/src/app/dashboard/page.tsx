@@ -1,6 +1,6 @@
 import { getAllOrders } from '@static-wears/order-service';
-import { getAllUsers } from '@static-wears/user-service';
 import { getAllProductsAdmin } from '@static-wears/product-service';
+import { clerkClient } from '@clerk/nextjs/server';
 import { DashboardStats } from '@/components/dashboard/stats';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { RecentOrders } from '@/components/dashboard/recent-orders';
@@ -11,10 +11,11 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function DashboardPage() {
-  const [orders, users, products] = await Promise.all([
+  const client = await clerkClient();
+  const [orders, products, { totalCount: totalCustomers }] = await Promise.all([
     getAllOrders(),
-    getAllUsers(),
     getAllProductsAdmin(),
+    client.users.getUserList({ limit: 1 }),
   ]);
 
   const activeOrders = orders.filter((o) => o.status !== 'cancelled');
@@ -23,7 +24,7 @@ export default async function DashboardPage() {
   const stats = {
     totalRevenue,
     totalOrders: orders.length,
-    totalCustomers: users.length,
+    totalCustomers,
     totalProducts: products.length,
     pendingOrders: orders.filter((o) => o.status === 'pending').length,
   };
