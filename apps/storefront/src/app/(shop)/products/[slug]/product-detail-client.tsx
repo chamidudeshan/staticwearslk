@@ -83,6 +83,7 @@ export function ProductDetailClient({ product, related }: Props) {
 
   function pickSize(v: ProductVariant) {
     setSelectedVariant(v);
+    setActiveIdx(0);
     setQty(1);
   }
 
@@ -140,6 +141,7 @@ export function ProductDetailClient({ product, related }: Props) {
             {/* Main image */}
             <div className="relative flex-1 aspect-[4/5] overflow-hidden bg-[#111]">
               <Image
+                key={`${selectedVariant?.id ?? 'base'}-${activeIdx}`}
                 src={imgSrc(galleryImages[activeIdx]?.image_path ?? '', activeIdx)}
                 alt={product.name}
                 fill
