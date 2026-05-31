@@ -6,18 +6,22 @@ import { Plus, Trash2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
+import { ImageUploader, type UploadedImage } from '@/components/products/image-uploader';
 
 interface Variant {
   size: string;
   color: string;
   stock_qty: number;
   price_adj: number;
+  sku: string;
+  image: UploadedImage | null;
 }
 
 interface Option { id: string; name: string }
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
 const COLORS = ['Black', 'White', 'Navy', 'Grey', 'Khaki', 'Olive', 'Red', 'Blue'];
+const STATUSES = ['active', 'draft', 'inactive'] as const;
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -26,10 +30,12 @@ export default function NewProductPage() {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [basePrice, setBasePrice] = useState('');
+  const [status, setStatus] = useState<'active' | 'draft' | 'inactive'>('active');
   const [brandId, setBrandId] = useState('');
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
+  const [productImages, setProductImages] = useState<UploadedImage[]>([]);
   const [variants, setVariants] = useState<Variant[]>([
-    { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0 },
+    { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0, sku: '', image: null },
   ]);
 
   const [brands, setBrands] = useState<Option[]>([]);
@@ -41,20 +47,19 @@ export default function NewProductPage() {
   }, []);
 
   function toggleCategory(id: string) {
-    setCategoryIds((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]
-    );
+    setCategoryIds((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);
   }
 
   function addVariant() {
-    setVariants((v) => [...v, { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0 }]);
+    setVariants((v) => [...v, { size: 'M', color: 'Black', stock_qty: 10, price_adj: 0, sku: '', image: null }]);
   }
 
   function removeVariant(i: number) {
+    if (variants.length === 1) return;
     setVariants((v) => v.filter((_, idx) => idx !== i));
   }
 
-  function updateVariant(i: number, field: keyof Variant, value: string | number) {
+  function updateVariant(i: number, field: keyof Variant, value: unknown) {
     setVariants((v) => v.map((item, idx) => idx === i ? { ...item, [field]: value } : item));
   }
 
@@ -70,12 +75,21 @@ export default function NewProductPage() {
           name: name.trim(),
           description: description.trim() || undefined,
           base_price: parseFloat(basePrice),
+          status,
           brand_id: brandId || undefined,
           category_ids: categoryIds,
+          images: productImages.map((img, i) => ({
+            url: img.url,
+            is_main: img.is_main,
+            sort_order: i,
+          })),
           variants: variants.map((v) => ({
-            ...v,
+            size: v.size,
+            color: v.color,
             stock_qty: Number(v.stock_qty),
             price_adj: Number(v.price_adj),
+            sku: v.sku || null,
+            image_url: v.image?.url ?? null,
           })),
         }),
       });
@@ -104,6 +118,7 @@ export default function NewProductPage() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+
         {/* Basic Info */}
         <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6 space-y-5">
           <h2 className="font-mono text-xs uppercase tracking-widest text-[#555]">Basic Info</h2>
@@ -130,7 +145,7 @@ export default function NewProductPage() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-1.5">
               <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Base Price (LKR) *</label>
               <input
@@ -146,13 +161,26 @@ export default function NewProductPage() {
             </div>
 
             <div className="space-y-1.5">
+              <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Status</label>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value as typeof status)}
+                className="w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>{s.charAt(0).toUpperCase() + s.slice(1)}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
               <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Brand</label>
               <select
                 value={brandId}
                 onChange={(e) => setBrandId(e.target.value)}
                 className="w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
               >
-                <option value="">— No brand —</option>
+                <option value="">— None —</option>
                 {brands.map((b) => (
                   <option key={b.id} value={b.id}>{b.name}</option>
                 ))}
@@ -163,7 +191,7 @@ export default function NewProductPage() {
           <div className="space-y-1.5">
             <label className="font-mono text-xs uppercase tracking-widest text-[#555]">Categories</label>
             {categories.length === 0 ? (
-              <p className="font-mono text-xs text-[#333]">No categories yet — add some in the Categories section.</p>
+              <p className="font-mono text-xs text-[#333]">No categories yet.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {categories.map((cat) => (
@@ -185,6 +213,16 @@ export default function NewProductPage() {
           </div>
         </div>
 
+        {/* Product Images */}
+        <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6">
+          <ImageUploader
+            images={productImages}
+            onChange={setProductImages}
+            label="Product Photos"
+            maxImages={8}
+          />
+        </div>
+
         {/* Variants */}
         <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6 space-y-4">
           <div className="flex items-center justify-between">
@@ -196,56 +234,88 @@ export default function NewProductPage() {
               onClick={addVariant}
               className="flex items-center gap-1.5 font-mono text-xs text-[#ff6b35] hover:text-[#e8ff59] transition-colors"
             >
-              <Plus size={13} />
-              Add Variant
+              <Plus size={13} /> Add Variant
             </button>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {variants.map((variant, i) => (
-              <div key={i} className="grid grid-cols-[1fr_1fr_90px_90px_36px] gap-2 items-center">
-                <select
-                  value={variant.size}
-                  onChange={(e) => updateVariant(i, 'size', e.target.value)}
-                  className="bg-[#12121a] border border-[#1e1e28] px-3 py-2.5 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
-                >
-                  {SIZES.map((s) => <option key={s}>{s}</option>)}
-                </select>
-                <select
-                  value={variant.color}
-                  onChange={(e) => updateVariant(i, 'color', e.target.value)}
-                  className="bg-[#12121a] border border-[#1e1e28] px-3 py-2.5 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
-                >
-                  {COLORS.map((c) => <option key={c}>{c}</option>)}
-                </select>
-                <input
-                  type="number"
-                  value={variant.stock_qty}
-                  onChange={(e) => updateVariant(i, 'stock_qty', e.target.value)}
-                  placeholder="Qty"
-                  min="0"
-                  className="bg-[#12121a] border border-[#1e1e28] px-3 py-2.5 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+              <div key={i} className="bg-[#12121a] border border-[#1e1e28] p-4 space-y-3">
+                <div className="grid grid-cols-[1fr_1fr_80px_80px_1fr_32px] gap-2 items-end">
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">Size</label>
+                    <select
+                      value={variant.size}
+                      onChange={(e) => updateVariant(i, 'size', e.target.value)}
+                      className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+                    >
+                      {SIZES.map((s) => <option key={s}>{s}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">Color</label>
+                    <select
+                      value={variant.color}
+                      onChange={(e) => updateVariant(i, 'color', e.target.value)}
+                      className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+                    >
+                      {COLORS.map((c) => <option key={c}>{c}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">Stock</label>
+                    <input
+                      type="number"
+                      value={variant.stock_qty}
+                      onChange={(e) => updateVariant(i, 'stock_qty', e.target.value)}
+                      min="0"
+                      className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">±Price</label>
+                    <input
+                      type="number"
+                      value={variant.price_adj}
+                      onChange={(e) => updateVariant(i, 'price_adj', e.target.value)}
+                      step="0.01"
+                      className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="font-mono text-[10px] uppercase tracking-widest text-[#444]">SKU</label>
+                    <input
+                      type="text"
+                      value={variant.sku}
+                      onChange={(e) => updateVariant(i, 'sku', e.target.value)}
+                      placeholder="SW-BLK-M"
+                      className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] placeholder:text-[#222] focus:outline-none focus:border-[#ff6b35] transition-colors"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => removeVariant(i)}
+                    disabled={variants.length === 1}
+                    className="mb-0.5 flex items-center justify-center text-[#333] hover:text-red-500 transition-colors disabled:opacity-20"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+
+                <ImageUploader
+                  images={variant.image ? [variant.image] : []}
+                  onChange={(imgs) => updateVariant(i, 'image', imgs[0] ?? null)}
+                  label={`Photo for ${variant.color} / ${variant.size}`}
+                  single
                 />
-                <input
-                  type="number"
-                  value={variant.price_adj}
-                  onChange={(e) => updateVariant(i, 'price_adj', e.target.value)}
-                  placeholder="±Price"
-                  step="0.01"
-                  className="bg-[#12121a] border border-[#1e1e28] px-3 py-2.5 font-mono text-xs text-[#e8e8f0] focus:outline-none focus:border-[#ff6b35] transition-colors"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeVariant(i)}
-                  disabled={variants.length === 1}
-                  className="flex items-center justify-center text-[#333] hover:text-red-500 transition-colors disabled:opacity-20"
-                >
-                  <Trash2 size={14} />
-                </button>
               </div>
             ))}
           </div>
-          <p className="font-mono text-[10px] text-[#333]">Size · Color · Stock Qty · Price Adjustment (LKR)</p>
         </div>
 
         {/* Actions */}
@@ -257,10 +327,7 @@ export default function NewProductPage() {
           >
             {loading ? 'Creating...' : 'Create Product'}
           </button>
-          <Link
-            href="/products"
-            className="font-mono text-xs text-[#444] hover:text-[#e8e8f0] transition-colors px-4 py-3"
-          >
+          <Link href="/products" className="font-mono text-xs text-[#444] hover:text-[#e8e8f0] transition-colors px-4 py-3">
             Cancel
           </Link>
         </div>

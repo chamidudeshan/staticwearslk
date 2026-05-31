@@ -69,6 +69,7 @@ export interface ProductVariant {
   stock_qty: number;
   price_adj: number;
   sku: string | null;
+  image_url: string | null;
   created_at: string;
 }
 

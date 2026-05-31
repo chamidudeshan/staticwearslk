@@ -33,9 +33,14 @@ export async function PATCH(
   if (!adminId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const body = await req.json();
-  const { variants, ...productFields } = body;
+  const { variants, images_to_add, images_to_delete, main_image_id, ...productFields } = body;
 
-  const result = await updateProduct(params.id, productFields);
+  const result = await updateProduct(params.id, {
+    ...productFields,
+    images_to_add,
+    images_to_delete,
+    main_image_id,
+  });
   if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
 
   if (Array.isArray(variants)) {
