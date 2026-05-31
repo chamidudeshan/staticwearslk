@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createSupabaseAdminClient } from '@static-wears/shared';
 import { requireAdmin } from '@/lib/require-admin';
 
+export const maxDuration = 30;
+
 export async function POST(req: NextRequest) {
   const adminId = await requireAdmin();
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

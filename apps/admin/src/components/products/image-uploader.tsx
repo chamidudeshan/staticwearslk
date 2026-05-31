@@ -42,10 +42,21 @@ export function ImageUploader({ images, onChange, maxImages = 8, label = 'Photos
       const fd = new FormData();
       fd.append('file', file);
 
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-      const data = await res.json();
+      let res: Response;
+      let data: { url?: string; error?: string };
+      try {
+        res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+        data = await res.json();
+      } catch (err) {
+        toast.error(`Network error: ${err instanceof Error ? err.message : 'unknown'}`);
+        continue;
+      }
       if (!res.ok) {
-        toast.error(data.error ?? 'Upload failed');
+        toast.error(`Upload failed: ${data.error ?? res.statusText}`);
+        continue;
+      }
+      if (!data.url) {
+        toast.error('Upload succeeded but no URL returned');
         continue;
       }
       results.push({
