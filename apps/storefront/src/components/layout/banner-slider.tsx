@@ -111,12 +111,12 @@ export function BannerSlider({ banners }: { banners: SliderBanner[] }) {
       {banners.length > 1 && (
         <>
           <button onClick={prev} aria-label="Previous"
-            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 border border-white/20 bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:border-[#ff6b35] hover:text-[#ff6b35] transition-all duration-200">
-            <ChevronLeft size={18} />
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-[#ff6b35] transition-colors duration-200">
+            <ChevronLeft size={28} />
           </button>
           <button onClick={next} aria-label="Next"
-            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 border border-white/20 bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:border-[#ff6b35] hover:text-[#ff6b35] transition-all duration-200">
-            <ChevronRight size={18} />
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-[#ff6b35] transition-colors duration-200">
+            <ChevronRight size={28} />
           </button>
         </>
       )}

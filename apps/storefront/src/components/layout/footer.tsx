@@ -10,14 +10,6 @@ const TikTokIcon = () => (
   </svg>
 );
 
-const shopLinks = [
-  { href: '/shop', label: 'All Products' },
-  { href: '/shop?category=t-shirts', label: 'T-Shirts' },
-  { href: '/shop?category=hoodies', label: 'Hoodies' },
-  { href: '/shop?category=caps', label: 'Caps' },
-  { href: '/shop?category=accessories', label: 'Accessories' },
-];
-
 const helpLinks = [
   { href: '/account', label: 'My Account' },
   { href: '/orders', label: 'Track Order' },
@@ -83,20 +75,8 @@ export function Footer() {
             </div>
           </div>
 
-          {/* Shop */}
-          <div className="col-span-1 md:col-span-3">
-            <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-5">Shop</div>
-            <div className="flex flex-col gap-3">
-              {shopLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors">
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-          </div>
-
           {/* Help */}
-          <div className="col-span-1 md:col-span-3">
+          <div className="col-span-1 md:col-span-4">
             <div className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#333] mb-5">Help</div>
             <div className="flex flex-col gap-3">
               {helpLinks.map((link) => (
