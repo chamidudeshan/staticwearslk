@@ -318,6 +318,13 @@ export function ProductDetailClient({ product, related }: Props) {
               </div>
             )}
 
+            {/* Variant description */}
+            {selectedVariant?.description && (
+              <p className="font-mono text-xs text-[#666] border-l-2 border-[#ff6b35]/30 pl-3">
+                {selectedVariant.description}
+              </p>
+            )}
+
             {/* SKU */}
             {selectedVariant?.sku && (
               <p className="font-mono text-[10px] text-[#333]">SKU: {selectedVariant.sku}</p>

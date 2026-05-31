@@ -126,10 +126,10 @@ export async function updateProduct(
 
 export async function deleteProduct(id: string): Promise<{ error: string | null }> {
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase
-    .from('products')
-    .update({ status: 'inactive' })
-    .eq('id', id);
+  await supabase.from('product_images').delete().eq('product_id', id);
+  await supabase.from('product_categories').delete().eq('product_id', id);
+  await supabase.from('product_variants').delete().eq('product_id', id);
+  const { error } = await supabase.from('products').delete().eq('id', id);
   return { error: error?.message ?? null };
 }
 

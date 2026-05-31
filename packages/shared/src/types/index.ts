@@ -70,6 +70,7 @@ export interface ProductVariant {
   price_adj: number;
   sku: string | null;
   image_url: string | null;
+  description: string | null;
   created_at: string;
 }
 
