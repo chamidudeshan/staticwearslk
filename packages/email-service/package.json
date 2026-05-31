@@ -6,7 +6,7 @@
   "types": "./src/index.ts",
   "dependencies": {
     "@static-wears/shared": "workspace:*",
-    "resend": "^3.2.0"
+    "resend": "^3.5.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0"

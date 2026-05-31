@@ -7,16 +7,17 @@ import type { OrderStatus } from '@static-wears/shared';
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const adminId = await requireAdmin();
   if (!adminId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
+  const { id } = await params;
   const { status } = await req.json();
-  const result = await updateOrderStatus(params.id, status as OrderStatus);
+  const result = await updateOrderStatus(id, status as OrderStatus);
   if (result.error) return NextResponse.json({ error: result.error }, { status: 400 });
 
-  const order = await getOrderByIdAdmin(params.id);
+  const order = await getOrderByIdAdmin(id);
   if (order) {
     try {
       const client = await clerkClient();

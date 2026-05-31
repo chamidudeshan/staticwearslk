@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { clerkClient } from '@clerk/nextjs/server';
 import { requireAdmin } from '@/lib/require-admin';
 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminId = await requireAdmin();
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const { id } = await params;
   const body = await req.json();
   const client = await clerkClient();
 
@@ -15,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (body.role !== undefined) updates.publicMetadata = { role: body.role };
 
   try {
-    await client.users.updateUser(params.id, updates);
+    await client.users.updateUser(id, updates);
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to update user';
@@ -23,13 +24,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 }
 
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminId = await requireAdmin();
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const { id } = await params;
   const client = await clerkClient();
   try {
-    await client.users.deleteUser(params.id);
+    await client.users.deleteUser(id);
     return NextResponse.json({ success: true });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to delete user';
@@ -37,10 +39,11 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const adminId = await requireAdmin();
   if (!adminId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const { id } = await params;
   const { action } = await req.json();
   if (action !== 'reset-password') {
     return NextResponse.json({ error: 'Unknown action' }, { status: 400 });
@@ -48,11 +51,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   const client = await clerkClient();
   try {
-    const user = await client.users.getUser(params.id);
+    const user = await client.users.getUser(id);
     const email = user.emailAddresses[0]?.emailAddress;
     if (!email) return NextResponse.json({ error: 'User has no email' }, { status: 400 });
 
-    const token = await client.signInTokens.createSignInToken({ userId: params.id, expiresInSeconds: 86400 });
+    const token = await client.signInTokens.createSignInToken({ userId: id, expiresInSeconds: 86400 });
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
     const link = `${appUrl}/set-password?__clerk_ticket=${token.token}`;
     return NextResponse.json({ reset_link: link, email });

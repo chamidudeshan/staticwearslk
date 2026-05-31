@@ -30,13 +30,15 @@ export default async function OrderDetailPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { success?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ success?: string }>;
 }) {
   const { userId } = await auth();
   if (!userId) redirect('/login');
 
-  const order = await getOrderById(params.id);
+  const { id } = await params;
+  const { success } = await searchParams;
+  const order = await getOrderById(id);
   if (!order || order.customer_id !== userId) notFound();
 
   const currentStep = STATUS_STEPS.indexOf(order.status as OrderStatus);
@@ -54,7 +56,7 @@ export default async function OrderDetailPage({
             My Orders
           </Link>
 
-          {searchParams.success && (
+          {success && (
             <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 mb-8">
               <p className="font-mono text-sm text-emerald-400">
                 Payment confirmed! Your order is being processed.
