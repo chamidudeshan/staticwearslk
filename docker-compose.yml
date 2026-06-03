@@ -41,7 +41,7 @@ services:
     networks:
       - staticwears-net
 
-  # ── Storefront (Customer Site — port 3000) ──────────────────────────────────
+  # ── Storefront (Customer Site) ─────────────────────────────────────────────
   storefront:
     build:
       context: .
@@ -54,12 +54,12 @@ services:
     env_file: ./apps/storefront/.env.production
     environment:
       - KAFKA_BROKERS=kafka:9092
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     networks:
       - staticwears-net
 
-  # ── Admin Dashboard (port 3001) ─────────────────────────────────────────────
+  # ── Admin Dashboard ─────────────────────────────────────────────────────────
   admin:
     build:
       context: .
@@ -72,8 +72,26 @@ services:
     env_file: ./apps/admin/.env.production
     environment:
       - KAFKA_BROKERS=kafka:9092
+    expose:
+      - "3001"
+    networks:
+      - staticwears-net
+
+  # ── Nginx Reverse Proxy ─────────────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: staticwears-nginx
+    restart: unless-stopped
+    depends_on:
+      - storefront
+      - admin
     ports:
-      - "3001:3001"
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - certbot-www:/var/www/certbot:ro
     networks:
       - staticwears-net
 
@@ -98,6 +116,7 @@ services:
 
 volumes:
   kafka-data:
+  certbot-www:
   # postgres-data:   # Phase 2
 
 networks:
