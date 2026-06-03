@@ -208,6 +208,7 @@ services:
     env_file: ./apps/storefront/.env.production
     environment:
       - KAFKA_BROKERS=kafka:9092
+      - SUPABASE_INTERNAL_URL=http://kong:8000
     expose:
       - "3000"
     networks:
@@ -228,6 +229,7 @@ services:
     env_file: ./apps/admin/.env.production
     environment:
       - KAFKA_BROKERS=kafka:9092
+      - SUPABASE_INTERNAL_URL=http://kong:8000
     expose:
       - "3001"
     networks:

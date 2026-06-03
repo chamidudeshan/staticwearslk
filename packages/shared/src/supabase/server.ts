@@ -25,8 +25,6 @@ export async function createSupabaseServerClient() {
 }
 
 export function createSupabaseAdminClient() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
+  const url = process.env.SUPABASE_INTERNAL_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  return createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 }
