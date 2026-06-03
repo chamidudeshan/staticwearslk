@@ -2,7 +2,7 @@ services:
 
   # ── Message Broker (Kafka — KRaft, no Zookeeper needed) ────────────────────
   kafka:
-    image: bitnami/kafka:3.7
+    image: bitnami/kafka:3.6
     container_name: staticwears-kafka
     restart: unless-stopped
     environment:
