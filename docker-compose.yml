@@ -1,296 +1,105 @@
-version: '3.8'
-
-networks:
-  static-wears:
-    driver: bridge
-
-volumes:
-  postgres-data:
-  storage-data:
-  zookeeper-data:
-  kafka-data:
-
 services:
 
-  # ─── DATABASE ─────────────────────────────────────────────────────────────
-  db:
-    image: supabase/postgres:15.1.0.147
-    restart: unless-stopped
-    networks: [static-wears]
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_HOST: /var/run/postgresql
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: postgres
-      JWT_SECRET: ${JWT_SECRET}
-      POSTGRES_PORT: 5432
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-      - ./SUPABASE_SCHEMA.sql:/docker-entrypoint-initdb.d/01-schema.sql
-      - ./SUPABASE_SEED.sql:/docker-entrypoint-initdb.d/02-seed.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ─── SUPABASE AUTH (GoTrue) ────────────────────────────────────────────────
-  auth:
-    image: supabase/gotrue:v2.151.0
-    restart: unless-stopped
-    networks: [static-wears]
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      GOTRUE_API_HOST: 0.0.0.0
-      GOTRUE_API_PORT: 9999
-      API_EXTERNAL_URL: ${API_EXTERNAL_URL}
-      GOTRUE_DB_DRIVER: postgres
-      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/postgres
-      GOTRUE_SITE_URL: ${SITE_URL}
-      GOTRUE_URI_ALLOW_LIST: ${ADDITIONAL_REDIRECT_URLS}
-      GOTRUE_DISABLE_SIGNUP: false
-      GOTRUE_JWT_ADMIN_ROLES: service_role
-      GOTRUE_JWT_AUD: authenticated
-      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
-      GOTRUE_JWT_EXP: 3600
-      GOTRUE_JWT_SECRET: ${JWT_SECRET}
-      GOTRUE_EXTERNAL_EMAIL_ENABLED: true
-      GOTRUE_MAILER_AUTOCONFIRM: ${ENABLE_EMAIL_AUTOCONFIRM:-false}
-      GOTRUE_SMTP_ADMIN_EMAIL: ${SMTP_ADMIN_EMAIL}
-      GOTRUE_SMTP_HOST: ${SMTP_HOST}
-      GOTRUE_SMTP_PORT: ${SMTP_PORT:-587}
-      GOTRUE_SMTP_USER: ${SMTP_USER}
-      GOTRUE_SMTP_PASS: ${SMTP_PASS}
-      GOTRUE_SMTP_SENDER_NAME: Static Wears
-      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
-      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
-      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
-      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
-
-  # ─── SUPABASE REST (PostgREST) ─────────────────────────────────────────────
-  rest:
-    image: postgrest/postgrest:v12.2.0
-    restart: unless-stopped
-    networks: [static-wears]
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/postgres
-      PGRST_DB_SCHEMAS: public
-      PGRST_DB_ANON_ROLE: anon
-      PGRST_JWT_SECRET: ${JWT_SECRET}
-      PGRST_DB_USE_LEGACY_GUCS: false
-      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET}
-      PGRST_APP_SETTINGS_JWT_EXP: 3600
-
-  # ─── SUPABASE REALTIME ─────────────────────────────────────────────────────
-  realtime:
-    image: supabase/realtime:v2.30.23
-    restart: unless-stopped
-    networks: [static-wears]
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      PORT: 4000
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: supabase_admin
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
-      DB_NAME: postgres
-      DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
-      DB_ENC_KEY: supabaserealtime
-      API_JWT_SECRET: ${JWT_SECRET}
-      FLY_ALLOC_ID: fly123
-      FLY_APP_NAME: realtime
-      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
-      ERL_AFLAGS: -proto_dist inet_tcp
-      ENABLE_TAILSCALE: false
-      DNS_NODES: "''"
-    command: >
-      sh -c "/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server"
-
-  # ─── SUPABASE STORAGE ──────────────────────────────────────────────────────
-  storage:
-    image: supabase/storage-api:v1.0.6
-    restart: unless-stopped
-    networks: [static-wears]
-    depends_on:
-      db:
-        condition: service_healthy
-      rest:
-        condition: service_started
-    environment:
-      ANON_KEY: ${ANON_KEY}
-      SERVICE_KEY: ${SERVICE_ROLE_KEY}
-      POSTGREST_URL: http://rest:3000
-      PGRST_JWT_SECRET: ${JWT_SECRET}
-      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/postgres
-      FILE_SIZE_LIMIT: 52428800
-      STORAGE_BACKEND: file
-      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
-      TENANT_ID: stub
-      REGION: stub
-      GLOBAL_S3_BUCKET: stub
-      ENABLE_IMAGE_TRANSFORMATION: true
-      IMGPROXY_URL: http://imgproxy:5001
-    volumes:
-      - storage-data:/var/lib/storage
-
-  # ─── IMAGE PROXY ───────────────────────────────────────────────────────────
-  imgproxy:
-    image: darthsim/imgproxy:v3.8.0
-    restart: unless-stopped
-    networks: [static-wears]
-    environment:
-      IMGPROXY_BIND: ":5001"
-      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
-      IMGPROXY_USE_ETAG: true
-      IMGPROXY_ENABLE_WEBP_DETECTION: true
-
-  # ─── SUPABASE META ─────────────────────────────────────────────────────────
-  meta:
-    image: supabase/postgres-meta:v0.83.2
-    restart: unless-stopped
-    networks: [static-wears]
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      PG_META_PORT: 8080
-      PG_META_DB_HOST: db
-      PG_META_DB_PORT: 5432
-      PG_META_DB_NAME: postgres
-      PG_META_DB_USER: supabase_admin
-      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD}
-
-  # ─── KONG API GATEWAY ──────────────────────────────────────────────────────
-  kong:
-    image: kong:2.8.1
-    restart: unless-stopped
-    networks: [static-wears]
-    ports:
-      - "8000:8000"
-    depends_on:
-      db:
-        condition: service_healthy
-    environment:
-      KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
-      KONG_DNS_ORDER: LAST,A,CNAME
-      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
-      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
-      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
-      SUPABASE_ANON_KEY: ${ANON_KEY}
-      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
-      DASHBOARD_USERNAME: ${DASHBOARD_USERNAME:-admin}
-      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD}
-    volumes:
-      - ./volumes/api/kong.yml:/var/lib/kong/kong.yml:ro
-
-  # ─── KAFKA (EVENT BUS) ────────────────────────────────────────────────────
-  zookeeper:
-    image: bitnami/zookeeper:3.9
-    restart: unless-stopped
-    networks: [static-wears]
-    environment:
-      ALLOW_ANONYMOUS_LOGIN: "yes"
-    volumes:
-      - zookeeper-data:/bitnami/zookeeper
-
+  # ── Message Broker (Kafka — KRaft, no Zookeeper needed) ────────────────────
   kafka:
-    image: bitnami/kafka:3.6
+    image: bitnami/kafka:3.7
+    container_name: staticwears-kafka
     restart: unless-stopped
-    networks: [static-wears]
-    ports:
-      - "9092:9092"
-    depends_on:
-      - zookeeper
     environment:
-      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
-      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      ALLOW_PLAINTEXT_LISTENER: "yes"
-      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@kafka:9093
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
     volumes:
       - kafka-data:/bitnami/kafka
+    networks:
+      - staticwears-net
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
-      interval: 15s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 40s
 
-  # ─── EMAIL CONSUMER (Kafka → Resend) ──────────────────────────────────────
-  email-consumer:
+  # ── Email Worker (Kafka Consumer → Resend) ──────────────────────────────────
+  email-worker:
     build:
       context: .
-      dockerfile: packages/kafka/Dockerfile
+      dockerfile: Dockerfile.email-worker
+    container_name: staticwears-email-worker
     restart: unless-stopped
-    networks: [static-wears]
     depends_on:
       kafka:
         condition: service_healthy
+    env_file: ./apps/storefront/.env.production
     environment:
-      KAFKA_BROKERS: kafka:9092
-      RESEND_API_KEY: ${RESEND_API_KEY}
+      - KAFKA_BROKERS=kafka:9092
+    networks:
+      - staticwears-net
 
-  # ─── STOREFRONT ────────────────────────────────────────────────────────────
+  # ── Storefront (Customer Site — port 3000) ──────────────────────────────────
   storefront:
     build:
       context: .
-      dockerfile: apps/storefront/Dockerfile
+      dockerfile: Dockerfile.storefront
+    container_name: staticwears-storefront
     restart: unless-stopped
-    networks: [static-wears]
     depends_on:
-      db:
+      kafka:
         condition: service_healthy
+    env_file: ./apps/storefront/.env.production
     environment:
-      NEXT_PUBLIC_SUPABASE_URL: ${API_EXTERNAL_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      NEXT_PUBLIC_APP_URL: ${SITE_URL}
-      NEXT_PUBLIC_ADMIN_URL: ${ADMIN_URL}
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY}
-      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
-      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-    expose:
-      - "3000"
+      - KAFKA_BROKERS=kafka:9092
+    ports:
+      - "3000:3000"
+    networks:
+      - staticwears-net
 
-  # ─── ADMIN ─────────────────────────────────────────────────────────────────
+  # ── Admin Dashboard (port 3001) ─────────────────────────────────────────────
   admin:
     build:
       context: .
-      dockerfile: apps/admin/Dockerfile
+      dockerfile: Dockerfile.admin
+    container_name: staticwears-admin
     restart: unless-stopped
-    networks: [static-wears]
     depends_on:
-      db:
+      kafka:
         condition: service_healthy
+    env_file: ./apps/admin/.env.production
     environment:
-      NEXT_PUBLIC_SUPABASE_URL: ${API_EXTERNAL_URL}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${ANON_KEY}
-      SUPABASE_SERVICE_ROLE_KEY: ${SERVICE_ROLE_KEY}
-      NEXT_PUBLIC_APP_URL: ${SITE_URL}
-      NEXT_PUBLIC_ADMIN_URL: ${ADMIN_URL}
-    expose:
-      - "3001"
-
-  # ─── NGINX ─────────────────────────────────────────────────────────────────
-  nginx:
-    image: nginx:1.25-alpine
-    restart: unless-stopped
-    networks: [static-wears]
+      - KAFKA_BROKERS=kafka:9092
     ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - storefront
-      - admin
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - "3001:3001"
+    networks:
+      - staticwears-net
+
+  # ── Phase 2: Self-hosted Supabase (uncomment when migrating off hosted) ─────
+  #
+  # db:
+  #   image: supabase/postgres:15.1.0.147
+  #   restart: unless-stopped
+  #   networks: [staticwears-net]
+  #   environment:
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: postgres
+  #     JWT_SECRET: ${JWT_SECRET}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #     - ./supabase/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+
+volumes:
+  kafka-data:
+  # postgres-data:   # Phase 2
+
+networks:
+  staticwears-net:
+    driver: bridge

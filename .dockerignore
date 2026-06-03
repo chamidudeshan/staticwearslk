@@ -1,0 +1,13 @@
+.git
+.gitignore
+node_modules
+**/node_modules
+**/.next
+**/dist
+*.md
+.env*
+!.env.example
+apps/admin/tsconfig.tsbuildinfo
+apps/storefront/tsconfig.tsbuildinfo
+docker-compose.yml
+*.pdf
