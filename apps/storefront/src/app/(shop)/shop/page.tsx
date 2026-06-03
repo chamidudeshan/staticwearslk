@@ -3,14 +3,14 @@ import { ProductCard } from '@/components/product/product-card';
 import { PageTransition } from '@/components/ui/page-transition';
 import Link from 'next/link';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 interface ShopPageProps {
-  searchParams: {
+  searchParams: Promise<{
     category?: string;
     search?: string;
     sort?: 'newest' | 'price_asc' | 'price_desc';
-  };
+  }>;
 }
 
 const SORT_OPTIONS = [
@@ -20,18 +20,20 @@ const SORT_OPTIONS = [
 ];
 
 export default async function ShopPage({ searchParams }: ShopPageProps) {
+  const { category, search, sort } = await searchParams;
+
   const [products, categories] = await Promise.all([
     getProducts({
-      sort: searchParams.sort ?? 'newest',
-      search: searchParams.search,
-      category: searchParams.category,
+      sort: sort ?? 'newest',
+      search,
+      category,
       limit: 24,
     }),
     getCategories(),
   ]);
 
-  const activeSort = searchParams.sort ?? 'newest';
-  const activeCategory = searchParams.category ?? '';
+  const activeSort = sort ?? 'newest';
+  const activeCategory = category ?? '';
   const activeCategoryName = categories.find(c => c.slug === activeCategory)?.name;
 
   function sortLink(s: string) {
