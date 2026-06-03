@@ -1,6 +1,154 @@
 services:
 
-  # ── Message Broker (Kafka — KRaft, no Zookeeper needed) ────────────────────
+  # ════════════════════════════════════════════════════════════════════════════
+  # SUPABASE SELF-HOSTED STACK
+  # ════════════════════════════════════════════════════════════════════════════
+
+  # ── PostgreSQL Database ─────────────────────────────────────────────────────
+  db:
+    image: supabase/postgres:15.1.0.147
+    container_name: staticwears-db
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET}
+      POSTGRES_PORT: 5432
+      # Memory tuning for 4GB VPS
+      POSTGRES_SHARED_BUFFERS: 128MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 512MB
+      POSTGRES_WORK_MEM: 4MB
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - staticwears-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ── PostgREST (REST API over PostgreSQL) ────────────────────────────────────
+  rest:
+    image: postgrest/postgrest:v12.2.0
+    container_name: staticwears-rest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_SCHEMAS: public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+    networks:
+      - staticwears-net
+
+  # ── GoTrue (Auth — required by Storage even though we use Clerk) ────────────
+  auth:
+    image: supabase/gotrue:v2.151.0
+    container_name: staticwears-auth
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: https://api.staticwears.com
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_SITE_URL: https://staticwears.com
+      GOTRUE_DISABLE_SIGNUP: "false"
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+    networks:
+      - staticwears-net
+
+  # ── Supabase Storage ────────────────────────────────────────────────────────
+  storage:
+    image: supabase/storage-api:v1.0.6
+    container_name: staticwears-storage
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+      auth:
+        condition: service_started
+    environment:
+      ANON_KEY: ${SUPABASE_ANON_KEY}
+      SERVICE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      POSTGREST_URL: http://rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD}@db:5432/postgres
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: "true"
+      IMGPROXY_URL: http://imgproxy:5001
+    volumes:
+      - storage-data:/var/lib/storage
+    networks:
+      - staticwears-net
+
+  # ── Imgproxy (Image optimisation) ───────────────────────────────────────────
+  imgproxy:
+    image: darthsim/imgproxy:v3.8.0
+    container_name: staticwears-imgproxy
+    restart: unless-stopped
+    environment:
+      IMGPROXY_BIND: ":5001"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: "true"
+    networks:
+      - staticwears-net
+
+  # ── Kong API Gateway ────────────────────────────────────────────────────────
+  kong:
+    image: kong:2.8.1
+    container_name: staticwears-kong
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+    volumes:
+      - ./supabase/kong.yml:/var/lib/kong/kong.yml:ro
+    expose:
+      - "8000"
+    networks:
+      - staticwears-net
+
+  # ════════════════════════════════════════════════════════════════════════════
+  # APPLICATION SERVICES
+  # ════════════════════════════════════════════════════════════════════════════
+
+  # ── Message Broker (Kafka — KRaft mode) ─────────────────────────────────────
   kafka:
     image: apache/kafka:3.7.1
     container_name: staticwears-kafka
@@ -13,7 +161,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
       KAFKA_CONTROLLER_QUORUM_VOTERS: 0@kafka:9093
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: true
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
@@ -29,7 +177,7 @@ services:
       retries: 5
       start_period: 40s
 
-  # ── Email Worker (Kafka Consumer → Resend) ──────────────────────────────────
+  # ── Email Worker (Kafka Consumer → Resend) ───────────────────────────────────
   email-worker:
     build:
       context: .
@@ -45,7 +193,7 @@ services:
     networks:
       - staticwears-net
 
-  # ── Storefront (Customer Site) ─────────────────────────────────────────────
+  # ── Storefront (Customer Site) ───────────────────────────────────────────────
   storefront:
     build:
       context: .
@@ -55,6 +203,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      db:
+        condition: service_healthy
     env_file: ./apps/storefront/.env.production
     environment:
       - KAFKA_BROKERS=kafka:9092
@@ -63,7 +213,7 @@ services:
     networks:
       - staticwears-net
 
-  # ── Admin Dashboard ─────────────────────────────────────────────────────────
+  # ── Admin Dashboard ──────────────────────────────────────────────────────────
   admin:
     build:
       context: .
@@ -73,6 +223,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+      db:
+        condition: service_healthy
     env_file: ./apps/admin/.env.production
     environment:
       - KAFKA_BROKERS=kafka:9092
@@ -81,7 +233,7 @@ services:
     networks:
       - staticwears-net
 
-  # ── Nginx Reverse Proxy ─────────────────────────────────────────────────────
+  # ── Nginx Reverse Proxy ──────────────────────────────────────────────────────
   nginx:
     image: nginx:1.25-alpine
     container_name: staticwears-nginx
@@ -89,6 +241,7 @@ services:
     depends_on:
       - storefront
       - admin
+      - kong
     ports:
       - "80:80"
       - "443:443"
@@ -99,29 +252,11 @@ services:
     networks:
       - staticwears-net
 
-  # ── Phase 2: Self-hosted Supabase (uncomment when migrating off hosted) ─────
-  #
-  # db:
-  #   image: supabase/postgres:15.1.0.147
-  #   restart: unless-stopped
-  #   networks: [staticwears-net]
-  #   environment:
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: postgres
-  #     JWT_SECRET: ${JWT_SECRET}
-  #   volumes:
-  #     - postgres-data:/var/lib/postgresql/data
-  #     - ./supabase/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U postgres"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-
 volumes:
+  postgres-data:
+  storage-data:
   kafka-data:
   certbot-www:
-  # postgres-data:   # Phase 2
 
 networks:
   staticwears-net:
