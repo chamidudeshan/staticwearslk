@@ -101,7 +101,7 @@ export function Footer() {
         </div>
 
         <div className="border-t border-[#111] pt-8 flex flex-col sm:flex-row justify-between items-center gap-3">
-          <span className="font-mono text-[10px] text-[#333]">© 2026 Static Wears · All rights reserved</span>
+          <span className="font-mono text-[10px] text-[#333]">© 2026 Static Wears · Sri Lanka · All rights reserved</span>
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-[#333]">Made in Sri Lanka 🇱🇰</span>
             <span className="h-3 w-px bg-[#1a1a1a]" />
