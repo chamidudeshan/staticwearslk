@@ -6,7 +6,7 @@ import { MarqueeStrip } from '@/components/layout/marquee-strip';
 import { FeaturedProducts } from '@/components/product/featured-products';
 import { CategoryShowcase } from '@/components/product/category-showcase';
 
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 async function getActiveBanners(): Promise<SliderBanner[]> {
   try {
