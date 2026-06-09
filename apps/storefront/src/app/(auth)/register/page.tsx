@@ -1,13 +1,21 @@
 import { SignUp } from '@clerk/nextjs';
+import Link from 'next/link';
 
 export default function RegisterPage() {
   return (
-    <div className="w-full flex flex-col items-center">
-      <div className="mb-10 self-start">
-        <h1 className="font-display text-5xl text-white mb-2">CREATE ACCOUNT</h1>
-        <p className="font-mono text-sm text-[#555]">Join the movement.</p>
+    <div className="space-y-8">
+      {/* Heading */}
+      <div>
+        <span className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#ff6b35] block mb-3">
+          Join the movement
+        </span>
+        <h1 className="font-display text-5xl text-white leading-none mb-2">CREATE ACCOUNT</h1>
+        <p className="font-mono text-sm text-[#444]">
+          Get early access to drops and exclusive releases.
+        </p>
       </div>
 
+      {/* Clerk form */}
       <SignUp
         forceRedirectUrl="/"
         appearance={{
@@ -22,24 +30,33 @@ export default function RegisterPage() {
             fontFamily: 'var(--font-mono)',
           },
           elements: {
-            card: 'shadow-none border border-[#1a1a1a] w-full',
+            rootBox: 'w-full',
+            card: 'shadow-none bg-transparent border-0 p-0 w-full',
             headerTitle: 'hidden',
             headerSubtitle: 'hidden',
-            socialButtonsBlockButton: 'border border-[#1a1a1a] bg-[#111] text-[#f0f0f0]',
+            socialButtonsBlockButton:
+              'border border-[#1e1e1e] bg-[#111] text-[#f0f0f0] hover:bg-[#1a1a1a] hover:border-[#ff6b35]/40 transition-colors font-mono text-xs uppercase tracking-widest',
             dividerLine: 'bg-[#1a1a1a]',
-            dividerText: 'text-[#444]',
-            formFieldLabel: 'text-[#555] font-mono text-xs uppercase tracking-widest',
-            footerActionLink: 'text-[#ff6b35]',
+            dividerText: 'text-[#333] font-mono text-[10px] uppercase tracking-widest',
+            formFieldLabel: 'text-[#555] font-mono text-[10px] uppercase tracking-widest',
+            formFieldInput:
+              'bg-[#111] border border-[#1e1e1e] text-[#f0f0f0] focus:border-[#ff6b35] font-mono text-sm transition-colors',
+            formButtonPrimary:
+              'bg-[#ff6b35] text-black font-mono font-bold text-xs uppercase tracking-widest hover:bg-[#e8ff59] transition-colors',
+            footerActionLink: 'text-[#ff6b35] hover:text-[#e8ff59] font-mono text-xs',
             footer: 'hidden',
+            identityPreviewText: 'text-[#888] font-mono text-xs',
+            formResendCodeLink: 'text-[#ff6b35] font-mono text-xs',
           },
         }}
       />
 
-      <p className="font-mono text-xs text-[#555] mt-6 text-center">
+      {/* Footer link */}
+      <p className="font-mono text-xs text-[#444] text-center pt-2 border-t border-[#111]">
         Already have an account?{' '}
-        <a href="/login" className="text-[#ff6b35] hover:underline">
+        <Link href="/login" className="text-[#ff6b35] hover:text-[#e8ff59] transition-colors">
           Sign in
-        </a>
+        </Link>
       </p>
     </div>
   );
