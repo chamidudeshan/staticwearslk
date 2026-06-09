@@ -15,7 +15,6 @@ interface Variant {
   stock_qty: number | string;
   sku: string;
   description: string;
-  image: UploadedImage | null;
 }
 
 interface Option { id: string; name: string }
@@ -25,7 +24,7 @@ const SUGGEST_SIZES  = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
 const SUGGEST_COLORS = ['Black', 'White', 'Navy', 'Grey', 'Khaki', 'Olive', 'Red', 'Blue', 'Green', 'Brown', 'Beige', 'Cream'];
 
 function emptyVariant(): Variant {
-  return { size: '', color: '', price: '', stock_qty: 10, sku: '', description: '', image: null };
+  return { size: '', color: '', price: '', stock_qty: 10, sku: '', description: '' };
 }
 
 export default function NewProductPage() {
@@ -41,6 +40,7 @@ export default function NewProductPage() {
   const [productImages, setProductImages] = useState<UploadedImage[]>([]);
   const [hasVariants, setHasVariants] = useState(false);
   const [variants, setVariants]     = useState<Variant[]>([emptyVariant()]);
+  const [colorImages, setColorImages] = useState<Record<string, UploadedImage[]>>({});
 
   const [brands, setBrands]         = useState<Option[]>([]);
   const [categories, setCategories] = useState<Option[]>([]);
@@ -89,7 +89,7 @@ export default function NewProductPage() {
             stock_qty: Number(v.stock_qty),
             sku: v.sku || null,
             description: v.description || null,
-            image_url: v.image?.url ?? null,
+            image_url: colorImages[v.color]?.[0]?.url ?? null,
           })) : [],
         }),
       });
@@ -242,13 +242,6 @@ export default function NewProductPage() {
                       placeholder="e.g. Limited colourway, stonewash finish..."
                       className="w-full bg-[#0e0e12] border border-[#1e1e28] px-3 py-2 font-mono text-xs text-[#e8e8f0] placeholder:text-[#222] focus:outline-none focus:border-[#ff6b35] transition-colors" />
                   </div>
-
-                  <ImageUploader
-                    images={variant.image ? [variant.image] : []}
-                    onChange={(imgs) => updateVariant(i, 'image', imgs[0] ?? null)}
-                    label={`Photo (${[variant.color, variant.size].filter(Boolean).join(' / ') || 'variant'})`}
-                    single
-                  />
                 </div>
               ))}
 
@@ -256,6 +249,29 @@ export default function NewProductPage() {
                 className="flex items-center gap-2 font-mono text-xs text-[#ff6b35] hover:text-[#e8ff59] transition-colors">
                 <Plus size={13} /> Add Another Variant
               </button>
+
+              {/* Color Photos — one uploader per unique color */}
+              {(() => {
+                const uniqueColors = Array.from(new Set(variants.map((v) => v.color).filter(Boolean)));
+                if (uniqueColors.length === 0) return null;
+                return (
+                  <div className="border-t border-[#1e1e28] pt-4 space-y-4">
+                    <p className="font-mono text-[10px] uppercase tracking-widest text-[#555]">
+                      Color Photos — upload photos per colour (shared across sizes)
+                    </p>
+                    {uniqueColors.map((color) => (
+                      <div key={color} className="bg-[#0e0e12] border border-[#1e1e28] rounded-lg p-3">
+                        <ImageUploader
+                          images={colorImages[color] ?? []}
+                          onChange={(imgs) => setColorImages((prev) => ({ ...prev, [color]: imgs }))}
+                          label={`${color} Photos`}
+                          maxImages={6}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
