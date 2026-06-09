@@ -25,5 +25,13 @@ export async function POST(req: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const { data } = supabase.storage.from('product-images').getPublicUrl(path);
-  return NextResponse.json({ url: data.publicUrl, path });
+
+  // Replace internal Docker URL with public URL
+  const internalUrl = process.env.SUPABASE_INTERNAL_URL ?? '';
+  const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const url = internalUrl
+    ? data.publicUrl.replace(internalUrl, publicUrl)
+    : data.publicUrl;
+
+  return NextResponse.json({ url, path });
 }

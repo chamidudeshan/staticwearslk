@@ -20,5 +20,15 @@ export async function GET(req: NextRequest) {
 
   const { data: pub } = supabase.storage.from('product-images').getPublicUrl(path);
 
-  return NextResponse.json({ signedUrl: data.signedUrl, path, url: pub.publicUrl });
+  // Replace internal Docker URL with public URL so the browser can reach it
+  const internalUrl = process.env.SUPABASE_INTERNAL_URL ?? '';
+  const publicUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const signedUrl = internalUrl
+    ? data.signedUrl.replace(internalUrl, publicUrl)
+    : data.signedUrl;
+  const url = internalUrl
+    ? pub.publicUrl.replace(internalUrl, publicUrl)
+    : pub.publicUrl;
+
+  return NextResponse.json({ signedUrl, path, url });
 }
