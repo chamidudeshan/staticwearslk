@@ -48,7 +48,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <Link href="/account"
+            <Link href="/login"
               className="hidden md:flex items-center justify-center w-10 h-10 text-[#888] hover:text-[#ff6b35] transition-colors">
               <User size={18} />
             </Link>
