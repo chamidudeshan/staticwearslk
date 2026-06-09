@@ -173,9 +173,9 @@ services:
     healthcheck:
       test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list"]
       interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 40s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
 
   # ── Email Worker (Kafka Consumer → Resend) ───────────────────────────────────
   email-worker:
