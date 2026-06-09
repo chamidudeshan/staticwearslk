@@ -81,7 +81,7 @@ export function Navbar() {
             </Link>
           ))}
           <div className="mt-4 border-t border-[#2a2a2a] pt-6 flex flex-col gap-4">
-            <Link href="/account" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">My Account</Link>
+            <Link href="/login" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">My Account</Link>
             <Link href="/orders" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">Track Order</Link>
             <Link href="/contact" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">Contact Us</Link>
           </div>
