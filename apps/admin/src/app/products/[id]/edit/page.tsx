@@ -23,7 +23,7 @@ interface Variant {
 interface Option { id: string; name: string }
 
 const STATUSES = ['active', 'draft', 'inactive'] as const;
-const SUGGEST_SIZES  = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size', '28', '30', '32', '34', '36', '38'];
+const SUGGEST_SIZES  = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'One Size'];
 const SUGGEST_COLORS = ['Black', 'White', 'Navy', 'Grey', 'Khaki', 'Olive', 'Red', 'Blue', 'Green', 'Brown', 'Beige', 'Cream'];
 
 function emptyVariant(): Variant {
