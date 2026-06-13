@@ -57,6 +57,7 @@ export default function EditProductPage() {
         fetch('/api/admin/brands'),
         fetch('/api/admin/categories'),
       ]);
+      if (productRes.status === 401 || productRes.status === 403) { toast.error('Unauthorized — check ADMIN_USER_IDS in .env.production'); setLoading(false); return; }
       if (!productRes.ok) { toast.error('Product not found'); router.push('/products'); return; }
       const product = await productRes.json();
       const brandsData = await brandsRes.json();
