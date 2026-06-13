@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, LayoutDashboard, Package, ShoppingBag, Users, MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
 import { Sidebar } from './sidebar';
+
+const BOTTOM_NAV = [
+  { href: '/dashboard', label: 'Home',     icon: LayoutDashboard },
+  { href: '/products',  label: 'Products', icon: Package },
+  { href: '/orders',    label: 'Orders',   icon: ShoppingBag },
+  { href: '/users',     label: 'Customers',icon: Users },
+];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -54,9 +62,33 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="w-8" />
         </header>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 pb-24 md:pb-8">
           {children}
         </main>
+
+        {/* ── Mobile bottom nav ── */}
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#0e0e12] border-t border-[#1e1e28] flex items-stretch">
+          {BOTTOM_NAV.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname === href || pathname.startsWith(href + '/');
+            return (
+              <Link key={href} href={href}
+                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${
+                  isActive ? 'text-[#ff6b35]' : 'text-[#444] hover:text-[#888]'
+                }`}>
+                <Icon size={20} />
+                <span className="font-mono text-[9px] uppercase tracking-wider">{label}</span>
+                {isActive && <span className="absolute bottom-0 w-8 h-0.5 bg-[#ff6b35] rounded-full" />}
+              </Link>
+            );
+          })}
+          {/* More button opens drawer */}
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="flex-1 flex flex-col items-center justify-center gap-1 py-2.5 text-[#444] hover:text-[#888] transition-colors">
+            <MoreHorizontal size={20} />
+            <span className="font-mono text-[9px] uppercase tracking-wider">More</span>
+          </button>
+        </nav>
       </div>
     </div>
   );
