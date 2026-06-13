@@ -13,6 +13,7 @@ import {
   LogOut,
   ExternalLink,
   Image,
+  X,
 } from 'lucide-react';
 import { useClerk } from '@clerk/nextjs';
 
@@ -27,7 +28,11 @@ const navItems = [
   { href: '/settings', label: 'Settings', icon: Settings },
 ];
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { signOut } = useClerk();
@@ -38,19 +43,22 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-60 shrink-0 bg-[#0e0e12] border-r border-[#1e1e28] flex flex-col h-screen sticky top-0">
+    <aside className="w-64 shrink-0 bg-[#0e0e12] border-r border-[#1e1e28] flex flex-col h-screen">
       {/* Logo */}
-      <div className="p-6 border-b border-[#1e1e28]">
-        <div className="font-mono text-[10px] text-[#ff6b35] uppercase tracking-widest mb-1">
-          Admin
+      <div className="p-5 border-b border-[#1e1e28] flex items-center justify-between">
+        <div>
+          <div className="font-mono text-[10px] text-[#ff6b35] uppercase tracking-widest mb-0.5">Admin</div>
+          <div className="font-bold text-base text-[#e8e8f0] tracking-tight">Static Wears</div>
         </div>
-        <div className="font-bold text-lg text-[#e8e8f0] tracking-tight">
-          Static Wears
-        </div>
+        {onClose && (
+          <button onClick={onClose} className="text-[#444] hover:text-[#e8e8f0] transition-colors p-1 md:hidden">
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -67,7 +75,7 @@ export function Sidebar() {
               {isActive && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-[#ff6b35] rounded-full" />
               )}
-              <Icon size={16} />
+              <Icon size={16} className="shrink-0" />
               {item.label}
             </Link>
           );
@@ -75,21 +83,21 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-[#1e1e28] space-y-2">
+      <div className="p-3 border-t border-[#1e1e28] space-y-1">
         <a
-          href={process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}
+          href={process.env.NEXT_PUBLIC_APP_URL ?? 'https://staticwears.com'}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center gap-3 px-3 py-2.5 text-[#444] hover:text-[#666] font-mono text-xs transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 text-[#444] hover:text-[#666] font-mono text-xs transition-colors rounded-lg hover:bg-[#12121a]"
         >
-          <ExternalLink size={14} />
+          <ExternalLink size={14} className="shrink-0" />
           View Storefront
         </a>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-[#444] hover:text-red-400 font-mono text-xs transition-colors"
+          className="flex items-center gap-3 px-3 py-2.5 w-full text-left text-[#444] hover:text-red-400 font-mono text-xs transition-colors rounded-lg hover:bg-[#12121a]"
         >
-          <LogOut size={14} />
+          <LogOut size={14} className="shrink-0" />
           Sign Out
         </button>
       </div>
