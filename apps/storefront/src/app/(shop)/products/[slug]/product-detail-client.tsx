@@ -20,15 +20,12 @@ const COLOR_HEX: Record<string, string> = {
   black: '#1a1a1a', white: '#f0f0f0', navy: '#1a2040',
   khaki: '#c9b99a', grey: '#888', gray: '#888',
   olive: '#6b7c4a', red: '#cc3333', blue: '#2255aa',
+  green: '#3a7a3a', brown: '#7a5533', beige: '#d4bc8a', cream: '#f5f0e0',
 };
 
 function imgSrc(path: string, idx = 0) {
   if (!path || path.startsWith('demo/')) return DEMO_IMAGES[idx % DEMO_IMAGES.length];
   return getSupabaseImageUrl(path);
-}
-
-function variantPrice(v: ProductVariant, hasVariants: boolean, base: number) {
-  return hasVariants ? v.price_adj : base;
 }
 
 interface Props { product: Product; related: Product[] }
@@ -37,103 +34,109 @@ export function ProductDetailClient({ product, related }: Props) {
   const { dispatch } = useCart();
   const hasVariants = (product.variants?.length ?? 0) > 0;
 
-  // Normalise: DB can return null for color/size even though typed as string
   const allVariants = (product.variants ?? []).map((v) => ({
     ...v,
     color: v.color ?? '',
     size:  v.size  ?? '',
   }));
 
-  // Only show color selector when at least one variant has a non-empty color
   const uniqueColors = Array.from(new Set(allVariants.map((v) => v.color))).filter(Boolean);
   const hasColors = uniqueColors.length > 0;
 
   const [selectedColor, setSelectedColor] = useState<string>(uniqueColors[0] ?? '');
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
-    allVariants[0] ?? null
-  );
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(allVariants[0] ?? null);
+  const [activeIdx, setActiveIdx] = useState(0);
   const [qty, setQty] = useState(1);
 
-  const productImages = product.images?.length
-    ? product.images
-    : [{ id: 'demo', image_path: 'demo/1', is_main: true, sort_order: 0, product_id: product.id, created_at: '' }];
+  // ── Gallery logic (Etsy-style: gallery follows COLOR not individual variant) ──
 
-  // Build full gallery: all unique variant images first, then product images
-  type GalleryItem = { id: string; image_path: string; is_main: boolean; sort_order: number; product_id: string; created_at: string; variantId?: string };
-  const seenUrls = new Set<string>();
-  const variantGallery: GalleryItem[] = (product.variants ?? [])
-    .filter((v) => v.image_url)
-    .reduce<GalleryItem[]>((acc, v) => {
-      if (!seenUrls.has(v.image_url!)) {
-        seenUrls.add(v.image_url!);
-        acc.push({ id: `vimg-${v.id}`, image_path: v.image_url!, is_main: false, sort_order: -1, product_id: product.id, created_at: '', variantId: v.id });
+  // Build color → [unique image URLs] map from variant.image_url
+  const colorImageMap: Record<string, string[]> = {};
+  for (const v of allVariants) {
+    if (v.color && v.image_url) {
+      if (!colorImageMap[v.color]) colorImageMap[v.color] = [];
+      if (!colorImageMap[v.color].includes(v.image_url)) {
+        colorImageMap[v.color].push(v.image_url);
       }
-      return acc;
-    }, []);
+    }
+  }
 
-  const galleryImages: GalleryItem[] = [...variantGallery, ...productImages.filter((img) => !seenUrls.has(img.image_path))];
-  if (galleryImages.length === 0) galleryImages.push({ id: 'demo', image_path: 'demo/1', is_main: true, sort_order: 0, product_id: product.id, created_at: '' });
+  // Product-level images (not color-specific, from product_images table)
+  const productImgPaths = (product.images ?? []).map((img) => img.image_path);
 
-  const [activeIdx, setActiveIdx] = useState(0);
+  // Active gallery = selected color's images + any product images not already shown
+  const colorPaths = selectedColor ? (colorImageMap[selectedColor] ?? []) : [];
+  const colorPathSet = new Set(colorPaths);
+  const galleryPaths: string[] = [
+    ...colorPaths,
+    ...productImgPaths.filter((p) => !colorPathSet.has(p)),
+  ];
+  // Fallback to demo images when no images uploaded yet
+  if (galleryPaths.length === 0) {
+    DEMO_IMAGES.forEach((_, i) => galleryPaths.push(`demo/${i}`));
+  }
 
-  // When no colors used → show every variant as a size option
-  // When colors used → filter by selected colour
+  // ── Selectors ──
+
   const sizesForColor = hasColors
     ? allVariants.filter((v) => v.color === selectedColor)
     : allVariants;
+
   const selectedSize = selectedVariant?.size ?? null;
 
-  // Price
+  function pickColor(color: string) {
+    setSelectedColor(color);
+    setActiveIdx(0); // reset gallery to first image of new color
+    // Try to keep the same size across colors, otherwise pick first available
+    const v = allVariants.find((x) => x.color === color && x.size === selectedSize)
+      ?? allVariants.find((x) => x.color === color);
+    setSelectedVariant(v ?? null);
+    setQty(1);
+  }
+
+  function pickSize(v: ProductVariant) {
+    setSelectedVariant(v);
+    // Intentionally do NOT change activeIdx — gallery stays on current color
+    setQty(1);
+  }
+
+  // ── Price ──
+
   const lowestPrice = hasVariants
     ? Math.min(...(product.variants?.map((v) => v.price_adj) ?? [product.base_price]))
     : product.base_price;
   const displayPrice = selectedVariant
-    ? variantPrice(selectedVariant, hasVariants, product.base_price)
+    ? (hasVariants ? selectedVariant.price_adj : product.base_price)
     : lowestPrice;
   const showFrom = hasVariants && !selectedVariant;
 
   const isOutOfStock = selectedVariant ? selectedVariant.stock_qty === 0 : false;
   const maxQty = selectedVariant?.stock_qty ?? 0;
 
-  function jumpToVariantImg(variantId: string) {
-    const idx = galleryImages.findIndex((img) => img.variantId === variantId);
-    if (idx !== -1) setActiveIdx(idx);
-    else setActiveIdx(0);
-  }
-
-  function pickColor(color: string) {
-    setSelectedColor(color);
-    const v = allVariants.find((x) => x.color === color && x.size === selectedSize)
-      ?? allVariants.find((x) => x.color === color);
-    setSelectedVariant(v ?? null);
-    if (v) jumpToVariantImg(v.id);
-    else setActiveIdx(0);
-    setQty(1);
-  }
-
-  function pickSize(v: ProductVariant) {
-    setSelectedVariant(v);
-    jumpToVariantImg(v.id);
-    setQty(1);
-  }
+  // Cart image: use first image of selected color, or fallback to first product image
+  const cartImagePath = colorPaths[0] ?? productImgPaths[0] ?? 'demo/0';
 
   function handleAddToCart() {
-    if (!selectedVariant) { toast.error('Please select a size'); return; }
+    if (hasVariants && !selectedVariant) { toast.error('Please select a size'); return; }
     if (isOutOfStock) return;
     dispatch({
       type: 'ADD_ITEM',
       payload: {
         product_id: product.id,
-        variant_id: selectedVariant.id,
+        variant_id: selectedVariant?.id ?? '',
         product_name: product.name,
-        variant_desc: `${selectedVariant.size} / ${selectedVariant.color}`,
-        image_path: galleryImages[0]?.image_path ?? '',
+        variant_desc: selectedVariant
+          ? `${selectedVariant.size}${selectedVariant.color ? ` / ${selectedVariant.color}` : ''}`
+          : '',
+        image_path: cartImagePath,
         unit_price: displayPrice,
         quantity: qty,
       },
     });
     toast.success(`${product.name} added to cart`, {
-      description: `${selectedVariant.size} / ${selectedVariant.color} × ${qty}`,
+      description: selectedVariant
+        ? `${selectedVariant.color} / ${selectedVariant.size} × ${qty}`
+        : `× ${qty}`,
     });
   }
 
@@ -151,42 +154,30 @@ export function ProductDetailClient({ product, related }: Props) {
 
           {/* ── IMAGE COLUMN ── */}
           <div className="flex gap-3">
-            {/* Thumbnail strip */}
-            {galleryImages.length > 1 && (
+            {/* Thumbnail strip — shown when more than 1 image */}
+            {galleryPaths.length > 1 && (
               <div className="flex flex-col gap-2 shrink-0">
-                {galleryImages.map((img, i) => {
-                  const isVariantThumb = !!img.variantId;
-                  const isActiveVariant = img.variantId && img.variantId === selectedVariant?.id;
-                  return (
-                    <button
-                      key={img.id}
-                      onClick={() => {
-                        setActiveIdx(i);
-                        if (img.variantId) {
-                          const v = product.variants?.find((x) => x.id === img.variantId);
-                          if (v) { setSelectedVariant(v); setSelectedColor(v.color); setQty(1); }
-                        }
-                      }}
-                      className={`relative w-14 h-[72px] overflow-hidden border-2 shrink-0 transition-colors ${
-                        activeIdx === i
-                          ? 'border-[#ff6b35]'
-                          : isVariantThumb && isActiveVariant
-                          ? 'border-[#ff6b35]/50'
-                          : 'border-[#2a2a2a] hover:border-[#555]'
-                      }`}
-                    >
-                      <Image src={imgSrc(img.image_path, i)} alt="" fill className="object-cover" sizes="56px" />
-                    </button>
-                  );
-                })}
+                {galleryPaths.map((path, i) => (
+                  <button
+                    key={`${path}-${i}`}
+                    onClick={() => setActiveIdx(i)}
+                    className={`relative w-14 h-[72px] overflow-hidden border-2 shrink-0 transition-colors ${
+                      activeIdx === i
+                        ? 'border-[#ff6b35]'
+                        : 'border-[#2a2a2a] hover:border-[#555]'
+                    }`}
+                  >
+                    <Image src={imgSrc(path, i)} alt="" fill className="object-cover" sizes="56px" />
+                  </button>
+                ))}
               </div>
             )}
 
             {/* Main image */}
             <div className="relative flex-1 aspect-[4/5] overflow-hidden bg-[#111]">
               <Image
-                key={`${selectedVariant?.id ?? 'base'}-${activeIdx}`}
-                src={imgSrc(galleryImages[activeIdx]?.image_path ?? '', activeIdx)}
+                key={`${selectedColor}-${activeIdx}`}
+                src={imgSrc(galleryPaths[activeIdx] ?? 'demo/0', activeIdx)}
                 alt={product.name}
                 fill
                 priority
@@ -222,7 +213,7 @@ export function ProductDetailClient({ product, related }: Props) {
               {product.name.toUpperCase()}
             </h1>
 
-            {/* Variant short description */}
+            {/* Variant description */}
             {selectedVariant?.description && (
               <p className="font-mono text-xs text-[#666] border-l-2 border-[#ff6b35]/30 pl-3 -mt-2">
                 {selectedVariant.description}
@@ -241,7 +232,7 @@ export function ProductDetailClient({ product, related }: Props) {
 
             <div className="border-t border-[#1e1e1e]" />
 
-            {/* Color selector — only when colours are actually set */}
+            {/* ── Color selector ── */}
             {hasColors && (
               <div className="space-y-3">
                 <p className="font-mono text-xs uppercase tracking-widest text-[#555]">
@@ -250,22 +241,28 @@ export function ProductDetailClient({ product, related }: Props) {
                 <div className="flex gap-2 flex-wrap">
                   {uniqueColors.map((color) => {
                     const hex = COLOR_HEX[color.toLowerCase()];
+                    const hasImg = (colorImageMap[color]?.length ?? 0) > 0;
                     return (
                       <button
                         key={color}
                         onClick={() => pickColor(color)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 border font-mono text-xs uppercase tracking-wider transition-all ${
+                        className={`relative flex items-center gap-1.5 px-3 py-1.5 border font-mono text-xs uppercase tracking-wider transition-all ${
                           selectedColor === color
                             ? 'border-[#ff6b35] text-[#ff6b35] bg-[#ff6b35]/10'
                             : 'border-[#2a2a2a] text-[#888] hover:border-[#ff6b35] hover:text-[#ff6b35]'
                         }`}
                       >
-                        {hex && (
+                        {hex ? (
                           <span
                             className="w-3 h-3 rounded-full border border-white/20 shrink-0"
                             style={{ backgroundColor: hex }}
                           />
-                        )}
+                        ) : hasImg ? (
+                          /* Tiny thumbnail preview for colors without a known hex */
+                          <span className="relative w-3 h-3 rounded-full overflow-hidden shrink-0 border border-white/20">
+                            <Image src={imgSrc(colorImageMap[color][0])} alt="" fill className="object-cover" sizes="12px" />
+                          </span>
+                        ) : null}
                         {color}
                       </button>
                     );
@@ -274,7 +271,7 @@ export function ProductDetailClient({ product, related }: Props) {
               </div>
             )}
 
-            {/* Size selector */}
+            {/* ── Size selector ── */}
             {sizesForColor.length > 0 && (
               <div className="space-y-3">
                 <p className="font-mono text-xs uppercase tracking-widest text-[#555]">Size</p>
@@ -282,7 +279,7 @@ export function ProductDetailClient({ product, related }: Props) {
                   {sizesForColor.map((v) => {
                     const inStock = v.stock_qty > 0;
                     const selected = selectedVariant?.id === v.id;
-                    const price = variantPrice(v, hasVariants, product.base_price);
+                    const price = hasVariants ? v.price_adj : product.base_price;
                     return (
                       <button
                         key={v.id}
@@ -307,15 +304,10 @@ export function ProductDetailClient({ product, related }: Props) {
                     );
                   })}
                 </div>
-                {!hasVariants && selectedVariant && (
-                  <p className="font-mono text-[10px] text-[#444]">
-                    {selectedVariant.stock_qty} in stock
-                  </p>
-                )}
               </div>
             )}
 
-            {/* No variant product — stock */}
+            {/* No-variant stock */}
             {!hasVariants && (
               <p className="font-mono text-xs text-[#555]">
                 {(product.variants?.[0]?.stock_qty ?? 0) > 0
@@ -324,7 +316,7 @@ export function ProductDetailClient({ product, related }: Props) {
               </p>
             )}
 
-            {/* Quantity */}
+            {/* ── Quantity ── */}
             {selectedVariant && !isOutOfStock && (
               <div className="space-y-2">
                 <p className="font-mono text-xs uppercase tracking-widest text-[#555]">Quantity</p>
@@ -348,7 +340,7 @@ export function ProductDetailClient({ product, related }: Props) {
               </div>
             )}
 
-            {/* Add to cart */}
+            {/* ── Add to cart ── */}
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock || (hasVariants && !selectedVariant)}
@@ -365,7 +357,6 @@ export function ProductDetailClient({ product, related }: Props) {
                 : 'Add to Cart'}
             </button>
 
-            {/* Total if qty > 1 */}
             {qty > 1 && selectedVariant && (
               <p className="font-mono text-xs text-[#555] text-center">
                 Total: {formatPrice(displayPrice * qty)}
@@ -380,7 +371,6 @@ export function ProductDetailClient({ product, related }: Props) {
               </div>
             )}
 
-            {/* SKU */}
             {selectedVariant?.sku && (
               <p className="font-mono text-[10px] text-[#333]">SKU: {selectedVariant.sku}</p>
             )}

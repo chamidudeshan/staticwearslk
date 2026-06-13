@@ -97,18 +97,24 @@ export async function getProductBySlug(slug: string): Promise<Product | null> {
 
 export async function getProductById(id: string): Promise<Product | null> {
   const supabase = createSupabaseAdminClient();
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('products')
     .select(`
       *,
       brand:brands(*),
       variants:product_variants(*),
-      images:product_images(*),
-      product_categories(category_id)
+      images:product_images(*)
     `)
     .eq('id', id)
     .single();
-  return data ?? null;
+  if (error || !data) return null;
+
+  const { data: cats } = await supabase
+    .from('product_categories')
+    .select('category_id')
+    .eq('product_id', id);
+
+  return { ...data, product_categories: cats ?? [] };
 }
 
 export async function getCategories(): Promise<Category[]> {
