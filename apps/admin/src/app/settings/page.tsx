@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Save, Store, Bell, CreditCard, Check, Globe, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
+import { Toggle } from '@/components/ui/toggle';
 
 type Tab = 'store' | 'homepage' | 'social';
 
@@ -170,10 +171,7 @@ export default function SettingsPage() {
                       <p className="font-mono text-sm text-[#e8e8f0]">{item.label}</p>
                       <p className="font-mono text-xs text-[#444]">{item.desc}</p>
                     </div>
-                    <button type="button" onClick={() => item.set(!item.value)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${item.value ? 'bg-[#ff6b35]' : 'bg-[#1e1e28]'}`}>
-                      <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${item.value ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                    </button>
+                    <Toggle checked={item.value} onChange={item.set} />
                   </label>
                 ))}
                 {lowStockNotif && (

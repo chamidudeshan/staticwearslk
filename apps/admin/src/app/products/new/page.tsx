@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { ImageUploader, type UploadedImage } from '@/components/products/image-uploader';
+import { Toggle } from '@/components/ui/toggle';
 
 interface Variant {
   size: string;
@@ -182,10 +183,7 @@ export default function NewProductPage() {
                 {hasVariants ? 'Each variant has its own price and stock.' : 'No variants — base price applies.'}
               </p>
             </div>
-            <button type="button" onClick={() => setHasVariants((v) => !v)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${hasVariants ? 'bg-[#ff6b35]' : 'bg-[#1e1e28]'}`}>
-              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform ${hasVariants ? 'translate-x-6' : 'translate-x-1'}`} />
-            </button>
+            <Toggle checked={hasVariants} onChange={setHasVariants} />
           </div>
 
           {hasVariants && (
