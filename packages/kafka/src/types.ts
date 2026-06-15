@@ -14,4 +14,8 @@ export interface OrderStatusChangedEvent {
   status: string;
 }
 
-export type KafkaEventPayload = OrderPlacedEvent | OrderStatusChangedEvent;
+export interface StockLowEvent {
+  items: { productName: string; color: string; size: string; currentStock: number; threshold: number }[];
+}
+
+export type KafkaEventPayload = OrderPlacedEvent | OrderStatusChangedEvent | StockLowEvent;

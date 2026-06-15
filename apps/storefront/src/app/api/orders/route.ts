@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { createOrder, getOrdersByCustomer } from '@static-wears/order-service';
 import { publishEvent, TOPICS } from '@static-wears/kafka';
+import { getVariantStockInfo } from '@static-wears/product-service';
 
 export async function GET() {
   const { userId } = await auth();
@@ -45,6 +46,27 @@ export async function POST(req: NextRequest) {
       ),
       shippingAddress: body.shipping?.address ?? '',
     }).catch((err) => console.error('[orders] Kafka publish failed:', err));
+  }
+
+  // Check stock levels after order — publish low stock alert if any variant is below threshold
+  const LOW_STOCK_THRESHOLD = parseInt(process.env.LOW_STOCK_THRESHOLD ?? '5', 10);
+  const variantIds: string[] = (body.items ?? [])
+    .map((i: { variant_id?: string }) => i.variant_id)
+    .filter(Boolean);
+
+  if (variantIds.length > 0) {
+    Promise.all(variantIds.map((id) => getVariantStockInfo(id)))
+      .then((infos) => {
+        const lowItems = infos
+          .filter((info): info is NonNullable<typeof info> => !!info && info.currentStock <= LOW_STOCK_THRESHOLD)
+          .map((info) => ({ ...info, threshold: LOW_STOCK_THRESHOLD }));
+        if (lowItems.length > 0) {
+          publishEvent(TOPICS.STOCK_LOW, { items: lowItems }).catch((err) =>
+            console.error('[orders] Low stock Kafka publish failed:', err)
+          );
+        }
+      })
+      .catch((err) => console.error('[orders] Stock check failed:', err));
   }
 
   return NextResponse.json({ order });

@@ -117,6 +117,24 @@ export async function getProductById(id: string): Promise<Product | null> {
   return { ...data, product_categories: cats ?? [] };
 }
 
+export async function getVariantStockInfo(variantId: string): Promise<{
+  productName: string; color: string; size: string; currentStock: number;
+} | null> {
+  const supabase = createSupabaseAdminClient();
+  const { data } = await supabase
+    .from('product_variants')
+    .select('stock_qty, color, size, product:products(name)')
+    .eq('id', variantId)
+    .single();
+  if (!data) return null;
+  return {
+    productName: (data.product as { name: string } | null)?.name ?? 'Unknown',
+    color: data.color ?? '',
+    size: data.size ?? '',
+    currentStock: data.stock_qty,
+  };
+}
+
 export async function getCategories(): Promise<Category[]> {
   const supabase = await createSupabaseServerClient();
   const { data } = await supabase

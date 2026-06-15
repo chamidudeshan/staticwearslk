@@ -1,14 +1,14 @@
 import { kafka } from '../client';
 import { TOPICS } from '../topics';
-import type { OrderPlacedEvent, OrderStatusChangedEvent } from '../types';
-import { sendOrderConfirmation, sendShippingUpdate } from '@static-wears/email-service';
+import type { OrderPlacedEvent, OrderStatusChangedEvent, StockLowEvent } from '../types';
+import { sendOrderConfirmation, sendShippingUpdate, sendLowStockAlert } from '@static-wears/email-service';
 
 const consumer = kafka.consumer({ groupId: 'email-service' });
 
 async function run() {
   await consumer.connect();
   await consumer.subscribe({
-    topics: [TOPICS.ORDER_PLACED, TOPICS.ORDER_STATUS_CHANGED],
+    topics: [TOPICS.ORDER_PLACED, TOPICS.ORDER_STATUS_CHANGED, TOPICS.STOCK_LOW],
     fromBeginning: false,
   });
 
@@ -22,7 +22,7 @@ async function run() {
       try {
         if (topic === TOPICS.ORDER_PLACED) {
           const e = event as OrderPlacedEvent;
-          await sendOrderConfirmation({
+          const { error } = await sendOrderConfirmation({
             to: e.to,
             customerName: e.customerName,
             orderId: e.orderId,
@@ -30,16 +30,25 @@ async function run() {
             total: e.total,
             shippingAddress: e.shippingAddress,
           });
-          console.log(`[email-worker] Order confirmation sent for ${e.orderId}`);
+          if (error) throw new Error(error);
+          console.log(`[email-worker] Order confirmation sent → ${e.to} (${e.orderId})`);
+
         } else if (topic === TOPICS.ORDER_STATUS_CHANGED) {
           const e = event as OrderStatusChangedEvent;
-          await sendShippingUpdate({
+          const { error } = await sendShippingUpdate({
             to: e.to,
             customerName: e.customerName,
             orderId: e.orderId,
             status: e.status,
           });
-          console.log(`[email-worker] Shipping update sent for ${e.orderId} — ${e.status}`);
+          if (error) throw new Error(error);
+          console.log(`[email-worker] Shipping update sent → ${e.to} — ${e.status}`);
+
+        } else if (topic === TOPICS.STOCK_LOW) {
+          const e = event as StockLowEvent;
+          const { error } = await sendLowStockAlert({ items: e.items });
+          if (error) throw new Error(error);
+          console.log(`[email-worker] Low stock alert sent — ${e.items.length} variant(s)`);
         }
       } catch (err) {
         console.error(`[email-worker] Failed to process ${topic}:`, err);

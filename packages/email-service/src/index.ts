@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
 import { orderConfirmationHtml } from './templates/order-confirmation';
+import { shippingUpdateHtml } from './templates/shipping-update';
+import { lowStockAlertHtml } from './templates/low-stock-alert';
 
 const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -20,8 +22,7 @@ export async function sendOrderConfirmation(data: {
     });
     return { error: null };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return { error: msg };
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
 }
 
@@ -35,20 +36,29 @@ export async function sendShippingUpdate(data: {
     await resend.emails.send({
       from: 'Static Wears <orders@staticwears.lk>',
       to: data.to,
-      subject: `Your Order Has Been ${data.status} — Static Wears`,
-      html: `
-        <div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:40px;background:#0a0a0a;color:#f0f0f0;">
-          <h1 style="color:#ff6b35;">Static Wears</h1>
-          <p>Hi ${data.customerName},</p>
-          <p>Your order <strong>#${data.orderId.slice(0, 8).toUpperCase()}</strong> has been updated to: <strong style="color:#ff6b35;">${data.status}</strong>.</p>
-          <p>Thank you for shopping with us!</p>
-          <p style="color:#888;font-size:12px;margin-top:40px;">© 2026 Static Wears — Sri Lanka</p>
-        </div>
-      `,
+      subject: `Your Order Is ${data.status} — Static Wears`,
+      html: shippingUpdateHtml(data),
     });
     return { error: null };
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Unknown error';
-    return { error: msg };
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
+}
+
+export async function sendLowStockAlert(data: {
+  items: { productName: string; color: string; size: string; currentStock: number; threshold: number }[];
+}): Promise<{ error: string | null }> {
+  const adminEmail = process.env.ADMIN_EMAIL;
+  if (!adminEmail) return { error: 'ADMIN_EMAIL not set' };
+  try {
+    await resend.emails.send({
+      from: 'Static Wears Alerts <alerts@staticwears.lk>',
+      to: adminEmail,
+      subject: `⚠️ Low Stock Alert — ${data.items.length} variant${data.items.length > 1 ? 's' : ''} need restocking`,
+      html: lowStockAlertHtml(data),
+    });
+    return { error: null };
+  } catch (err: unknown) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
   }
 }
