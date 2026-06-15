@@ -20,6 +20,7 @@ const nextConfig = {
     '@static-wears/user-service',
     '@static-wears/product-service',
     '@static-wears/order-service',
+    '@static-wears/email-service',
   ],
 };
 
