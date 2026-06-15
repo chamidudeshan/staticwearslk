@@ -128,7 +128,7 @@ export async function getVariantStockInfo(variantId: string): Promise<{
     .single();
   if (!data) return null;
   return {
-    productName: (data.product as { name: string } | null)?.name ?? 'Unknown',
+    productName: (Array.isArray(data.product) ? data.product[0] : data.product as { name: string } | null)?.name ?? 'Unknown',
     color: data.color ?? '',
     size: data.size ?? '',
     currentStock: data.stock_qty,
