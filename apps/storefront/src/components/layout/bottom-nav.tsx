@@ -8,7 +8,7 @@ import { useCart } from '@/context/cart-context';
 const tabs = [
   { href: '/',        label: 'Home',    icon: Home },
   { href: '/shop',    label: 'Shop',    icon: Grid2x2 },
-  { href: '/account', label: 'Account', icon: User },
+  { href: '/login', label: 'Account', icon: User },
 ];
 
 export function BottomNav() {

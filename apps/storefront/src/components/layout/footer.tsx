@@ -11,7 +11,7 @@ const TikTokIcon = () => (
 );
 
 const helpLinks = [
-  { href: '/account', label: 'My Account' },
+  { href: '/login', label: 'My Account' },
   { href: '/orders', label: 'Track Order' },
   { href: '/size-guide', label: 'Size Guide' },
   { href: '/returns', label: 'Returns & Exchanges' },
