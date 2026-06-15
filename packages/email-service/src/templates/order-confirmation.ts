@@ -90,7 +90,7 @@ export function orderConfirmationHtml(data: {
     <!-- Footer -->
     <div style="background:#0d0d0d;border-top:1px solid #1a1a1a;padding:32px 40px;text-align:center;">
       <p style="margin:0 0 8px;font-size:12px;color:#555;">Questions? We're here for you.</p>
-      <a href="mailto:hello@staticwears.lk" style="color:#ff6b35;font-size:13px;text-decoration:none;font-family:'Courier New',monospace;">hello@staticwears.lk</a>
+      <a href="mailto:hello@staticwears.com" style="color:#ff6b35;font-size:13px;text-decoration:none;font-family:'Courier New',monospace;">hello@staticwears.com</a>
       <p style="margin:24px 0 0;font-size:11px;color:#333;font-family:'Courier New',monospace;letter-spacing:1px;">© 2026 STATIC WEARS — SRI LANKA</p>
     </div>
 

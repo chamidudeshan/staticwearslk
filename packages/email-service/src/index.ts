@@ -15,7 +15,7 @@ export async function sendOrderConfirmation(data: {
 }): Promise<{ error: string | null }> {
   try {
     await resend.emails.send({
-      from: 'Static Wears <orders@staticwears.lk>',
+      from: 'Static Wears <orders@staticwears.com>',
       to: data.to,
       subject: `Order Confirmed — #${data.orderId.slice(0, 8).toUpperCase()}`,
       html: orderConfirmationHtml(data),
@@ -34,7 +34,7 @@ export async function sendShippingUpdate(data: {
 }): Promise<{ error: string | null }> {
   try {
     await resend.emails.send({
-      from: 'Static Wears <orders@staticwears.lk>',
+      from: 'Static Wears <orders@staticwears.com>',
       to: data.to,
       subject: `Your Order Is ${data.status} — Static Wears`,
       html: shippingUpdateHtml(data),
@@ -52,7 +52,7 @@ export async function sendLowStockAlert(data: {
   if (!adminEmail) return { error: 'ADMIN_EMAIL not set' };
   try {
     await resend.emails.send({
-      from: 'Static Wears Alerts <alerts@staticwears.lk>',
+      from: 'Static Wears Alerts <alerts@staticwears.com>',
       to: adminEmail,
       subject: `⚠️ Low Stock Alert — ${data.items.length} variant${data.items.length > 1 ? 's' : ''} need restocking`,
       html: lowStockAlertHtml(data),

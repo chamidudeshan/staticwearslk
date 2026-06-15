@@ -62,7 +62,7 @@ export async function GET(req: Request) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Static Wears <orders@staticwears.lk>',
+        from: 'Static Wears <orders@staticwears.com>',
         to,
         subject: subjects[type] ?? subjects.order,
         html: bodies[type] ?? bodies.order,
