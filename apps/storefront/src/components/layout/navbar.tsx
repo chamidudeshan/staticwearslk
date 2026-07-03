@@ -3,11 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 import { useCart } from '@/context/cart-context';
 import { CartSheet } from '@/components/cart/cart-sheet';
 
 export function Navbar() {
   const { cart } = useCart();
+  const { isSignedIn } = useUser();
+  const accountHref = isSignedIn ? '/account' : '/login';
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -48,7 +51,7 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <Link href="/login"
+            <Link href={accountHref}
               className="hidden md:flex items-center justify-center w-10 h-10 text-[#888] hover:text-[#ff6b35] transition-colors">
               <User size={18} />
             </Link>
@@ -81,7 +84,7 @@ export function Navbar() {
             </Link>
           ))}
           <div className="mt-4 border-t border-[#2a2a2a] pt-6 flex flex-col gap-4">
-            <Link href="/login" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">My Account</Link>
+            <Link href={accountHref} onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">My Account</Link>
             <Link href="/orders" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">Track Order</Link>
             <Link href="/contact" onClick={() => setMobileOpen(false)} className="font-mono text-sm text-[#888] hover:text-[#ff6b35] transition-colors">Contact Us</Link>
           </div>

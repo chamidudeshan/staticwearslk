@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Instagram, Facebook, Youtube } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 
 const TikTokIcon = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -10,8 +11,7 @@ const TikTokIcon = () => (
   </svg>
 );
 
-const helpLinks = [
-  { href: '/login', label: 'My Account' },
+const staticHelpLinks = [
   { href: '/orders', label: 'Track Order' },
   { href: '/size-guide', label: 'Size Guide' },
   { href: '/returns', label: 'Returns & Exchanges' },
@@ -33,6 +33,11 @@ const socialItems = [
 
 export function Footer() {
   const [social, setSocial] = useState<Record<string, string>>({});
+  const { isSignedIn } = useUser();
+  const helpLinks = [
+    { href: isSignedIn ? '/account' : '/login', label: 'My Account' },
+    ...staticHelpLinks,
+  ];
 
   useEffect(() => {
     fetch('/api/settings')

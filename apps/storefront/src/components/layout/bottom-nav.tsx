@@ -3,17 +3,19 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, ShoppingBag, Grid2x2, User } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
 import { useCart } from '@/context/cart-context';
-
-const tabs = [
-  { href: '/',        label: 'Home',    icon: Home },
-  { href: '/shop',    label: 'Shop',    icon: Grid2x2 },
-  { href: '/login', label: 'Account', icon: User },
-];
 
 export function BottomNav() {
   const pathname = usePathname();
   const { cart } = useCart();
+  const { isSignedIn } = useUser();
+
+  const tabs = [
+    { href: '/',                          label: 'Home',    icon: Home },
+    { href: '/shop',                      label: 'Shop',    icon: Grid2x2 },
+    { href: isSignedIn ? '/account' : '/login', label: 'Account', icon: User },
+  ];
   const totalItems = cart.items.reduce((s, i) => s + i.quantity, 0);
 
   function isActive(href: string) {
