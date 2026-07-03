@@ -109,8 +109,6 @@ export function Footer() {
           <span className="font-mono text-[10px] text-[#333]">© 2026 Static Wears · Sri Lanka · All rights reserved</span>
           <div className="flex items-center gap-4">
             <span className="font-mono text-[10px] text-[#333]">Made in Sri Lanka 🇱🇰</span>
-            <span className="h-3 w-px bg-[#1a1a1a]" />
-            <span className="font-mono text-[10px] text-[#ff6b35]">HND Project 2026</span>
           </div>
         </div>
       </div>
