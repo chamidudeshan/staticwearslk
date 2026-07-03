@@ -31,8 +31,8 @@ export default clerkMiddleware(async (auth, req) => {
     // Clerk API error — deny access to be safe
   }
 
-  // Logged in but not admin → unauthorized page
-  return NextResponse.redirect(new URL('/unauthorized', req.url));
+  // Logged in but not admin → redirect to storefront
+  return NextResponse.redirect('https://staticwears.com');
 });
 
 export const config = {
