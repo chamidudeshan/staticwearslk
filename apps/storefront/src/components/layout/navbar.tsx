@@ -8,12 +8,11 @@ import { useCart } from '@/context/cart-context';
 import { CartSheet } from '@/components/cart/cart-sheet';
 
 export function Navbar() {
-  const { cart } = useCart();
+  const { cart, isCartOpen, openCart, closeCart } = useCart();
   const { isSignedIn } = useUser();
   const accountHref = isSignedIn ? '/account' : '/login';
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -55,7 +54,7 @@ export function Navbar() {
               className="hidden md:flex items-center justify-center w-10 h-10 text-[#888] hover:text-[#ff6b35] transition-colors">
               <User size={18} />
             </Link>
-            <button onClick={() => setCartOpen(true)}
+            <button onClick={openCart}
               className="relative flex items-center justify-center w-10 h-10 text-[#888] hover:text-[#ff6b35] transition-colors">
               <ShoppingBag size={18} />
               {totalItems > 0 && (
@@ -91,7 +90,7 @@ export function Navbar() {
         </div>
       </div>
 
-      <CartSheet open={cartOpen} onClose={() => setCartOpen(false)} />
+      <CartSheet open={isCartOpen} onClose={closeCart} />
     </>
   );
 }

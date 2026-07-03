@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useReducer,
+  useState,
   useEffect,
   ReactNode,
 } from 'react';
@@ -72,10 +73,14 @@ function cartReducer(state: Cart, action: CartAction): Cart {
 const CartContext = createContext<{
   cart: Cart;
   dispatch: React.Dispatch<CartAction>;
+  isCartOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
 } | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
     const saved = sessionStorage.getItem('sw-cart');
@@ -91,7 +96,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart]);
 
   return (
-    <CartContext.Provider value={{ cart, dispatch }}>
+    <CartContext.Provider value={{
+      cart,
+      dispatch,
+      isCartOpen,
+      openCart: () => setIsCartOpen(true),
+      closeCart: () => setIsCartOpen(false),
+    }}>
       {children}
     </CartContext.Provider>
   );

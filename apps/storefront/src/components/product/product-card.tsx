@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Eye } from 'lucide-react';
-import { toast } from 'sonner';
 import type { Product } from '@static-wears/shared';
 import { useCart } from '@/context/cart-context';
 import { formatPrice, getSupabaseImageUrl } from '@/lib/utils';
@@ -47,7 +46,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, index = 0 }: ProductCardProps) {
   const [hovered, setHovered] = useState(false);
-  const { dispatch } = useCart();
+  const { dispatch, openCart } = useCart();
 
   const mainImage = product.images?.find((i) => i.is_main) ?? product.images?.[0];
   const secondImage = product.images?.[1];
@@ -76,9 +75,7 @@ export function ProductCard({ product, index = 0 }: ProductCardProps) {
         quantity: 1,
       },
     });
-    toast.success(`${product.name} added`, {
-      description: `${variant.size} / ${variant.color}`,
-    });
+    openCart();
   }
 
   return (

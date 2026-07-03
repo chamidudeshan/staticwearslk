@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ShoppingBag, ChevronLeft, Plus, Minus } from 'lucide-react';
 import Link from 'next/link';
-import { toast } from 'sonner';
 import type { Product, ProductVariant } from '@static-wears/shared';
 import { useCart } from '@/context/cart-context';
 import { formatPrice, getSupabaseImageUrl } from '@/lib/utils';
@@ -31,7 +30,7 @@ function imgSrc(path: string, idx = 0) {
 interface Props { product: Product; related: Product[] }
 
 export function ProductDetailClient({ product, related }: Props) {
-  const { dispatch } = useCart();
+  const { dispatch, openCart } = useCart();
   const hasVariants = (product.variants?.length ?? 0) > 0;
 
   const allVariants = (product.variants ?? []).map((v) => ({
@@ -117,7 +116,7 @@ export function ProductDetailClient({ product, related }: Props) {
   const cartImagePath = colorPaths[0] ?? productImgPaths[0] ?? 'demo/0';
 
   function handleAddToCart() {
-    if (hasVariants && !selectedVariant) { toast.error('Please select a size'); return; }
+    if (hasVariants && !selectedVariant) { alert('Please select a size'); return; }
     if (isOutOfStock) return;
     dispatch({
       type: 'ADD_ITEM',
@@ -133,11 +132,7 @@ export function ProductDetailClient({ product, related }: Props) {
         quantity: qty,
       },
     });
-    toast.success(`${product.name} added to cart`, {
-      description: selectedVariant
-        ? `${selectedVariant.color} / ${selectedVariant.size} × ${qty}`
-        : `× ${qty}`,
-    });
+    openCart();
   }
 
   return (
