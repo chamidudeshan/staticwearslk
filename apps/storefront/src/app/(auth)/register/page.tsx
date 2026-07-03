@@ -17,7 +17,7 @@ export default function RegisterPage() {
 
       {/* Clerk form */}
       <SignUp
-        forceRedirectUrl="/"
+        fallbackRedirectUrl="/"
         appearance={{
           variables: {
             colorPrimary: '#ff6b35',

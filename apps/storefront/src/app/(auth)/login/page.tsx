@@ -17,7 +17,7 @@ export default function LoginPage() {
 
       {/* Clerk form */}
       <SignIn
-        forceRedirectUrl="/"
+        fallbackRedirectUrl="/"
         appearance={{
           variables: {
             colorPrimary: '#ff6b35',
