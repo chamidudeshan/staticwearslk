@@ -2,7 +2,7 @@ import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-w
 import type { Order } from '@static-wears/shared';
 
 export async function getOrdersByCustomer(customerId: string): Promise<Order[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from('orders')
     .select('*, items:order_items(*)')
@@ -12,7 +12,7 @@ export async function getOrdersByCustomer(customerId: string): Promise<Order[]> 
 }
 
 export async function getOrderById(orderId: string): Promise<Order | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from('orders')
     .select('*, items:order_items(*)')

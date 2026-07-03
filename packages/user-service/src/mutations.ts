@@ -1,11 +1,11 @@
-import { createSupabaseServerClient } from '@static-wears/shared';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import type { Profile, UserAddress } from '@static-wears/shared';
 
 export async function updateProfile(
   userId: string,
   data: Partial<Pick<Profile, 'full_name' | 'phone' | 'avatar_url'>>
 ): Promise<{ error: string | null }> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { error } = await supabase
     .from('profiles')
     .update({ ...data, updated_at: new Date().toISOString() })
@@ -16,7 +16,7 @@ export async function updateProfile(
 export async function addAddress(
   data: Omit<UserAddress, 'id' | 'created_at'>
 ): Promise<{ error: string | null }> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   if (data.is_default) {
     await supabase
       .from('user_addresses')
@@ -33,7 +33,7 @@ export async function deleteAddress(
   addressId: string,
   userId: string
 ): Promise<{ error: string | null }> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { error } = await supabase
     .from('user_addresses')
     .delete()

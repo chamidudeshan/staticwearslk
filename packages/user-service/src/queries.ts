@@ -2,7 +2,7 @@ import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-w
 import type { Profile, UserAddress } from '@static-wears/shared';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('profiles')
     .select('*')
@@ -13,7 +13,7 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 }
 
 export async function getUserAddresses(userId: string): Promise<UserAddress[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('user_addresses')
     .select('*')
