@@ -3,5 +3,11 @@
 import { AuthenticateWithRedirectCallback } from '@clerk/nextjs';
 
 export default function SSOCallback() {
-  return <AuthenticateWithRedirectCallback />;
+  return (
+    <AuthenticateWithRedirectCallback
+      afterSignInUrl="/"
+      afterSignUpUrl="/cart"
+      continueSignUpUrl="/register"
+    />
+  );
 }
