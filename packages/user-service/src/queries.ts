@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import type { Profile, UserAddress } from '@static-wears/shared';
 
 export async function getProfile(userId: string): Promise<Profile | null> {

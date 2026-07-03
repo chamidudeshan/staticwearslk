@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import type { Order } from '@static-wears/shared';
 
 export async function getOrdersByCustomer(customerId: string): Promise<Order[]> {

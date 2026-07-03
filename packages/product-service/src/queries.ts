@@ -1,4 +1,4 @@
-import { createSupabaseServerClient, createSupabaseAdminClient } from '@static-wears/shared';
+import { createSupabaseAdminClient } from '@static-wears/shared';
 import type { Product, Category, Brand } from '@static-wears/shared';
 
 export async function getProducts(filters?: {
@@ -10,7 +10,7 @@ export async function getProducts(filters?: {
   limit?: number;
   offset?: number;
 }): Promise<Product[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
 
   let query = supabase
     .from('products')
@@ -79,7 +79,7 @@ export async function getAllProductsAdmin(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from('products')
     .select(`
@@ -136,7 +136,7 @@ export async function getVariantStockInfo(variantId: string): Promise<{
 }
 
 export async function getCategories(): Promise<Category[]> {
-  const supabase = await createSupabaseServerClient();
+  const supabase = createSupabaseAdminClient();
   const { data } = await supabase
     .from('categories')
     .select('*')
