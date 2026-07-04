@@ -9,7 +9,8 @@ deploy:
   before_script:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
-    - echo "$VPS_SSH_KEY" | tr -d '\r' | ssh-add -
+    - chmod 600 "$VPS_SSH_KEY"
+    - ssh-add "$VPS_SSH_KEY"
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
     - ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
   script:
