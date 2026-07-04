@@ -28,7 +28,13 @@ const CATEGORY_CONFIG: Record<string, { color: string; accent: string; img: stri
   },
 };
 
-export function CategoryShowcase({ categories }: { categories: Category[] }) {
+export function CategoryShowcase({
+  categories,
+  categoryImages,
+}: {
+  categories: Category[];
+  categoryImages?: Record<string, string>;
+}) {
   if (!categories.length) return null;
 
   return (
@@ -48,6 +54,7 @@ export function CategoryShowcase({ categories }: { categories: Category[] }) {
             img: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80',
             label: cat.name,
           };
+          const imgUrl = categoryImages?.[cat.slug] ?? cfg.img;
 
           return (
             <Link key={cat.id} href={`/shop?category=${cat.slug}`}>
@@ -55,7 +62,7 @@ export function CategoryShowcase({ categories }: { categories: Category[] }) {
                 {/* Background image */}
                 <div
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-110"
-                  style={{ backgroundImage: `url('${cfg.img}')` }}
+                  style={{ backgroundImage: `url('${imgUrl}')` }}
                 />
                 {/* Overlay */}
                 <div className="absolute inset-0 bg-black/50 group-hover:bg-black/40 transition-colors duration-500" />

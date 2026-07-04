@@ -8,6 +8,23 @@ import { CategoryShowcase } from '@/components/product/category-showcase';
 
 export const dynamic = 'force-dynamic';
 
+async function getCategoryImages(): Promise<Record<string, string>> {
+  try {
+    const supabase = createSupabaseAdminClient();
+    const { data } = await supabase
+      .from('site_settings')
+      .select('key, value')
+      .like('key', 'category_img_%');
+    const map: Record<string, string> = {};
+    (data ?? []).forEach((row: { key: string; value: string }) => {
+      map[row.key.replace('category_img_', '')] = row.value;
+    });
+    return map;
+  } catch {
+    return {};
+  }
+}
+
 async function getActiveBanners(): Promise<SliderBanner[]> {
   try {
     const supabase = createSupabaseAdminClient();
@@ -24,10 +41,11 @@ async function getActiveBanners(): Promise<SliderBanner[]> {
 }
 
 export default async function HomePage() {
-  const [products, categories, banners] = await Promise.all([
+  const [products, categories, banners, categoryImages] = await Promise.all([
     getProducts({ limit: 8, sort: 'newest' }),
     getCategories(),
     getActiveBanners(),
+    getCategoryImages(),
   ]);
 
   return (
@@ -35,7 +53,7 @@ export default async function HomePage() {
       {banners.length > 0 ? <BannerSlider banners={banners} /> : <HeroSection />}
       <MarqueeStrip />
       <FeaturedProducts products={products} />
-      <CategoryShowcase categories={categories} />
+      <CategoryShowcase categories={categories} categoryImages={categoryImages} />
       <BrandManifesto />
     </>
   );

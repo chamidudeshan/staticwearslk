@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Save, Store, Bell, CreditCard, Check, Globe, Share2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Save, Store, Bell, CreditCard, Check, Globe, Share2, Upload, ImageIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import { Header } from '@/components/layout/header';
 import { Toggle } from '@/components/ui/toggle';
@@ -28,6 +28,15 @@ export default function SettingsPage() {
   const [contactPhone, setContactPhone] = useState('+94 77 000 0000');
   const [contactAddress, setContactAddress] = useState('Colombo, Sri Lanka');
 
+  // Category showcase images
+  const CATEGORY_SLUGS = ['t-shirts', 'hoodies', 'caps', 'accessories'] as const;
+  type CategorySlug = (typeof CATEGORY_SLUGS)[number];
+  const [categoryImages, setCategoryImages] = useState<Record<CategorySlug, string>>({
+    't-shirts': '', hoodies: '', caps: '', accessories: '',
+  });
+  const [uploadingSlug, setUploadingSlug] = useState<CategorySlug | null>(null);
+  const fileInputRefs = useRef<Partial<Record<CategorySlug, HTMLInputElement | null>>>({});
+
   // Social links
   const [instagram, setInstagram] = useState('');
   const [tiktok, setTiktok] = useState('');
@@ -47,6 +56,14 @@ export default function SettingsPage() {
         if (data.contact_phone) setContactPhone(data.contact_phone);
         if (data.contact_address) setContactAddress(data.contact_address);
         if (data.admin_notification_email) setAdminNotifEmail(data.admin_notification_email);
+        setCategoryImages((prev) => {
+          const next = { ...prev };
+          for (const slug of ['t-shirts', 'hoodies', 'caps', 'accessories'] as const) {
+            const val = data[`category_img_${slug}`];
+            if (val) next[slug] = val;
+          }
+          return next;
+        });
       })
       .catch(() => {})
       .finally(() => setLoadingSettings(false));
@@ -63,6 +80,11 @@ export default function SettingsPage() {
         contact_email: contactEmail,
         contact_phone: contactPhone,
         contact_address: contactAddress,
+        ...Object.fromEntries(
+          Object.entries(categoryImages)
+            .filter(([, v]) => v)
+            .map(([slug, url]) => [`category_img_${slug}`, url])
+        ),
       }),
     });
     if (res.ok) toast.success('Homepage settings saved');
@@ -99,6 +121,23 @@ export default function SettingsPage() {
     if (res.ok) toast.success('Settings saved');
     else toast.error('Failed to save');
     setSaving(false);
+  }
+
+  async function handleCategoryImageUpload(slug: CategorySlug, file: File) {
+    setUploadingSlug(slug);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      if (!res.ok) { toast.error('Upload failed'); return; }
+      const { url } = await res.json() as { url: string };
+      setCategoryImages((prev) => ({ ...prev, [slug]: url }));
+      toast.success('Image uploaded — save to apply');
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setUploadingSlug(null);
+    }
   }
 
   const inputClass = 'w-full bg-[#12121a] border border-[#1e1e28] px-4 py-3 font-mono text-sm text-[#e8e8f0] placeholder:text-[#333] focus:outline-none focus:border-[#ff6b35] transition-colors';
@@ -230,6 +269,64 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <label className={labelClass}>Address</label>
                   <input value={contactAddress} onChange={(e) => setContactAddress(e.target.value)} className={inputClass} placeholder="Colombo, Sri Lanka" />
+                </div>
+              </div>
+
+              {/* Category showcase images */}
+              <div className="bg-[#0e0e12] border border-[#1e1e28] rounded-xl p-6 space-y-5">
+                <div className="flex items-center gap-2">
+                  <ImageIcon size={14} className="text-[#ff6b35]" />
+                  <h2 className="font-mono text-xs uppercase tracking-widest text-[#ff6b35]">Shop the Drop — Category Images</h2>
+                </div>
+                <p className="font-mono text-[10px] text-[#444]">Upload images for the 4 category tiles on the homepage. Click Save Changes after uploading.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  {(['t-shirts', 'hoodies', 'caps', 'accessories'] as const).map((slug) => {
+                    const label = { 'T-shirts': 't-shirts', Hoodies: 'hoodies', Caps: 'caps', Accessories: 'accessories' };
+                    const displayName = Object.entries(label).find(([, s]) => s === slug)?.[0] ?? slug;
+                    const imgUrl = categoryImages[slug];
+                    const isUploading = uploadingSlug === slug;
+                    return (
+                      <div key={slug} className="space-y-2">
+                        <p className={labelClass}>{displayName}</p>
+                        <div
+                          className="relative aspect-[3/4] bg-[#12121a] border border-[#1e1e28] overflow-hidden group cursor-pointer"
+                          onClick={() => fileInputRefs.current[slug]?.click()}
+                        >
+                          {imgUrl ? (
+                            <div
+                              className="absolute inset-0 bg-cover bg-center"
+                              style={{ backgroundImage: `url('${imgUrl}')` }}
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <ImageIcon size={28} className="text-[#333]" />
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            {isUploading ? (
+                              <span className="font-mono text-[10px] text-white uppercase tracking-widest animate-pulse">Uploading…</span>
+                            ) : (
+                              <div className="flex flex-col items-center gap-2 text-white">
+                                <Upload size={18} />
+                                <span className="font-mono text-[10px] uppercase tracking-widest">Change</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          ref={(el) => { fileInputRefs.current[slug] = el; }}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleCategoryImageUpload(slug, file);
+                            e.target.value = '';
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
