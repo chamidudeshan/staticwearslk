@@ -101,7 +101,7 @@ export async function sendContactNotification(data: {
     await resend.emails.send({
       from: 'Static Wears <notifications@staticwears.com>',
       to: adminEmail,
-      replyTo: data.email,
+      reply_to: data.email,
       subject: `[Contact] ${label} — from ${data.name}`,
       html,
     });
