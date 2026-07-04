@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Mail, Phone, MapPin, Clock } from 'lucide-react';
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '', _hp: '' });
   const [loading, setLoading] = useState(false);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
@@ -17,9 +17,21 @@ export default function ContactPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    toast.success('Message sent! We\'ll get back to you within 24 hours.');
-    setForm({ name: '', email: '', subject: '', message: '' });
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        toast.success('Message sent! We\'ll get back to you within 24 hours.');
+        setForm({ name: '', email: '', subject: '', message: '', _hp: '' });
+      } else {
+        toast.error('Failed to send. Please try again.');
+      }
+    } catch {
+      toast.error('Failed to send. Please try again.');
+    }
     setLoading(false);
   }
 
@@ -46,6 +58,17 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
             {/* Form */}
             <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-4">
+                      {/* Honeypot — visually hidden, bots fill it, humans don't */}
+              <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px', width: 0, height: 0, overflow: 'hidden' }}>
+                <input
+                  name="_hp"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={form._hp}
+                  onChange={handleChange}
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="font-mono text-[10px] uppercase tracking-widest text-[#555]">Your Name</label>

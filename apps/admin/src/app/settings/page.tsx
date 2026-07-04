@@ -16,6 +16,7 @@ export default function SettingsPage() {
   // Store settings
   const [storeName, setStoreName] = useState('Static Wears');
   const [storeEmail, setStoreEmail] = useState('hello@staticwears.lk');
+  const [adminNotifEmail, setAdminNotifEmail] = useState('');
   const [currency, setCurrency] = useState('LKR');
   const [orderNotif, setOrderNotif] = useState(true);
   const [lowStockNotif, setLowStockNotif] = useState(true);
@@ -45,6 +46,7 @@ export default function SettingsPage() {
         if (data.contact_email) setContactEmail(data.contact_email);
         if (data.contact_phone) setContactPhone(data.contact_phone);
         if (data.contact_address) setContactAddress(data.contact_address);
+        if (data.admin_notification_email) setAdminNotifEmail(data.admin_notification_email);
       })
       .catch(() => {})
       .finally(() => setLoadingSettings(false));
@@ -89,8 +91,13 @@ export default function SettingsPage() {
   async function saveStore(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
-    await new Promise((r) => setTimeout(r, 600));
-    toast.success('Settings saved');
+    const res = await fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_notification_email: adminNotifEmail }),
+    });
+    if (res.ok) toast.success('Settings saved');
+    else toast.error('Failed to save');
     setSaving(false);
   }
 
@@ -147,6 +154,12 @@ export default function SettingsPage() {
                 <div className="space-y-1.5">
                   <label className={labelClass}>Contact Email</label>
                   <input type="email" value={storeEmail} onChange={(e) => setStoreEmail(e.target.value)} className={inputClass} />
+                </div>
+                <div className="space-y-1.5">
+                  <label className={labelClass}>Admin Notification Email</label>
+                  <input type="email" value={adminNotifEmail} onChange={(e) => setAdminNotifEmail(e.target.value)}
+                    placeholder="your@email.com" className={inputClass} />
+                  <p className="font-mono text-[10px] text-[#444]">Contact form submissions will be sent to this address.</p>
                 </div>
                 <div className="space-y-1.5">
                   <label className={labelClass}>Currency</label>

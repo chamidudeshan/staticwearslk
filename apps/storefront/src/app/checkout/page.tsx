@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { useCart } from '@/context/cart-context';
 import { Navbar } from '@/components/layout/navbar';
 import { Footer } from '@/components/layout/footer';
@@ -25,6 +26,14 @@ declare global {
 export default function CheckoutPage() {
   const { cart, dispatch } = useCart();
   const router = useRouter();
+  const { isLoaded, isSignedIn } = useUser();
+
+  // Redirect unauthenticated users to login, then back to checkout
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) {
+      router.replace('/login?redirect_url=/checkout');
+    }
+  }, [isLoaded, isSignedIn, router]);
   const [loading, setLoading] = useState(false);
   const [payMethod, setPayMethod] = useState<PaymentMethod>('stripe');
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -204,6 +213,19 @@ export default function CheckoutPage() {
     setupPayPal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [payMethod]);
+
+  // Show nothing while Clerk is loading or while redirecting unauthenticated users
+  if (!isLoaded || !isSignedIn) {
+    return (
+      <>
+        <Navbar />
+        <main className="min-h-screen pt-24 flex items-center justify-center">
+          <p className="font-mono text-xs text-[#444] tracking-widest uppercase">Loading...</p>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (cart.items.length === 0) {
     return (
