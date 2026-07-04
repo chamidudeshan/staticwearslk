@@ -59,14 +59,12 @@ export async function PATCH(
 
     const active = variants.filter((v: { _deleted?: boolean }) => !v._deleted);
 
-    // Existing variants (have id) → update individually
     const existing = active.filter((v: { id?: string }) => v.id);
     for (const v of existing) {
       const { _deleted, id: vid, ...fields } = v as { _deleted?: boolean; id: string; [k: string]: unknown };
       await supabase.from('product_variants').update(fields).eq('id', vid);
     }
 
-    // New variants (no id) → insert individually so each is independent
     const fresh = active.filter((v: { id?: string }) => !v.id);
     for (const v of fresh) {
       const { _deleted, id: _vid, ...fields } = v as { _deleted?: boolean; id?: string; [k: string]: unknown };

@@ -266,7 +266,7 @@ export default function BannersPage() {
                     </p>
                     {banner.subtitle && <p className="font-mono text-xs text-[#555] mb-1">{banner.subtitle}</p>}
                     <p className="font-mono text-[10px] text-[#333]">
-                      CTA: {banner.cta_text ?? 'Shop Now'} → {banner.cta_link ?? '/shop'}
+                      CTA: {banner.cta_text ?? 'Shop Now'} / {banner.cta_link ?? '/shop'}
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
