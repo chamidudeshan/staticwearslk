@@ -7,15 +7,13 @@ import { Suspense } from 'react';
 function SSOCallbackInner() {
   const params = useSearchParams();
 
-  // Clerk passes the original redirect_url through the OAuth flow as a full URL.
-  // Extract just the pathname so we redirect to /checkout, not https://domain/checkout.
-  let redirectTo = '/';
+  let redirectTo = '/cart'; // default after sign-up
   const raw = params.get('redirect_url');
   if (raw) {
     try {
       redirectTo = new URL(raw).pathname;
     } catch {
-      redirectTo = raw; // already a pathname
+      redirectTo = raw;
     }
   }
 
@@ -28,7 +26,7 @@ function SSOCallbackInner() {
   );
 }
 
-export default function SSOCallback() {
+export default function RegisterSSOCallback() {
   return (
     <Suspense>
       <SSOCallbackInner />
