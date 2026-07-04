@@ -1,4 +1,5 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
 const isProtected = createRouteMatcher([
   '/account(.*)',
@@ -7,13 +8,20 @@ const isProtected = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isProtected(req)) {
+  if (!isProtected(req)) return;
+
+  try {
     const { userId } = await auth();
     if (!userId) {
-      const loginUrl = new URL('/login', req.url);
-      loginUrl.searchParams.set('redirect_url', req.url);
-      return Response.redirect(loginUrl);
+      const url = new URL('/login', req.url);
+      url.searchParams.set('redirect_url', req.nextUrl.pathname);
+      return NextResponse.redirect(url);
     }
+  } catch {
+    // auth() threw (e.g. no session context) — redirect to login instead of 500
+    const url = new URL('/login', req.url);
+    url.searchParams.set('redirect_url', req.nextUrl.pathname);
+    return NextResponse.redirect(url);
   }
 });
 
