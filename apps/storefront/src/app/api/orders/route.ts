@@ -5,15 +5,25 @@ import { publishEvent, TOPICS } from '@static-wears/kafka';
 import { getVariantStockInfo } from '@static-wears/product-service';
 
 export async function GET() {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const orders = await getOrdersByCustomer(userId);
-  return NextResponse.json({ orders });
+    const orders = await getOrdersByCustomer(userId);
+    return NextResponse.json({ orders });
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 }
 
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
+  let userId: string | null = null;
+  try {
+    const session = await auth();
+    userId = session.userId;
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json();
