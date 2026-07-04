@@ -7,7 +7,7 @@ import { Suspense } from 'react';
 function SSOCallbackInner() {
   const params = useSearchParams();
 
-  let redirectTo = '/cart'; // default after sign-up
+  let redirectTo = '/cart';
   const raw = params.get('redirect_url');
   if (raw) {
     try {
@@ -21,7 +21,6 @@ function SSOCallbackInner() {
     <AuthenticateWithRedirectCallback
       afterSignInUrl={redirectTo}
       afterSignUpUrl={redirectTo}
-      continueSignUpUrl="/register"
     />
   );
 }
