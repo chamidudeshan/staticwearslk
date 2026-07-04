@@ -3,22 +3,30 @@ stages:
 
 deploy:
   stage: deploy
-  tags:
-    - vps-runner
+  image: alpine:latest
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
+  before_script:
+    - apk add --no-cache openssh-client bash
+    - eval $(ssh-agent -s)
+    - echo "$VPS_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
   script:
-    - set -e
-    - cd /home/deploy/staticwears
-    - echo ">>> Pulling latest code..."
-    - git pull origin main
-    - echo ">>> Rebuilding changed services..."
-    - docker compose --env-file .env.supabase build storefront admin
-    - echo ">>> Restarting services..."
-    - docker compose --env-file .env.supabase up -d storefront admin
-    - echo ">>> Cleaning up unused images..."
-    - docker image prune -f
-    - echo ">>> Deploy complete."
+    - |
+      ssh "$VPS_USER@$VPS_HOST" bash -s << 'ENDSSH'
+        set -e
+        cd /home/deploy/staticwears
+        echo ">>> Pulling latest code..."
+        git pull origin main
+        echo ">>> Rebuilding changed services..."
+        docker compose --env-file .env.supabase build storefront admin
+        echo ">>> Restarting services..."
+        docker compose --env-file .env.supabase up -d storefront admin
+        echo ">>> Cleaning up unused images..."
+        docker image prune -f
+        echo ">>> Deploy complete."
+      ENDSSH
   environment:
     name: production
     url: https://staticwears.com
