@@ -26,6 +26,10 @@ deploy:
         docker compose --env-file .env.supabase build storefront admin
         echo ">>> Restarting services..."
         docker compose --env-file .env.supabase up -d storefront admin
+        echo ">>> Waiting for apps to be ready..."
+        sleep 15
+        echo ">>> Reloading nginx..."
+        docker compose --env-file .env.supabase restart nginx
         echo ">>> Cleaning up unused images..."
         docker image prune -f
         echo ">>> Deploy complete."
