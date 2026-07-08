@@ -1,0 +1,2510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Static Wears — Project Docs</title>
+<style>
+:root {
+  --bg: #0d0d0d;
+  --surface: #111118;
+  --surface2: #16161f;
+  --border: #1e1e2a;
+  --accent: #ff6b35;
+  --accent-bg: rgba(255,107,53,0.1);
+  --text: #ddddef;
+  --text-dim: #5a5a70;
+  --text-mid: #9898b0;
+  --code-bg: #090910;
+  --code-text: #b4c8ff;
+  --sidebar: 248px;
+  --content: 740px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.75;
+  min-height: 100vh;
+}
+
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: var(--sidebar);
+  flex-shrink: 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  padding: 32px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.sidebar-logo {
+  padding: 0 20px 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.sidebar-logo .logo-mark {
+  font-family: system-ui, sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.sidebar-logo .logo-sub {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+}
+
+.toc-section {
+  padding: 0 20px;
+  margin-bottom: 8px;
+}
+
+.toc-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 10px 0 6px;
+  display: block;
+}
+
+.toc-link {
+  display: block;
+  font-family: system-ui, sans-serif;
+  font-size: 12.5px;
+  color: var(--text-mid);
+  text-decoration: none;
+  padding: 4px 0 4px 10px;
+  border-left: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+  line-height: 1.4;
+}
+
+.toc-link:hover { color: var(--text); border-left-color: var(--border); }
+.toc-link.active { color: var(--accent); border-left-color: var(--accent); }
+
+.main {
+  margin-left: var(--sidebar);
+  padding: 64px 56px 120px;
+  max-width: calc(var(--sidebar) + var(--content) + 112px);
+  width: 100%;
+}
+
+.content { max-width: var(--content); }
+
+.section {
+  padding-top: 72px;
+  border-top: 1px solid var(--border);
+  margin-top: 72px;
+}
+
+.section:first-child { border-top: none; margin-top: 0; padding-top: 0; }
+
+.eyebrow {
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+  display: block;
+}
+
+h1 {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 800;
+  font-size: 2.6rem;
+  line-height: 1.1;
+  color: var(--text);
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: 1.65rem;
+  line-height: 1.2;
+  color: var(--text);
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--text);
+  margin: 32px 0 10px;
+  letter-spacing: -0.005em;
+}
+
+h4 {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 24px 0 8px;
+}
+
+p {
+  color: var(--text-mid);
+  max-width: 68ch;
+  margin-bottom: 16px;
+  font-size: 0.975rem;
+}
+
+p strong { color: var(--text); font-weight: 600; font-family: system-ui, sans-serif; font-size: 0.9rem; }
+
+ul, ol {
+  padding-left: 22px;
+  margin-bottom: 16px;
+}
+
+li {
+  color: var(--text-mid);
+  font-size: 0.975rem;
+  margin-bottom: 6px;
+}
+
+li strong { color: var(--text); font-family: system-ui, sans-serif; font-size: 0.9rem; }
+
+code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82em;
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+}
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 20px 22px;
+  overflow-x: auto;
+  margin: 20px 0;
+  line-height: 1.6;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.82rem;
+  color: var(--code-text);
+  white-space: pre;
+}
+
+.code-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-left: 3px solid var(--accent);
+  padding: 6px 12px;
+  display: block;
+  margin-top: 20px;
+}
+
+.code-label + pre { margin-top: 0; border-top: none; }
+
+.callout {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 16px 20px;
+  margin: 20px 0;
+}
+
+.callout p { margin-bottom: 0; }
+
+.tag {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  margin: 2px;
+  vertical-align: middle;
+}
+
+.tag.accent {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.flow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  margin: 24px 0;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.flow-step {
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 12px 16px;
+  min-width: 140px;
+  text-align: center;
+}
+
+.flow-step .step-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.flow-step .step-name {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.flow-step.accent-step {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.flow-step.accent-step .step-name { color: var(--accent); }
+
+.flow-arrow {
+  flex-shrink: 0;
+  align-self: center;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 0 6px;
+}
+
+.arch {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.arch-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.arch-box {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  color: var(--text-mid);
+  text-align: center;
+  flex: 1;
+  max-width: 160px;
+}
+
+.arch-box.orange {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.arch-box.wide { max-width: 320px; }
+
+.arch-connector {
+  text-align: center;
+  color: var(--text-dim);
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  margin: 2px 0;
+}
+
+/* Call stack tree */
+.cstack {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 18px 22px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 11.5px;
+  line-height: 1.95;
+}
+.cs-row { display: flex; align-items: baseline; white-space: nowrap; }
+.cs-pipe { color: var(--text-dim); flex-shrink: 0; user-select: none; }
+.cs-fn { color: var(--code-text); }
+.cs-pkg { color: var(--accent); font-size: 10px; margin-left: 10px; }
+.cs-note { color: var(--text-dim); font-size: 10px; margin-left: 8px; }
+.cs-http { color: #8dbe82; }
+.cs-db { color: #c792ea; }
+.cs-ext { color: #e5c07b; }
+.cs-async {
+  font-size: 8.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0px 5px;
+  margin-left: 10px;
+  vertical-align: middle;
+  opacity: 0.75;
+}
+.cs-trigger {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 3px 8px;
+  margin-bottom: 12px;
+  display: inline-block;
+}
+
+/* API calls diagram */
+.api-diagram {
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.api-row {
+  display: grid;
+  grid-template-columns: 180px 60px 1fr;
+  align-items: center;
+  gap: 0;
+}
+.api-from, .api-to {
+  font-family: 'Courier New', monospace;
+  font-size: 11px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-mid);
+  text-align: center;
+}
+.api-from.hi { border-color: var(--accent); color: var(--accent); background: var(--accent-bg); }
+.api-to { text-align: left; max-width: 300px; }
+.api-to.ext { color: #8dbe82; border-color: #8dbe82; background: rgba(141,190,130,0.07); }
+.api-arrow {
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  font-size: 10px;
+  color: var(--text-dim);
+  padding: 0 4px;
+}
+.api-method {
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  padding: 1px 5px;
+  margin-right: 6px;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  letter-spacing: 0.05em;
+}
+.api-method.green { background: rgba(141,190,130,0.1); color: #8dbe82; border-color: #8dbe82; }
+.api-method.purple { background: rgba(199,146,234,0.1); color: #c792ea; border-color: #c792ea; }
+.api-label {
+  font-family: 'Courier New', monospace;
+  font-size: 10.5px;
+  color: var(--text-mid);
+}
+.api-section-label {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  padding: 14px 0 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  grid-column: 1 / -1;
+}
+
+.table-wrap { overflow-x: auto; margin: 20px 0; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+th {
+  font-family: 'Courier New', monospace;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-mid);
+  font-size: 0.875rem;
+  vertical-align: top;
+}
+
+td code { font-size: 11px; }
+td:first-child { color: var(--text); font-family: 'Courier New', monospace; font-size: 12px; }
+
+tr:last-child td { border-bottom: none; }
+
+.hero {
+  padding-bottom: 56px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0;
+}
+
+.hero h1 { margin-bottom: 16px; }
+.hero .subtitle {
+  font-family: system-ui, sans-serif;
+  font-size: 1.05rem;
+  color: var(--text-mid);
+  max-width: 58ch;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.meta-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 20px;
+}
+
+hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); }
+
+@media (max-width: 800px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 32px 20px 80px; }
+}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-mark">Static Wears</div>
+    <div class="logo-sub">project documentation</div>
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">Getting started</span>
+    <a class="toc-link" href="#overview">What is this?</a>
+    <a class="toc-link" href="#structure">Project structure</a>
+    <a class="toc-link" href="#microservices">Microservices architecture</a>
+    <a class="toc-link" href="#call-stacks">Call stacks</a>
+    <a class="toc-link" href="#api-calls">API calls between services</a>
+    <a class="toc-link" href="#diagram">Architecture diagram</a>
+    <a class="toc-link" href="#tech">Tech stack</a>
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">UI &amp; Security</span>
+    <a class="toc-link" href="#styling">Styling system</a>
+    <a class="toc-link" href="#security">Security &amp; protection</a>
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">Running the project</span>
+    <a class="toc-link" href="#docker-compose">Docker Compose explained</a>
+    <a class="toc-link" href="#how-to-start">How to start from scratch</a>
+    <a class="toc-link" href="#troubleshoot">Troubleshooting</a>
+    <a class="toc-link" href="#vps-commands">Useful VPS commands</a>
+  </div>
+  <div class="toc-section" style="display:none">
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">Packages</span>
+    <a class="toc-link" href="#shared">shared</a>
+    <a class="toc-link" href="#kafka">kafka</a>
+    <a class="toc-link" href="#product-service">product-service</a>
+    <a class="toc-link" href="#order-service">order-service</a>
+    <a class="toc-link" href="#user-service">user-service</a>
+    <a class="toc-link" href="#payment-service">payment-service</a>
+    <a class="toc-link" href="#email-service">email-service</a>
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">Apps</span>
+    <a class="toc-link" href="#storefront">Storefront</a>
+    <a class="toc-link" href="#admin">Admin Panel</a>
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">How it all works</span>
+    <a class="toc-link" href="#auth-flow">Auth flow</a>
+    <a class="toc-link" href="#order-flow">Order flow</a>
+    <a class="toc-link" href="#email-flow">Email flow</a>
+    <a class="toc-link" href="#payment-flow">Payment flow</a>
+  </div>
+
+  <div class="toc-section">
+    <span class="toc-label">Infrastructure</span>
+    <a class="toc-link" href="#database">Database</a>
+    <a class="toc-link" href="#docker">Docker</a>
+    <a class="toc-link" href="#deployment">Deployment</a>
+    <a class="toc-link" href="#env">Environment variables</a>
+  </div>
+</nav>
+
+<main class="main">
+<div class="content">
+
+<div class="hero section" id="overview">
+  <span class="eyebrow">Project Documentation</span>
+  <h1>Static Wears</h1>
+  <p class="subtitle">A full-stack e-commerce platform built as a microservices monorepo. This doc covers every part of the project - how it's structured, how the pieces talk to each other, and what actually happens when someone buys a t-shirt.</p>
+  <div class="meta-row">
+    <span class="tag accent">Next.js 16</span>
+    <span class="tag accent">Supabase</span>
+    <span class="tag accent">Clerk</span>
+    <span class="tag accent">Kafka</span>
+    <span class="tag accent">Docker</span>
+    <span class="tag">pnpm monorepo</span>
+    <span class="tag">Turborepo</span>
+    <span class="tag">Stripe / PayPal / PayHere</span>
+  </div>
+</div>
+
+<div class="section" id="structure">
+  <span class="eyebrow">Monorepo</span>
+  <h2>Project structure</h2>
+  <p>The whole thing lives in one Git repository managed by <strong>pnpm</strong> and <strong>Turborepo</strong>. pnpm handles dependencies with a shared cache so packages don't get duplicated, and Turbo handles the build order so everything compiles in the right sequence.</p>
+  <p>There are two kinds of things in the repo - <strong>apps</strong> (things that actually run) and <strong>packages</strong> (shared code that the apps import).</p>
+
+<span class="code-label">folder tree</span>
+<pre><code>staticwears/
+├── apps/
+│   ├── storefront/          - the customer-facing shop (port 3000)
+│   └── admin/               - the admin panel (port 3001)
+│
+├── packages/
+│   ├── shared/              - types + supabase clients used everywhere
+│   ├── kafka/               - event bus (publish/consume messages)
+│   ├── product-service/     - all product/category/brand DB queries
+│   ├── order-service/       - order creation and lookups
+│   ├── user-service/        - user profile queries
+│   ├── payment-service/     - stripe, paypal, payhere logic
+│   └── email-service/       - sends emails via Resend
+│
+├── docker-compose.yml       - runs everything in production
+├── .gitlab-ci.yml           - auto-deploys on every push to main
+└── turbo.json               - tells turbo how to build in order</code></pre>
+
+  <div class="callout">
+    <p>The apps import from packages using workspace aliases like <code>@static-wears/shared</code> or <code>@static-wears/order-service</code>. This means the business logic lives in one place - not duplicated between storefront and admin.</p>
+  </div>
+
+  <h3>How Turborepo fits in</h3>
+  <p>When you run <code>pnpm run build</code> from the root, Turbo looks at which packages depend on which others and builds them in the right order. So <code>shared</code> always builds before <code>product-service</code>, and <code>product-service</code> before the apps. Without Turbo you'd have to do this manually.</p>
+</div>
+
+<div class="section" id="microservices">
+  <span class="eyebrow">Architecture</span>
+  <h2>Microservices architecture</h2>
+  <p>Static Wears is built as a <strong>microservices monorepo</strong>. Each service owns a specific domain - products, orders, payments, emails - and nothing crosses those boundaries without going through the defined interface. They all live in one repo for convenience, but they're completely independent of each other at runtime.</p>
+
+  <div class="callout">
+    <p>In a traditional monolith, the checkout page might directly query the database, send the email, and update the stock in one big function. Here, each of those things is a separate service with one job. The storefront orchestrates them but doesn't own their logic.</p>
+  </div>
+
+  <h3>The full system map</h3>
+
+  <div class="arch" style="padding: 28px 20px;">
+    <div style="font-family:'Courier New',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-dim);text-align:center;margin-bottom:16px;">public internet</div>
+    <div class="arch-row">
+      <div class="arch-box wide orange" style="max-width:480px;">Nginx - reverse proxy + SSL termination</div>
+    </div>
+    <div class="arch-connector">|</div>
+    <div class="arch-row" style="gap:16px;">
+      <div class="arch-box orange" style="max-width:200px;">storefront<br><span style="font-size:9px;color:var(--text-dim);">port 3000</span></div>
+      <div class="arch-box orange" style="max-width:200px;">admin panel<br><span style="font-size:9px;color:var(--text-dim);">port 3001</span></div>
+    </div>
+    <div class="arch-connector">| imports from packages |</div>
+    <div class="arch-row" style="gap:8px;flex-wrap:wrap;justify-content:center;">
+      <div class="arch-box" style="max-width:130px;">product-service</div>
+      <div class="arch-box" style="max-width:130px;">order-service</div>
+      <div class="arch-box" style="max-width:130px;">user-service</div>
+      <div class="arch-box" style="max-width:130px;">payment-service</div>
+      <div class="arch-box" style="max-width:130px;">email-service</div>
+      <div class="arch-box" style="max-width:130px;">shared</div>
+    </div>
+    <div class="arch-connector">| all read/write through |</div>
+    <div class="arch-row" style="gap:16px;">
+      <div class="arch-box orange" style="max-width:200px;">Supabase (Kong)<br><span style="font-size:9px;color:var(--text-dim);">postgres + storage + auth</span></div>
+      <div class="arch-box" style="max-width:200px;">Kafka (KRaft)<br><span style="font-size:9px;color:var(--text-dim);">async event bus</span></div>
+    </div>
+    <div class="arch-connector">| Kafka consumed by |</div>
+    <div class="arch-row">
+      <div class="arch-box wide orange" style="max-width:320px;">email-worker container<br><span style="font-size:9px;color:var(--text-dim);">always running, listens for events</span></div>
+    </div>
+    <div class="arch-connector">| sends via |</div>
+    <div class="arch-row">
+      <div class="arch-box" style="max-width:200px;">Resend API</div>
+      <div class="arch-box" style="max-width:200px;">Stripe / PayPal / PayHere</div>
+    </div>
+  </div>
+
+  <h3>Service boundaries</h3>
+  <p>Each service has a strict scope. If you need data from a different domain, you go through that service's exports - not the database directly.</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Service</th><th>Owns</th><th>Talks to</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>product-service</td>
+        <td>products, variants, categories, brands, images</td>
+        <td>Supabase (read/write)</td>
+      </tr>
+      <tr>
+        <td>order-service</td>
+        <td>orders, order items</td>
+        <td>Supabase (read/write)</td>
+      </tr>
+      <tr>
+        <td>user-service</td>
+        <td>user profiles (saved addresses)</td>
+        <td>Supabase (read/write), Clerk API (read)</td>
+      </tr>
+      <tr>
+        <td>payment-service</td>
+        <td>payment sessions and records</td>
+        <td>Supabase (write), Stripe API, PayPal SDK, PayHere</td>
+      </tr>
+      <tr>
+        <td>email-service</td>
+        <td>email templates and sending logic</td>
+        <td>Resend API (send only)</td>
+      </tr>
+      <tr>
+        <td>kafka (package)</td>
+        <td>event topics, producer, consumer, worker</td>
+        <td>Kafka broker container</td>
+      </tr>
+      <tr>
+        <td>shared</td>
+        <td>TypeScript types, Supabase client factories</td>
+        <td>nothing - imported by everyone else</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Communication patterns</h3>
+  <p>Services talk to each other in two ways depending on whether the caller needs to wait for the result.</p>
+
+  <h4>Synchronous - direct import</h4>
+  <p>When the storefront needs a product list to render a page, it imports <code>getProducts()</code> from product-service and calls it directly. This is a regular TypeScript function call - fast, synchronous, and the response goes straight into the page render.</p>
+
+<span class="code-label">example - storefront fetching products synchronously</span>
+<pre><code>import { getProducts } from '@static-wears/product-service';
+
+// called in a server component - blocks until data is ready
+const products = await getProducts({ category: 'hoodies', limit: 12 });</code></pre>
+
+  <h4>Asynchronous - Kafka events</h4>
+  <p>When an order is placed, the storefront doesn't need to wait for the confirmation email to be sent before telling the user their order went through. So instead of calling the email service directly, it publishes an event to Kafka and moves on. The email-worker picks it up whenever it gets to it.</p>
+
+<span class="code-label">example - storefront publishing an event and not waiting</span>
+<pre><code>import { publishEvent, TOPICS } from '@static-wears/kafka';
+
+// don't await - fire and move on
+publishEvent(TOPICS.ORDER_PLACED, { orderId, to, items, total })
+  .catch(console.error);</code></pre>
+
+  <p>The rule is simple: if you need the result to continue, use a direct import. If the caller doesn't care about the outcome (emails, alerts, notifications), use Kafka.</p>
+
+  <h3>Why monorepo and not separate repos?</h3>
+  <p>The services are logically separate but share TypeScript types from the <code>shared</code> package. If products, orders, and the storefront each lived in their own repo, keeping the types in sync would mean publishing npm packages and versioning them. In a monorepo, a change to a type in <code>shared</code> is immediately visible to everything else - and TypeScript will break the build if something doesn't match, before anything gets deployed.</p>
+
+  <p>Turborepo handles the build order so each package only builds after its dependencies are ready. pnpm's workspace protocol (<code>workspace:*</code>) links local packages together instead of pulling from npm.</p>
+
+<span class="code-label">package.json in storefront - how it references local packages</span>
+<pre><code>{
+  "dependencies": {
+    "@static-wears/shared":          "workspace:*",
+    "@static-wears/product-service": "workspace:*",
+    "@static-wears/order-service":   "workspace:*",
+    "@static-wears/kafka":           "workspace:*"
+  }
+}</code></pre>
+
+  <h3>How data flows across services (full example)</h3>
+  <p>Here's the complete path when an admin changes an order status to "Shipped":</p>
+  <ol>
+    <li>Admin clicks "Mark as Shipped" in the admin panel</li>
+    <li>Admin panel calls <code>PATCH /api/admin/orders/[id]</code> with <code>{ status: 'shipped' }</code></li>
+    <li>API route calls <code>updateOrderStatus(id, 'shipped')</code> from order-service</li>
+    <li>order-service updates the row in Supabase</li>
+    <li>order-service publishes an <code>ORDER_STATUS_CHANGED</code> event to Kafka with the order details</li>
+    <li>email-worker picks up the event from Kafka</li>
+    <li>email-worker calls <code>sendShippingUpdate()</code> from email-service</li>
+    <li>email-service calls the Resend API</li>
+    <li>Customer gets an email saying their order shipped</li>
+  </ol>
+  <p>Steps 5-9 all happen asynchronously after the API route already returned a 200 to the admin. The admin sees "Status updated" instantly - the email goes out a few seconds later.</p>
+</div>
+
+<div class="section" id="call-stacks">
+  <span class="eyebrow">Architecture</span>
+  <h2>Call stacks</h2>
+  <p>These are the full invocation chains for every major operation in the app - from the browser request all the way down to the database or external API. Each layer calls the next. The colour coding shows which layer you're in: <span style="color:var(--code-text);font-family:'Courier New',monospace;font-size:12px;">blue = app code</span>, <span style="color:var(--accent);font-family:'Courier New',monospace;font-size:12px;">orange = package</span>, <span style="color:#8dbe82;font-family:'Courier New',monospace;font-size:12px;">green = HTTP/REST</span>, <span style="color:#c792ea;font-family:'Courier New',monospace;font-size:12px;">purple = SQL/DB</span>.</p>
+
+  <h3>1. Product page load</h3>
+  <p>A user opens <code>/shop/black-oversized-tee</code>. Everything is server-rendered — the page component fetches directly.</p>
+  <div class="cstack">
+    <div class="cs-trigger">browser GET /shop/black-oversized-tee</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">page.tsx</span><span class="cs-note">server component</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ </span><span class="cs-fn">getProduct(slug)</span><span class="cs-pkg">product-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ </span><span class="cs-fn">createSupabaseAdminClient()</span><span class="cs-pkg">shared</span></div>
+    <div class="cs-row"><span class="cs-pipe">          └─ </span><span class="cs-http">GET http://kong:8000/rest/v1/products?slug=eq.black-oversized-tee</span></div>
+    <div class="cs-row"><span class="cs-pipe">              └─ </span><span class="cs-http">PostgREST parses query</span></div>
+    <div class="cs-row"><span class="cs-pipe">                  └─ </span><span class="cs-db">SELECT products.*, variants.*, images.* WHERE slug = '...'</span></div>
+    <div class="cs-row"><span class="cs-pipe">                      └─ </span><span class="cs-db">Postgres returns rows</span></div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">page renders with product data - HTML sent to browser</span></div>
+  </div>
+
+  <h3>2. Add to cart</h3>
+  <p>No server involved. Cart lives in <code>localStorage</code> managed by CartContext.</p>
+  <div class="cstack">
+    <div class="cs-trigger">user clicks "Add to Cart"</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">ProductPage.tsx</span><span class="cs-note">client component</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ </span><span class="cs-fn">addToCart(item)</span><span class="cs-note">CartContext</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ </span><span class="cs-fn">setItems([...items, newItem])</span><span class="cs-note">React state update</span></div>
+    <div class="cs-row"><span class="cs-pipe">          └─ </span><span class="cs-fn">localStorage.setItem('cart', JSON.stringify(items))</span></div>
+    <div class="cs-row"><span class="cs-pipe">              └─ </span><span class="cs-fn">cart drawer opens</span><span class="cs-note">CartDrawer re-renders</span></div>
+  </div>
+
+  <h3>3. Place order (checkout)</h3>
+  <p>The most complex flow. Two Kafka events are fired after the DB write - both async, both non-blocking.</p>
+  <div class="cstack">
+    <div class="cs-trigger">browser POST /api/orders</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">route.ts</span><span class="cs-note">API route</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">auth()</span><span class="cs-note">Clerk SDK - verifies session cookie</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">GET https://clerk.com/session (internal)</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ returns userId</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">createOrder({ customer_id, items, shipping })</span><span class="cs-pkg">order-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   ├─ </span><span class="cs-fn">createSupabaseAdminClient()</span><span class="cs-pkg">shared</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   ├─ </span><span class="cs-http">POST http://kong:8000/rest/v1/orders</span><span class="cs-note">insert order header</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   │   └─ </span><span class="cs-db">INSERT INTO orders (...) RETURNING *</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">POST http://kong:8000/rest/v1/order_items</span><span class="cs-note">insert line items</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ </span><span class="cs-db">INSERT INTO order_items (...) for each cart item</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">getVariantStockInfo(variantIds)</span><span class="cs-pkg">product-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">GET http://kong:8000/rest/v1/product_variants?id=in.(...)</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ </span><span class="cs-db">SELECT stock_qty FROM product_variants WHERE id IN (...)</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">publishEvent(ORDER_PLACED, payload)</span><span class="cs-pkg">kafka</span><span class="cs-async">async</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-fn">producer.send({ topic: 'order.placed', ... })</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ </span><span class="cs-http">Kafka broker receives message on order.placed topic</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │           └─ email-worker picks it up</span><span class="cs-note">runs in separate container</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │               └─ </span><span class="cs-fn">sendOrderConfirmation(payload)</span><span class="cs-pkg">email-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │                   └─ </span><span class="cs-http">POST https://api.resend.com/emails</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │                       └─ customer receives confirmation email</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ </span><span class="cs-fn">publishEvent(STOCK_LOW, payload)</span><span class="cs-pkg">kafka</span><span class="cs-async">async, if stock low</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ email-worker picks it up</span></div>
+    <div class="cs-row"><span class="cs-pipe">          └─ </span><span class="cs-fn">sendLowStockAlert(payload)</span><span class="cs-pkg">email-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">              └─ </span><span class="cs-http">POST https://api.resend.com/emails</span></div>
+    <div class="cs-row"><span class="cs-pipe">                  └─ admin receives low stock alert email</span></div>
+    <div class="cs-row"><span class="cs-pipe">  </span></div>
+    <div class="cs-row"><span class="cs-pipe">  API route returns 200 { orderId } to browser</span><span class="cs-note">email sending happens in background</span></div>
+  </div>
+
+  <h3>4. Stripe payment confirmation (webhook)</h3>
+  <p>Stripe calls the app's webhook after the user pays on Stripe's hosted page. The app doesn't poll — Stripe pushes the result.</p>
+  <div class="cstack">
+    <div class="cs-trigger">stripe POST /api/payments/stripe/webhook</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">route.ts</span><span class="cs-note">webhook handler</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">stripe.webhooks.constructEvent(body, sig, secret)</span><span class="cs-note">verify webhook signature</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ event.type === 'checkout.session.completed'</span></div>
+    <div class="cs-row"><span class="cs-pipe">      ├─ </span><span class="cs-fn">updateOrderStatus(orderId, 'confirmed')</span><span class="cs-pkg">order-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">      │   └─ </span><span class="cs-http">PATCH http://kong:8000/rest/v1/orders?id=eq.{id}</span></div>
+    <div class="cs-row"><span class="cs-pipe">      │       └─ </span><span class="cs-db">UPDATE orders SET status = 'confirmed' WHERE id = ...</span></div>
+    <div class="cs-row"><span class="cs-pipe">      │</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ </span><span class="cs-fn">publishEvent(ORDER_STATUS_CHANGED, payload)</span><span class="cs-pkg">kafka</span><span class="cs-async">async</span></div>
+    <div class="cs-row"><span class="cs-pipe">          └─ email-worker picks it up</span></div>
+    <div class="cs-row"><span class="cs-pipe">              └─ </span><span class="cs-fn">sendShippingUpdate(payload)</span><span class="cs-pkg">email-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">                  └─ </span><span class="cs-http">POST https://api.resend.com/emails</span></div>
+  </div>
+
+  <h3>5. Admin changes order status</h3>
+  <p>Admin clicks a status button in the orders table. Same Kafka pattern as the webhook - the email goes out async.</p>
+  <div class="cstack">
+    <div class="cs-trigger">browser PATCH /api/admin/orders/[id]  { status: 'shipped' }</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">route.ts</span><span class="cs-note">admin API route</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">requireAdmin()</span><span class="cs-note">lib/require-admin.ts</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   ├─ </span><span class="cs-fn">auth()</span><span class="cs-note">Clerk SDK - verify session</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ check userId against ADMIN_USER_IDS env var</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">updateOrderStatus(id, 'shipped')</span><span class="cs-pkg">order-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   ├─ </span><span class="cs-fn">createSupabaseAdminClient()</span><span class="cs-pkg">shared</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">PATCH http://kong:8000/rest/v1/orders?id=eq.{id}</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ </span><span class="cs-db">UPDATE orders SET status = 'shipped' WHERE id = ...</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ </span><span class="cs-fn">publishEvent(ORDER_STATUS_CHANGED, payload)</span><span class="cs-pkg">kafka</span><span class="cs-async">async</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ email-worker picks it up</span></div>
+    <div class="cs-row"><span class="cs-pipe">          └─ </span><span class="cs-fn">sendShippingUpdate({ to, status: 'shipped', ... })</span><span class="cs-pkg">email-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">              └─ </span><span class="cs-http">POST https://api.resend.com/emails</span></div>
+  </div>
+
+  <h3>6. Admin creates / edits a product</h3>
+  <p>A PATCH that handles multiple DB operations in one request - product fields, variants (add / update / delete), and images.</p>
+  <div class="cstack">
+    <div class="cs-trigger">browser PATCH /api/admin/products/[id]  { name, price, variants, images_to_add, images_to_delete }</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">route.ts</span><span class="cs-note">admin API route</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">requireAdmin()</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">updateProduct(id, { name, price, images_to_add, images_to_delete })</span><span class="cs-pkg">product-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   ├─ </span><span class="cs-http">PATCH http://kong:8000/rest/v1/products?id=eq.{id}</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   ├─ </span><span class="cs-http">POST http://kong:8000/rest/v1/product_images</span><span class="cs-note">add new images</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">DELETE http://kong:8000/rest/v1/product_images?id=in.(...)</span><span class="cs-note">remove old images</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ variants loop (direct Supabase calls in route)</span></div>
+    <div class="cs-row"><span class="cs-pipe">      ├─ </span><span class="cs-fn">createSupabaseAdminClient()</span><span class="cs-pkg">shared</span></div>
+    <div class="cs-row"><span class="cs-pipe">      ├─ </span><span class="cs-http">DELETE ...product_variants?id=in.({deleted ids})</span><span class="cs-note">removed variants</span></div>
+    <div class="cs-row"><span class="cs-pipe">      ├─ </span><span class="cs-http">PATCH ...product_variants?id=eq.{id}</span><span class="cs-note">existing variants (loop)</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ </span><span class="cs-http">POST ...product_variants</span><span class="cs-note">new variants</span></div>
+  </div>
+
+  <h3>7. Contact form submission</h3>
+  <p>No Kafka here - email goes out synchronously before the API returns.</p>
+  <div class="cstack">
+    <div class="cs-trigger">browser POST /api/contact  { name, email, message, honeypot }</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">route.ts</span><span class="cs-note">storefront API route</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ validate honeypot field is empty</span><span class="cs-note">spam guard</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ validate rate limit (IP-based)</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">createSupabaseAdminClient()</span><span class="cs-pkg">shared</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">GET http://kong:8000/rest/v1/site_settings?key=eq.admin_notification_email</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ </span><span class="cs-db">SELECT value FROM site_settings WHERE key = 'admin_notification_email'</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ </span><span class="cs-fn">sendContactNotification({ to: adminEmail, from, message })</span><span class="cs-pkg">email-service</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ </span><span class="cs-http">POST https://api.resend.com/emails</span></div>
+    <div class="cs-row"><span class="cs-pipe">          └─ admin receives contact email with reply-to set to sender</span></div>
+  </div>
+
+  <h3>8. Admin image upload</h3>
+  <div class="cstack">
+    <div class="cs-trigger">browser POST /api/admin/upload  (multipart/form-data)</div>
+    <div class="cs-row"><span class="cs-pipe">  </span><span class="cs-fn">route.ts</span><span class="cs-note">admin API route</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">requireAdmin()</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ parse formData, extract file buffer + filename</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  ├─ </span><span class="cs-fn">createSupabaseAdminClient()</span><span class="cs-pkg">shared</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │   └─ </span><span class="cs-http">POST http://kong:8000/storage/v1/object/product-images/{filename}</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │       └─ Supabase Storage saves file to disk (Docker volume)</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │           └─ returns internal storage URL</span></div>
+    <div class="cs-row"><span class="cs-pipe">  │</span></div>
+    <div class="cs-row"><span class="cs-pipe">  └─ rewrite internal URL to public domain</span><span class="cs-note">kong:8000 -> api.staticwears.com</span></div>
+    <div class="cs-row"><span class="cs-pipe">      └─ return public URL to admin panel</span></div>
+  </div>
+</div>
+
+<div class="section" id="api-calls">
+  <span class="eyebrow">Architecture</span>
+  <h2>API calls between services</h2>
+  <p>Every arrow between services is an actual HTTP call. Here's the full map of what calls what, what method it uses, and what the response is.</p>
+
+  <div class="api-diagram">
+
+    <div class="cs-trigger" style="margin-bottom:8px;">storefront app</div>
+
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">SDK</span><span class="api-label">Clerk — auth() to verify session on every protected route</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">GET</span><span class="api-label">kong:8000/rest/v1/* — all Supabase DB reads (via service packages)</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method">POST</span><span class="api-label">kong:8000/rest/v1/orders — create order (order-service)</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method">POST</span><span class="api-label">kafka:9092 — publish ORDER_PLACED event (kafka package)</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">POST</span><span class="api-label">api.stripe.com/v1/checkout/sessions — create Stripe session</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">SDK</span><span class="api-label">PayPal JS SDK — browser-side, creates PayPal order directly</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">REDIRECT</span><span class="api-label">PayHere checkout page — signed form POST redirect</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to"><span class="api-method">GET</span><span class="api-label">kong:8000/rest/v1/site_settings — read admin email for contact form</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">storefront</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">POST</span><span class="api-label">api.resend.com/emails — contact form notification (direct, no Kafka)</span></div>
+    </div>
+
+    <div class="api-section-label">admin panel</div>
+
+    <div class="api-row">
+      <div class="api-from hi">admin</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">SDK</span><span class="api-label">Clerk — auth() + user list via Clerk API (users page)</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">admin</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">GET</span><span class="api-label">kong:8000/rest/v1/* — all DB reads (products, orders, settings)</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">admin</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method">PATCH</span><span class="api-label">kong:8000/rest/v1/orders — update order status</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">admin</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method">POST</span><span class="api-label">kafka:9092 — publish ORDER_STATUS_CHANGED after status update</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">admin</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method">POST</span><span class="api-label">kong:8000/storage/v1/object/product-images/* — image uploads</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from hi">admin</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method purple">CRUD</span><span class="api-label">kong:8000/rest/v1/products, variants, categories, brands, banners, site_settings</span></div>
+    </div>
+
+    <div class="api-section-label">external services calling back into the app (inbound webhooks)</div>
+
+    <div class="api-row">
+      <div class="api-from" style="border-color:#8dbe82;color:#8dbe82;background:rgba(141,190,130,0.07);">Stripe</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to"><span class="api-method green">POST</span><span class="api-label">storefront /api/payments/stripe/webhook — payment confirmed or failed</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from" style="border-color:#8dbe82;color:#8dbe82;background:rgba(141,190,130,0.07);">PayHere</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to"><span class="api-method green">POST</span><span class="api-label">storefront /api/payments/payhere/notify — payment result callback</span></div>
+    </div>
+
+    <div class="api-section-label">email-worker container (always running)</div>
+
+    <div class="api-row">
+      <div class="api-from" style="border-color:var(--text-dim);color:var(--text-mid);">email-worker</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to"><span class="api-method">SUB</span><span class="api-label">kafka:9092 — subscribes to order.placed, order.status.changed, stock.low</span></div>
+    </div>
+    <div class="api-row">
+      <div class="api-from" style="border-color:var(--text-dim);color:var(--text-mid);">email-worker</div>
+      <div class="api-arrow">--&gt;</div>
+      <div class="api-to ext"><span class="api-method green">POST</span><span class="api-label">api.resend.com/emails — sends order confirmation, shipping update, or low-stock alert</span></div>
+    </div>
+
+  </div>
+
+  <div class="callout">
+    <p>The <span style="color:#8dbe82;font-family:'Courier New',monospace;font-size:12px;">green</span> targets are external APIs on the internet. Everything else is internal Docker network traffic on <code>staticwears-net</code> - no round-trip through the internet, no latency from external DNS.</p>
+  </div>
+</div>
+
+<div class="section" id="diagram">
+  <span class="eyebrow">Architecture</span>
+  <h2>Full system architecture diagram</h2>
+  <p>Every service, connection, and communication type in one view. Swim lanes show which Docker layer each component lives in. Follow the arrows to trace any request from the browser all the way to the database and back.</p>
+  <div style="overflow-x:auto;margin:24px 0;">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1060 690" style="width:100%;min-width:820px;display:block;height:auto;">
+  <defs>
+    <marker id="ah" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#5a5a70"/></marker>
+    <marker id="ah-o" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#ff6b35"/></marker>
+    <marker id="ah-g" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#8dbe82"/></marker>
+    <marker id="ah-p" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto"><polygon points="0 0,7 2.5,0 5" fill="#c792ea"/></marker>
+  </defs>
+
+  <!-- BG -->
+  <rect width="1060" height="690" fill="#0d0d0d"/>
+
+  <!-- External column bg -->
+  <rect x="872" y="5" width="183" height="594" rx="3" fill="#0a0a12" stroke="#1e1e2a"/>
+  <text x="963" y="20" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="2" text-anchor="middle">EXTERNAL APIS</text>
+
+  <!-- Swim lanes -->
+  <rect x="5" y="5" width="862" height="62" rx="3" fill="#0d0d0d" stroke="#1e1e2a" stroke-dasharray="2,3"/>
+  <text x="14" y="19" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">CLIENT</text>
+
+  <rect x="5" y="72" width="862" height="68" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="14" y="86" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">ENTRY POINT</text>
+
+  <rect x="5" y="145" width="862" height="108" rx="3" fill="#0d0d0d" stroke="#1e1e2a" stroke-dasharray="2,3"/>
+  <text x="14" y="159" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">APPLICATION LAYER</text>
+
+  <rect x="5" y="258" width="862" height="108" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="14" y="272" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">SERVICE LAYER  (shared packages)</text>
+
+  <rect x="5" y="371" width="862" height="112" rx="3" fill="#0a0a12" stroke="#1e1e2a" stroke-dasharray="2,3"/>
+  <text x="14" y="385" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">INFRASTRUCTURE</text>
+
+  <rect x="5" y="488" width="862" height="100" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="14" y="502" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">WORKERS / STORAGE</text>
+
+  <!-- ===== BOXES ===== -->
+
+  <!-- Browser -->
+  <rect x="385" y="14" width="130" height="40" rx="3" fill="#111118" stroke="#5a5a70"/>
+  <text x="450" y="31" fill="#ddddef" font-family="system-ui,sans-serif" font-size="12" font-weight="600" text-anchor="middle">Browser</text>
+  <text x="450" y="46" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">user's device</text>
+
+  <!-- Nginx -->
+  <rect x="300" y="84" width="252" height="44" rx="3" fill="#1a0a05" stroke="#ff6b35"/>
+  <text x="426" y="102" fill="#ff6b35" font-family="system-ui,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Nginx</text>
+  <text x="426" y="119" fill="#9898b0" font-family="Courier New,monospace" font-size="9" text-anchor="middle">:80 / :443  -  SSL + reverse proxy</text>
+
+  <!-- Storefront -->
+  <rect x="100" y="162" width="172" height="54" rx="3" fill="#1a0a05" stroke="#ff6b35"/>
+  <text x="186" y="182" fill="#ff6b35" font-family="system-ui,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Storefront</text>
+  <text x="186" y="197" fill="#9898b0" font-family="Courier New,monospace" font-size="9" text-anchor="middle">Next.js 16  port 3000</text>
+  <text x="186" y="209" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">staticwears.com</text>
+
+  <!-- Admin -->
+  <rect x="580" y="162" width="172" height="54" rx="3" fill="#1a0a05" stroke="#ff6b35"/>
+  <text x="666" y="182" fill="#ff6b35" font-family="system-ui,sans-serif" font-size="12" font-weight="700" text-anchor="middle">Admin Panel</text>
+  <text x="666" y="197" fill="#9898b0" font-family="Courier New,monospace" font-size="9" text-anchor="middle">Next.js 16  port 3001</text>
+  <text x="666" y="209" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">admin.staticwears.com</text>
+
+  <!-- Package boxes -->
+  <rect x="14"  y="275" width="90"  height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="59"  y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">shared</text>
+  <text x="59"  y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">types+clients</text>
+
+  <rect x="114" y="275" width="136" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="182" y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">product-service</text>
+  <text x="182" y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">products, variants</text>
+
+  <rect x="260" y="275" width="122" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="321" y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">order-service</text>
+  <text x="321" y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">orders, items</text>
+
+  <rect x="392" y="275" width="112" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="448" y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">user-service</text>
+  <text x="448" y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">profiles</text>
+
+  <rect x="514" y="275" width="136" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="582" y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">payment-service</text>
+  <text x="582" y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">Stripe/PayPal/PayHere</text>
+
+  <rect x="660" y="275" width="124" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="722" y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">email-service</text>
+  <text x="722" y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">templates+Resend</text>
+
+  <rect x="796" y="275" width="66" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="829" y="292" fill="#b4c8ff" font-family="Courier New,monospace" font-size="10" text-anchor="middle">kafka</text>
+  <text x="829" y="307" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">events</text>
+
+  <!-- Supabase/Kong -->
+  <rect x="100" y="390" width="200" height="54" rx="3" fill="#0a0a12" stroke="#b4c8ff"/>
+  <text x="200" y="411" fill="#b4c8ff" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Supabase / Kong</text>
+  <text x="200" y="426" fill="#9898b0" font-family="Courier New,monospace" font-size="9" text-anchor="middle">kong:8000  REST API gateway</text>
+  <text x="200" y="438" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">api.staticwears.com</text>
+
+  <!-- Kafka Broker -->
+  <rect x="640" y="390" width="160" height="54" rx="3" fill="#0a0a12" stroke="#c792ea"/>
+  <text x="720" y="411" fill="#c792ea" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Kafka Broker</text>
+  <text x="720" y="426" fill="#9898b0" font-family="Courier New,monospace" font-size="9" text-anchor="middle">kafka:9092  KRaft mode</text>
+  <text x="720" y="438" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" text-anchor="middle">volume: kafka-data</text>
+
+  <!-- Postgres -->
+  <rect x="100" y="508" width="160" height="40" rx="3" fill="#0a0a12" stroke="#c792ea"/>
+  <text x="180" y="526" fill="#c792ea" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Postgres 15</text>
+  <text x="180" y="541" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">volume: postgres-data</text>
+
+  <!-- email-worker -->
+  <rect x="640" y="508" width="160" height="40" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="720" y="526" fill="#ddddef" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">email-worker</text>
+  <text x="720" y="541" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">Docker container (always on)</text>
+
+  <!-- External boxes -->
+  <rect x="884" y="88" width="152" height="40" rx="3" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="960" y="105" fill="#8dbe82" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Clerk</text>
+  <text x="960" y="120" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">authentication</text>
+
+  <rect x="884" y="160" width="152" height="40" rx="3" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="960" y="177" fill="#8dbe82" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Stripe API</text>
+  <text x="960" y="192" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">card payments</text>
+
+  <rect x="884" y="232" width="152" height="40" rx="3" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="960" y="249" fill="#8dbe82" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">PayPal SDK</text>
+  <text x="960" y="264" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">wallet payments</text>
+
+  <rect x="884" y="304" width="152" height="40" rx="3" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="960" y="321" fill="#8dbe82" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">PayHere</text>
+  <text x="960" y="336" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">LK local payments</text>
+
+  <rect x="884" y="376" width="152" height="40" rx="3" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="960" y="393" fill="#8dbe82" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">Resend API</text>
+  <text x="960" y="408" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">transactional email</text>
+
+  <rect x="884" y="448" width="152" height="40" rx="3" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="960" y="465" fill="#8dbe82" font-family="system-ui,sans-serif" font-size="11" font-weight="700" text-anchor="middle">GitLab CI/CD</text>
+  <text x="960" y="480" fill="#5a5a70" font-family="Courier New,monospace" font-size="9" text-anchor="middle">auto-deploy on push</text>
+
+  <!-- ===== CONNECTIONS ===== -->
+
+  <!-- Browser -> Nginx -->
+  <line x1="450" y1="54" x2="450" y2="84" stroke="#5a5a70" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Nginx -> Storefront -->
+  <polyline points="360,128 186,148 186,162" fill="none" stroke="#5a5a70" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Nginx -> Admin -->
+  <polyline points="492,128 666,148 666,162" fill="none" stroke="#5a5a70" stroke-width="1.5" marker-end="url(#ah)"/>
+
+  <!-- Package bus line at y=258 -->
+  <line x1="14" y1="260" x2="862" y2="260" stroke="#1e1e2a" stroke-width="1"/>
+
+  <!-- Storefront drop to bus -->
+  <line x1="186" y1="216" x2="186" y2="260" stroke="#ff6b35" stroke-width="1.5" stroke-opacity="0.5"/>
+  <!-- Admin drop to bus -->
+  <line x1="666" y1="216" x2="666" y2="260" stroke="#ff6b35" stroke-width="1.5" stroke-opacity="0.5"/>
+
+  <!-- Bus to package drops -->
+  <line x1="59"  y1="260" x2="59"  y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+  <line x1="182" y1="260" x2="182" y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+  <line x1="321" y1="260" x2="321" y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+  <line x1="448" y1="260" x2="448" y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+  <line x1="582" y1="260" x2="582" y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+  <line x1="722" y1="260" x2="722" y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+  <line x1="829" y1="260" x2="829" y2="275" stroke="#5a5a70" stroke-width="1" marker-end="url(#ah)"/>
+
+  <!-- Supabase bus at y=376 (services to supabase) -->
+  <line x1="14" y1="376" x2="660" y2="376" stroke="#1e1e2a" stroke-width="1"/>
+  <line x1="59"  y1="315" x2="59"  y2="376" stroke="#c792ea" stroke-width="1" stroke-opacity="0.35"/>
+  <line x1="182" y1="315" x2="182" y2="376" stroke="#c792ea" stroke-width="1" stroke-opacity="0.35"/>
+  <line x1="321" y1="315" x2="321" y2="376" stroke="#c792ea" stroke-width="1" stroke-opacity="0.35"/>
+  <line x1="448" y1="315" x2="448" y2="376" stroke="#c792ea" stroke-width="1" stroke-opacity="0.35"/>
+  <line x1="582" y1="315" x2="582" y2="376" stroke="#c792ea" stroke-width="1" stroke-opacity="0.35"/>
+  <!-- Bus down to Supabase -->
+  <line x1="200" y1="376" x2="200" y2="390" stroke="#c792ea" stroke-width="1.5" marker-end="url(#ah-p)"/>
+  <text x="340" y="373" fill="#c792ea" font-family="Courier New,monospace" font-size="8" text-anchor="middle" opacity="0.55">REST  kong:8000/rest/v1/*</text>
+
+  <!-- kafka package -> Kafka Broker -->
+  <polyline points="829,315 829,360 720,360 720,390" fill="none" stroke="#c792ea" stroke-width="1.5" marker-end="url(#ah-p)"/>
+
+  <!-- Supabase -> Postgres -->
+  <line x1="180" y1="444" x2="180" y2="508" stroke="#c792ea" stroke-width="1.5" marker-end="url(#ah-p)"/>
+
+  <!-- Kafka Broker -> email-worker (async dashed) -->
+  <line x1="720" y1="444" x2="720" y2="508" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-o)"/>
+  <text x="746" y="480" fill="#ff6b35" font-family="Courier New,monospace" font-size="8" opacity="0.8">async</text>
+
+  <!-- email-worker -> Resend (external) -->
+  <polyline points="800,528 840,528 840,396 884,396" fill="none" stroke="#8dbe82" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+
+  <!-- Storefront -> Clerk -->
+  <polyline points="272,178 870,178 870,108 884,108" fill="none" stroke="#8dbe82" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+
+  <!-- Admin -> Clerk -->
+  <line x1="752" y1="189" x2="884" y2="117" stroke="#8dbe82" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+
+  <!-- payment-service -> Stripe -->
+  <polyline points="650,295 868,295 868,180 884,180" fill="none" stroke="#8dbe82" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+
+  <!-- payment-service -> PayPal -->
+  <polyline points="650,305 870,305 870,252 884,252" fill="none" stroke="#8dbe82" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+
+  <!-- payment-service -> PayHere -->
+  <line x1="650" y1="312" x2="884" y2="320" stroke="#8dbe82" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+
+  <!-- GitLab -> Nginx (deploy) -->
+  <polyline points="884,468 856,468 856,106 552,106" fill="none" stroke="#8dbe82" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+  <text x="820" y="464" fill="#8dbe82" font-family="Courier New,monospace" font-size="8" text-anchor="middle" opacity="0.7">ssh deploy</text>
+
+  <!-- Stripe webhook -> Storefront (inbound) -->
+  <polyline points="884,172 854,172 854,230 272,230 272,216" fill="none" stroke="#ff6b35" stroke-width="1" stroke-dasharray="2,4" marker-end="url(#ah-o)"/>
+  <text x="568" y="227" fill="#ff6b35" font-family="Courier New,monospace" font-size="8" opacity="0.65">webhook</text>
+
+  <!-- PayHere notify -> Storefront (inbound) -->
+  <polyline points="884,316 858,316 858,240 272,240 272,216" fill="none" stroke="#ff6b35" stroke-width="1" stroke-dasharray="2,4" marker-end="url(#ah-o)"/>
+
+  <!-- email-service -> Resend note line (not a connection, just label) -->
+
+  <!-- ===== LEGEND ===== -->
+  <rect x="5" y="600" width="862" height="82" rx="3" fill="#111118" stroke="#1e1e2a"/>
+  <text x="18" y="616" fill="#5a5a70" font-family="Courier New,monospace" font-size="8" letter-spacing="1.5">LEGEND</text>
+
+  <line x1="18" y1="630" x2="62" y2="630" stroke="#5a5a70" stroke-width="1.5" marker-end="url(#ah)"/>
+  <text x="68" y="634" fill="#9898b0" font-family="Courier New,monospace" font-size="9">sync request (HTTP internal)</text>
+
+  <line x1="230" y1="630" x2="274" y2="630" stroke="#ff6b35" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#ah-o)"/>
+  <text x="280" y="634" fill="#9898b0" font-family="Courier New,monospace" font-size="9">async Kafka event</text>
+
+  <line x1="420" y1="630" x2="464" y2="630" stroke="#8dbe82" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#ah-g)"/>
+  <text x="470" y="634" fill="#9898b0" font-family="Courier New,monospace" font-size="9">external API call</text>
+
+  <line x1="600" y1="630" x2="644" y2="630" stroke="#c792ea" stroke-width="1.5" marker-end="url(#ah-p)"/>
+  <text x="650" y="634" fill="#9898b0" font-family="Courier New,monospace" font-size="9">database / infra</text>
+
+  <rect x="18" y="646" width="28" height="14" rx="2" fill="#1a0a05" stroke="#ff6b35"/>
+  <text x="52" y="656" fill="#9898b0" font-family="Courier New,monospace" font-size="9">Next.js app</text>
+
+  <rect x="160" y="646" width="28" height="14" rx="2" fill="#111118" stroke="#1e1e2a"/>
+  <text x="194" y="656" fill="#9898b0" font-family="Courier New,monospace" font-size="9">service package (TypeScript)</text>
+
+  <rect x="390" y="646" width="28" height="14" rx="2" fill="#0a0a12" stroke="#b4c8ff"/>
+  <text x="424" y="656" fill="#9898b0" font-family="Courier New,monospace" font-size="9">infrastructure / Docker container</text>
+
+  <rect x="660" y="646" width="28" height="14" rx="2" fill="rgba(141,190,130,0.07)" stroke="#8dbe82"/>
+  <text x="694" y="656" fill="#9898b0" font-family="Courier New,monospace" font-size="9">external service (internet)</text>
+</svg>
+  </div>
+  <p>The <strong>swim lanes</strong> map directly to Docker's container network. Within the same lane, calls are internal (no internet). Anything crossing into the External column is an outbound HTTPS call to a third-party API.</p>
+</div>
+
+<div class="section" id="styling">
+  <span class="eyebrow">UI &amp; Design</span>
+  <h2>Styling system</h2>
+  <p>Both apps use <strong>Tailwind CSS v3</strong> for all styling. No custom CSS files — every style is a utility class in JSX. The admin and storefront have separate Tailwind configs but share the same colour palette through the design tokens.</p>
+
+  <h3>Design tokens (tailwind.config.ts)</h3>
+<span class="code-label">shared colour palette</span>
+<pre><code>theme: {
+  extend: {
+    colors: {
+      brand: {
+        orange: '#ff6b35',   // primary accent - buttons, links, highlights
+        dark:   '#0d0d0f',   // page background
+        card:   '#111116',   // card / surface background
+        border: '#1e1e28',   // borders and dividers
+      }
+    },
+    fontFamily: {
+      sans: ['var(--font-geist-sans)', ...defaultTheme.fontFamily.sans],
+      mono: ['var(--font-geist-mono)', ...defaultTheme.fontFamily.mono],
+    }
+  }
+}</code></pre>
+
+  <h3>Component library</h3>
+  <p>The admin uses <strong>shadcn/ui</strong> components (Button, Input, Table, Badge, Dialog, Select, etc.) installed individually into <code>src/components/ui/</code>. These are copy-pasted, not a dependency - so they can be customised freely. The storefront uses handwritten components since the design is more bespoke.</p>
+
+  <h3>Storefront design decisions</h3>
+  <ul>
+    <li><strong>Font:</strong> Geist Sans + Geist Mono loaded via <code>next/font/google</code> - zero layout shift, auto-optimised</li>
+    <li><strong>Dark-only:</strong> The storefront doesn't have a light mode - the brand aesthetic is dark. <code>bg-brand-dark</code> is the base of every page.</li>
+    <li><strong>Product gallery:</strong> Color-tab based - clicking a colour swatch swaps the image set, not just one image. Each colour has its own image array from the DB.</li>
+    <li><strong>Cart drawer:</strong> Opens as a right-side slide-over on add-to-cart, not a page navigation. Uses a React Context to control visibility.</li>
+    <li><strong>Marquee strip:</strong> CSS animation (<code>@keyframes marquee</code>) on a duplicated text node. Content comes from <code>site_settings.marquee_text</code> in Supabase.</li>
+    <li><strong>Banner slider:</strong> Auto-advances every 5 seconds, pauses on hover, respects <code>prefers-reduced-motion</code>. Images and text from the <code>banners</code> table.</li>
+  </ul>
+
+  <h3>Admin design decisions</h3>
+  <ul>
+    <li><strong>Sidebar layout:</strong> Fixed left sidebar with nav links, main content area scrolls independently.</li>
+    <li><strong>Mobile nav:</strong> Sidebar collapses to a hamburger menu on small screens. Full-screen overlay nav on mobile.</li>
+    <li><strong>Status badges:</strong> Each order status (pending, confirmed, shipped, etc.) has a specific colour badge. Defined in a <code>STATUS_COLORS</code> map.</li>
+    <li><strong>Drag to reorder:</strong> Banners page uses <code>@dnd-kit/core</code> for drag-and-drop reordering. Saves order to DB on drop.</li>
+    <li><strong>Excel export:</strong> Each status gets its own sheet with a matching tab colour. The "Dashboard" sheet has merged cells and bold formatting for summary stats.</li>
+  </ul>
+
+  <h3>Responsive breakpoints</h3>
+  <p>Standard Tailwind breakpoints — <code>sm</code> (640px), <code>md</code> (768px), <code>lg</code> (1024px). The storefront shop grid goes from 1 column on mobile to 2 on tablet to 3 on desktop. The admin sidebar hides below <code>md</code> and becomes a hamburger menu.</p>
+</div>
+
+<div class="section" id="security">
+  <span class="eyebrow">Security</span>
+  <h2>Security &amp; protection</h2>
+
+  <h3>Contact form - spam protection</h3>
+  <p>Two layers:</p>
+  <ul>
+    <li><strong>Honeypot field:</strong> A hidden input called <code>website</code> is in the form but invisible to real users (CSS <code>display:none</code>). Bots fill it in. The API route checks — if it has a value, silently return 200 without processing.</li>
+    <li><strong>IP rate limiting:</strong> Max 3 submissions per IP per hour. Tracked in a server-side Map (resets on server restart). Stops someone submitting the form in a loop.</li>
+  </ul>
+
+<span class="code-label">apps/storefront/src/app/api/contact/route.ts - spam checks</span>
+<pre><code>// Honeypot check
+const honeypot = body.website;
+if (honeypot) return NextResponse.json({ ok: true }); // silent success
+
+// Rate limit check
+const ip = req.headers.get('x-forwarded-for') ?? 'unknown';
+const count = rateLimitMap.get(ip) ?? 0;
+if (count >= 3) {
+  return NextResponse.json({ error: 'Too many requests' }, { status: 429 });
+}
+rateLimitMap.set(ip, count + 1);
+setTimeout(() => rateLimitMap.delete(ip), 60 * 60 * 1000); // reset after 1 hour</code></pre>
+
+  <h3>Stripe webhook signature verification</h3>
+  <p>Anyone can POST to <code>/api/payments/stripe/webhook</code>. Stripe signs every webhook payload with the webhook secret. The handler verifies the signature before doing anything — if it doesn't match, it returns 400 and ignores the request.</p>
+
+<span class="code-label">stripe webhook verification</span>
+<pre><code>const sig = req.headers.get('stripe-signature')!;
+const body = await req.text();
+
+let event: Stripe.Event;
+try {
+  event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+} catch {
+  return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
+}</code></pre>
+
+  <h3>Admin authentication - two layers</h3>
+  <p>Getting into the admin panel requires passing two separate checks. Both run on the server before any page content loads.</p>
+  <ol>
+    <li><strong>Clerk session:</strong> Must be logged in. The middleware calls <code>auth()</code> — no valid session means redirect to login.</li>
+    <li><strong>Admin whitelist:</strong> The logged-in user's Clerk ID must be in <code>ADMIN_USER_IDS</code> (env var, comma-separated). Being logged in is not enough — only specific accounts can access admin.</li>
+  </ol>
+
+<span class="code-label">apps/admin/src/lib/require-admin.ts</span>
+<pre><code>export async function requireAdmin(): Promise&lt;string | null&gt; {
+  const { userId } = await auth();
+  if (!userId) return null;
+
+  const allowedIds = (process.env.ADMIN_USER_IDS ?? '')
+    .split(',')
+    .map(id => id.trim());
+
+  return allowedIds.includes(userId) ? userId : null;
+}
+
+// In every admin API route:
+const adminId = await requireAdmin();
+if (!adminId) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });</code></pre>
+
+  <h3>Service role key - never in the browser</h3>
+  <p>The Supabase service role key bypasses all row-level security. It lives only in server-side code (API routes and server components). It's never passed to the browser and never stored in a variable prefixed with <code>NEXT_PUBLIC_</code>.</p>
+
+  <h3>Image upload validation</h3>
+  <p>The upload route checks file size (max 10MB) and MIME type before sending to Supabase Storage. It only accepts <code>image/jpeg</code>, <code>image/png</code>, and <code>image/webp</code>. Anything else gets a 400 before touching storage.</p>
+
+  <h3>PayHere hash verification</h3>
+  <p>PayHere signs the notify callback with an MD5 hash of the order amount, currency, and merchant secret. The notify route verifies this hash before updating the order status — otherwise anyone could POST a fake "payment successful" to that URL.</p>
+</div>
+
+<div class="section" id="docker-compose">
+  <span class="eyebrow">Running the project</span>
+  <h2>Docker Compose explained</h2>
+  <p>If you've never used Docker before: Docker lets you run software in isolated boxes called <strong>containers</strong>. Each container has its own copy of everything it needs to run — the OS libraries, the runtime, the config. You don't install Postgres or Kafka on the server; you run them as containers instead.</p>
+  <p><strong>Docker Compose</strong> is a tool that lets you define multiple containers in one file (<code>docker-compose.yml</code>) and start them all together with one command. It also handles the networking between them — containers can talk to each other by name without knowing each other's IP addresses.</p>
+
+  <h3>Containers in this project</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Container name</th><th>Image</th><th>What it runs</th><th>Port</th></tr></thead>
+    <tbody>
+      <tr><td>storefront</td><td>built from <code>apps/storefront/Dockerfile</code></td><td>The Next.js storefront</td><td>3000</td></tr>
+      <tr><td>admin</td><td>built from <code>apps/admin/Dockerfile</code></td><td>The Next.js admin panel</td><td>3001</td></tr>
+      <tr><td>nginx</td><td>nginx:alpine</td><td>Reverse proxy + SSL</td><td>80, 443</td></tr>
+      <tr><td>kafka</td><td>apache/kafka:3.7.0</td><td>Kafka broker (KRaft mode)</td><td>9092</td></tr>
+      <tr><td>email-worker</td><td>built from <code>packages/kafka/Dockerfile</code></td><td>The Kafka consumer that sends emails</td><td>-</td></tr>
+      <tr><td>supabase-db</td><td>supabase/postgres</td><td>Postgres 15 database</td><td>5432 (internal only)</td></tr>
+      <tr><td>supabase-kong</td><td>kong:2.8.1</td><td>API gateway - the entry point for all DB queries</td><td>8000</td></tr>
+      <tr><td>supabase-auth</td><td>supabase/gotrue</td><td>GoTrue auth service (handles Supabase auth tokens)</td><td>9999 (internal)</td></tr>
+      <tr><td>supabase-rest</td><td>postgrest/postgrest</td><td>PostgREST - turns Postgres into a REST API</td><td>3000 (internal)</td></tr>
+      <tr><td>supabase-storage</td><td>supabase/storage-api</td><td>File storage service</td><td>5000 (internal)</td></tr>
+      <tr><td>imgproxy</td><td>darthsim/imgproxy</td><td>On-the-fly image resizing/conversion</td><td>8080 (internal)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>How the Dockerfile works</h3>
+  <p>Each Next.js app has its own Dockerfile. It's a multi-stage build — first it compiles the TypeScript, then it copies only the compiled output into a smaller final image.</p>
+
+<span class="code-label">apps/storefront/Dockerfile - simplified</span>
+<pre><code># Stage 1: build
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY . .
+RUN npm install -g pnpm
+RUN pnpm install --frozen-lockfile
+RUN pnpm run build --filter=storefront
+
+# Stage 2: run (smaller image, no dev tools)
+FROM node:20-alpine AS runner
+WORKDIR /app
+COPY --from=builder /app/apps/storefront/.next/standalone ./
+COPY --from=builder /app/apps/storefront/.next/static ./.next/static
+COPY --from=builder /app/apps/storefront/public ./public
+EXPOSE 3000
+CMD ["node", "server.js"]</code></pre>
+
+  <h3>The .npmrc copy fix</h3>
+  <p>The monorepo uses a <code>.npmrc</code> file at the root that tells pnpm how to install packages. Without it, the Docker build fails because pnpm can't find the workspace packages. The Dockerfile explicitly copies <code>.npmrc</code> before running <code>pnpm install</code>.</p>
+
+  <h3>Volumes - where data lives</h3>
+  <p>If a container restarts, everything inside it is gone unless it's in a volume. Three named volumes persist data between restarts:</p>
+  <ul>
+    <li><strong>postgres-data</strong> - mounted into the Postgres container at <code>/var/lib/postgresql/data</code></li>
+    <li><strong>storage-data</strong> - mounted into supabase-storage at <code>/var/lib/storage</code></li>
+    <li><strong>kafka-data</strong> - mounted into the Kafka container at <code>/var/lib/kafka/data</code></li>
+  </ul>
+  <p>These volumes live on the VPS disk at <code>/var/lib/docker/volumes/</code>. If you ever need to wipe the database and start fresh, you'd delete the <code>postgres-data</code> volume. Be careful.</p>
+
+  <h3>The internal network</h3>
+  <p>All containers join a Docker network called <code>staticwears-net</code>. On this network, containers can reach each other by name. So the storefront container can call <code>http://kong:8000</code> and Docker routes it to the Kong container. From outside Docker, none of these internal ports are accessible — only Nginx's ports 80 and 443 are published to the host.</p>
+
+  <h3>Environment variables in Docker</h3>
+  <p>The <code>docker-compose.yml</code> uses an env file: <code>--env-file .env.supabase</code>. This file lives on the VPS (not in the repo) and contains all the secrets. The compose file passes them into each container using <code>environment:</code> blocks.</p>
+
+<span class="code-label">docker-compose.yml - how env vars reach the storefront container</span>
+<pre><code>services:
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+    environment:
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - KAFKA_BROKERS=kafka:9092
+    networks:
+      - staticwears-net
+    depends_on:
+      - kafka
+      - supabase-kong</code></pre>
+</div>
+
+<div class="section" id="how-to-start">
+  <span class="eyebrow">Running the project</span>
+  <h2>How to start from scratch</h2>
+  <p>This is what you'd do on a brand new VPS or if you need to set everything up from nothing.</p>
+
+  <h3>Prerequisites on the VPS</h3>
+<span class="code-label">install Docker + Docker Compose on Ubuntu</span>
+<pre><code># Install Docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+newgrp docker
+
+# Verify
+docker --version
+docker compose version</code></pre>
+
+  <h3>Clone and configure</h3>
+<span class="code-label">VPS setup commands</span>
+<pre><code># Clone the repo
+mkdir -p /home/deploy
+cd /home/deploy
+git clone https://gitlab.com/staticwears/StaticWears-project.git staticwears
+cd staticwears
+
+# Create the env file (fill in all values)
+nano .env.supabase</code></pre>
+
+  <h3>The .env.supabase file template</h3>
+<span class="code-label">.env.supabase - all required variables</span>
+<pre><code>NEXT_PUBLIC_SUPABASE_URL=https://api.staticwears.com
+SUPABASE_INTERNAL_URL=http://kong:8000
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
+
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_live_...
+CLERK_SECRET_KEY=sk_live_...
+
+RESEND_API_KEY=re_...
+ADMIN_EMAIL=chamidu@staticwears.com
+
+ADMIN_USER_IDS=user_abc123,user_def456
+
+KAFKA_BROKERS=kafka:9092
+
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=AaBbCc...
+NEXT_PUBLIC_PAYHERE_MERCHANT_ID=12345
+
+LOW_STOCK_THRESHOLD=5
+
+# Supabase internal config (match your JWT secret)
+JWT_SECRET=your-32-char-jwt-secret
+POSTGRES_PASSWORD=your-postgres-password
+ANON_KEY=same-as-supabase-anon-key
+SERVICE_ROLE_KEY=same-as-supabase-service-role-key</code></pre>
+
+  <h3>First launch</h3>
+<span class="code-label">start everything for the first time</span>
+<pre><code>cd /home/deploy/staticwears
+docker compose --env-file .env.supabase build
+docker compose --env-file .env.supabase up -d
+
+# Check everything started
+docker compose ps</code></pre>
+
+  <h3>SSL certificates (first time only)</h3>
+<span class="code-label">issue Let's Encrypt certs</span>
+<pre><code># Make sure Nginx is running and DNS is pointing to this VPS
+docker compose exec nginx certbot --nginx \
+  -d staticwears.com \
+  -d www.staticwears.com \
+  -d admin.staticwears.com \
+  -d api.staticwears.com \
+  --non-interactive --agree-tos \
+  --email chamidu@staticwears.com</code></pre>
+
+  <h3>Running locally (development)</h3>
+<span class="code-label">local dev setup</span>
+<pre><code># Install dependencies
+pnpm install
+
+# Copy env files to each app
+cp .env.local.example apps/storefront/.env.local
+cp .env.local.example apps/admin/.env.local
+# Fill in the values (use Supabase cloud URL for local, not internal URL)
+
+# Start both apps + packages in watch mode
+pnpm run dev
+
+# Storefront: http://localhost:3000
+# Admin:      http://localhost:3001</code></pre>
+</div>
+
+<div class="section" id="troubleshoot">
+  <span class="eyebrow">Running the project</span>
+  <h2>Troubleshooting</h2>
+
+  <h3>Check if everything is running</h3>
+<span class="code-label">see all container statuses</span>
+<pre><code>docker compose ps
+
+# What you want to see - every service should say "Up"
+# If something says "Exit 1" or "Restarting" - it crashed</code></pre>
+
+  <h3>View logs</h3>
+<span class="code-label">logs commands</span>
+<pre><code># Live logs for one service (ctrl+c to stop)
+docker compose logs -f storefront
+docker compose logs -f admin
+docker compose logs -f email-worker
+docker compose logs -f kafka
+
+# Last 100 lines (no live follow)
+docker compose logs --tail=100 storefront
+
+# All services at once
+docker compose logs -f</code></pre>
+
+  <h3>Common issues</h3>
+
+  <h4>Storefront / Admin shows error page</h4>
+  <ul>
+    <li>Check logs: <code>docker compose logs storefront</code></li>
+    <li>Usually a missing env variable - look for <code>undefined</code> in the error</li>
+    <li>Rebuild after env changes: <code>docker compose build storefront &amp;&amp; docker compose up -d storefront</code></li>
+  </ul>
+
+  <h4>Kafka not connecting / email-worker keeps restarting</h4>
+  <ul>
+    <li>Kafka takes ~30 seconds to be ready after starting. The email-worker retries automatically.</li>
+    <li>If it keeps failing: <code>docker compose restart kafka</code>, wait 30 seconds, then <code>docker compose restart email-worker</code></li>
+    <li>Check Kafka logs: <code>docker compose logs kafka</code></li>
+  </ul>
+
+  <h4>Supabase API returning 401 or 403</h4>
+  <ul>
+    <li>The service role key is wrong or missing. Check <code>SUPABASE_SERVICE_ROLE_KEY</code> in your <code>.env.supabase</code>.</li>
+    <li>Make sure the apps are using <code>createSupabaseAdminClient()</code> in API routes, not the browser client.</li>
+  </ul>
+
+  <h4>Images not loading / 404 on storage URLs</h4>
+  <ul>
+    <li>The image URL uses the internal Docker URL (<code>kong:8000</code>) instead of the public URL. This happens if the URL rewrite in the upload route is broken.</li>
+    <li>Check that <code>NEXT_PUBLIC_SUPABASE_URL</code> is set to the public URL (<code>https://api.staticwears.com</code>), not the internal one.</li>
+  </ul>
+
+  <h4>SSL certificate expired</h4>
+<span class="code-label">renew SSL manually</span>
+<pre><code>docker compose exec nginx certbot renew
+docker compose restart nginx</code></pre>
+
+  <h4>Build fails with "workspace:* not found"</h4>
+  <p>This happens when the Docker build can't resolve local pnpm workspace packages. Make sure the <code>.npmrc</code> file at the repo root is being copied into the Docker build context. It should already be in the Dockerfile — if it's not, add <code>COPY .npmrc .</code> before <code>RUN pnpm install</code>.</p>
+
+  <h4>GitLab pipeline fails on deploy</h4>
+  <ul>
+    <li>SSH key issue: Check <code>VPS_SSH_KEY_B64</code> is set in GitLab CI/CD variables and hasn't expired.</li>
+    <li>VPS unreachable: <code>VPS_HOST</code> and <code>VPS_USER</code> must be correct.</li>
+    <li>Git pull fails: Someone may have force-pushed. SSH into VPS and run <code>git fetch &amp;&amp; git reset --hard origin/main</code> from the project directory.</li>
+  </ul>
+</div>
+
+<div class="section" id="vps-commands">
+  <span class="eyebrow">Running the project</span>
+  <h2>Useful VPS commands</h2>
+  <p>SSH into the VPS first: <code>ssh root@api.staticwears.com</code> (or whatever your VPS host is). Then <code>cd /home/deploy/staticwears</code>.</p>
+
+  <h3>Service management</h3>
+<span class="code-label">start / stop / restart</span>
+<pre><code># Restart one service without rebuilding
+docker compose restart storefront
+docker compose restart admin
+docker compose restart email-worker
+docker compose restart nginx
+
+# Stop everything
+docker compose down
+
+# Start everything
+docker compose --env-file .env.supabase up -d
+
+# Rebuild and restart one service
+docker compose --env-file .env.supabase build storefront
+docker compose --env-file .env.supabase up -d storefront</code></pre>
+
+  <h3>Manual deploy (skip CI/CD)</h3>
+<span class="code-label">deploy manually from VPS</span>
+<pre><code>cd /home/deploy/staticwears
+git pull origin main
+docker compose --env-file .env.supabase build storefront admin
+docker compose --env-file .env.supabase up -d storefront admin
+docker image prune -f</code></pre>
+
+  <h3>Database</h3>
+<span class="code-label">database commands</span>
+<pre><code># Open a Postgres shell
+docker compose exec supabase-db psql -U postgres
+
+# Inside psql - list tables
+\dt
+
+# Run a query
+SELECT * FROM orders ORDER BY created_at DESC LIMIT 10;
+
+# Exit psql
+\q
+
+# Backup the database
+docker compose exec supabase-db pg_dump -U postgres postgres > backup_$(date +%Y%m%d).sql
+
+# Restore from backup
+cat backup_20260705.sql | docker compose exec -T supabase-db psql -U postgres</code></pre>
+
+  <h3>Check disk and memory</h3>
+<span class="code-label">VPS health checks</span>
+<pre><code># Disk usage
+df -h
+
+# Docker disk usage (images, containers, volumes)
+docker system df
+
+# Memory
+free -m
+
+# Running processes
+docker compose ps
+
+# Resource usage per container (live)
+docker stats</code></pre>
+
+  <h3>Clean up old Docker images</h3>
+<span class="code-label">free up disk space</span>
+<pre><code># Remove unused images (safe - only removes untagged ones)
+docker image prune -f
+
+# Remove everything unused (images, stopped containers, networks)
+docker system prune -f
+
+# Remove a specific old image
+docker images                          # list all images
+docker rmi image_id_here               # delete by ID</code></pre>
+
+  <h3>View Nginx logs</h3>
+<span class="code-label">nginx access and error logs</span>
+<pre><code># Live access log (see every request coming in)
+docker compose exec nginx tail -f /var/log/nginx/access.log
+
+# Error log
+docker compose exec nginx tail -f /var/log/nginx/error.log</code></pre>
+
+  <h3>Update credentials</h3>
+  <p>If you need to rotate a secret key (e.g. a new Stripe key after a security incident):</p>
+<span class="code-label">update a credential without downtime</span>
+<pre><code># 1. Edit the env file on the VPS
+nano /home/deploy/staticwears/.env.supabase
+# change the value, save and exit (ctrl+x)
+
+# 2. Rebuild and restart only the affected service
+docker compose --env-file .env.supabase build storefront
+docker compose --env-file .env.supabase up -d storefront
+# The old container keeps running until the new one is ready</code></pre>
+
+  <h3>Check Kafka topics</h3>
+<span class="code-label">Kafka inspection commands</span>
+<pre><code># List all topics
+docker compose exec kafka kafka-topics.sh \
+  --bootstrap-server localhost:9092 --list
+
+# See messages on a topic (from beginning)
+docker compose exec kafka kafka-console-consumer.sh \
+  --bootstrap-server localhost:9092 \
+  --topic order.placed \
+  --from-beginning</code></pre>
+
+  <hr>
+  <p style="font-size:0.82rem; color: var(--text-dim); font-family: 'Courier New', monospace; letter-spacing: 0.03em; margin-top: 40px;">If a command isn't working - check you're in <code>/home/deploy/staticwears</code> and that Docker is running (<code>docker compose ps</code>).</p>
+</div>
+
+<div class="section" id="tech">
+  <span class="eyebrow">Technologies</span>
+  <h2>Tech stack</h2>
+
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Tool</th>
+        <th>What it does in this project</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Next.js 16</td>
+        <td>The framework for both apps. Uses the App Router (the new way with <code>app/</code> folders). Server components fetch data directly, client components handle interactivity.</td>
+      </tr>
+      <tr>
+        <td>Supabase</td>
+        <td>Self-hosted Postgres database + file storage. The shop runs its own Supabase stack in Docker rather than using Supabase's cloud - so all data stays on the VPS.</td>
+      </tr>
+      <tr>
+        <td>Clerk</td>
+        <td>Handles all authentication - login, register, Google OAuth, session management. The app never touches passwords directly. Clerk gives each user a unique ID that gets stored as <code>customer_id</code> in orders.</td>
+      </tr>
+      <tr>
+        <td>Kafka (KRaft)</td>
+        <td>Message queue for async events. When an order is placed, the storefront publishes an event to Kafka. A separate worker container picks it up and sends the confirmation email - no waiting.</td>
+      </tr>
+      <tr>
+        <td>Resend</td>
+        <td>Email sending API. The email-service package wraps Resend and has HTML templates for order confirmation, shipping updates, and low stock alerts.</td>
+      </tr>
+      <tr>
+        <td>Stripe</td>
+        <td>International card payments. Creates a payment session, redirects the user, then a webhook confirms the payment.</td>
+      </tr>
+      <tr>
+        <td>PayPal</td>
+        <td>PayPal wallet payments. Uses the PayPal JS SDK - the buttons render client-side and handle the whole flow in a popup.</td>
+      </tr>
+      <tr>
+        <td>PayHere</td>
+        <td>Sri Lankan local payment gateway. Redirects to PayHere's page, then comes back with a success/fail callback.</td>
+      </tr>
+      <tr>
+        <td>Docker Compose</td>
+        <td>Runs the entire stack on the VPS - both Next.js apps, Kafka, Supabase (Postgres + Auth + Storage + Kong), Nginx, and the email worker - all as separate containers.</td>
+      </tr>
+      <tr>
+        <td>Nginx</td>
+        <td>The only thing exposed to the internet. Handles HTTPS via Let's Encrypt and routes traffic to the right container based on the URL.</td>
+      </tr>
+      <tr>
+        <td>GitLab CI/CD</td>
+        <td>On every push to main, a pipeline SSHs into the VPS, pulls the latest code, rebuilds the containers, and restarts them.</td>
+      </tr>
+      <tr>
+        <td>ExcelJS</td>
+        <td>Used in the admin export feature. Generates styled Excel files with per-status order sheets when the admin downloads the orders report.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="section" id="shared">
+  <span class="eyebrow">Package</span>
+  <h2>shared</h2>
+  <p>This package is the foundation. Everything imports from it. It has two jobs: defining the TypeScript types for every domain object in the app, and exporting the Supabase database client.</p>
+
+  <h3>Types</h3>
+  <p>All the data shapes live here. If you add a field to an order, you change it here and TypeScript will tell you everywhere else that needs updating.</p>
+
+<span class="code-label">packages/shared/src/types/index.ts - key types</span>
+<pre><code>// The 6 states an order can be in
+type OrderStatus =
+  'pending' | 'confirmed' | 'processing' |
+  'shipped'  | 'delivered' | 'cancelled';
+
+// A product variant = one specific combination (e.g. Black / L)
+interface ProductVariant {
+  id: string;
+  product_id: string;
+  color: string;
+  size: string;
+  stock_qty: number;
+  price_adj: number;   // added to base product price (can be negative)
+  sku: string;
+}
+
+// Cart is client-side only - never saved to DB
+interface CartItem {
+  variantId: string;
+  productId: string;
+  name: string;
+  color: string;
+  size: string;
+  price: number;
+  quantity: number;
+  image?: string;
+}</code></pre>
+
+  <h3>Supabase clients</h3>
+  <p>There are two clients exported - one for the browser and one for the server. The important one is the <strong>admin client</strong> which uses the service role key and bypasses all row-level security rules. This is what the API routes use so they can read and write freely.</p>
+
+<span class="code-label">packages/shared/src/supabase/server.ts - the important one</span>
+<pre><code>// This client has full DB access - use only in API routes, never in the browser
+export function createSupabaseAdminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!   // secret key - bypasses RLS
+  );
+}</code></pre>
+</div>
+
+<div class="section" id="kafka">
+  <span class="eyebrow">Package</span>
+  <h2>kafka</h2>
+  <p>Kafka is a message queue. Instead of the storefront directly calling the email service (which would slow down checkout), it drops a message into Kafka and moves on. A separate worker process picks up the message and sends the email.</p>
+  <p>This is called an <strong>event-driven</strong> architecture. The storefront doesn't care whether the email got sent - it just fires the event and forgets about it.</p>
+
+  <h3>Topics</h3>
+  <p>Kafka organises messages into topics - basically named channels. This project has three:</p>
+
+<span class="code-label">packages/kafka/src/topics.ts</span>
+<pre><code>export const TOPICS = {
+  ORDER_PLACED:          'order.placed',          // sends order confirmation email
+  ORDER_STATUS_CHANGED:  'order.status.changed',  // sends shipping update email
+  STOCK_LOW:             'stock.low',             // sends low stock alert to admin
+};</code></pre>
+
+  <h3>Publishing an event</h3>
+  <p>The storefront calls <code>publishEvent()</code> after creating an order. It connects once, sends the message as JSON, and disconnects. The worker container on the other end is always listening.</p>
+
+<span class="code-label">packages/kafka/src/producer.ts - simplified</span>
+<pre><code>export async function publishEvent(topic: string, payload: object) {
+  await producer.connect();
+  await producer.send({
+    topic,
+    messages: [{ value: JSON.stringify(payload) }],
+  });
+}</code></pre>
+
+  <h3>The email worker</h3>
+  <p>This runs as its own Docker container - <code>email-worker</code>. It subscribes to all three topics and routes each message to the right email function.</p>
+
+<span class="code-label">packages/kafka/src/workers/email.ts - simplified</span>
+<pre><code>consumer.subscribe({ topics: Object.values(TOPICS) });
+
+await consumer.run({
+  eachMessage: async ({ topic, message }) => {
+    const payload = JSON.parse(message.value.toString());
+
+    if (topic === TOPICS.ORDER_PLACED) {
+      await sendOrderConfirmation(payload);
+    } else if (topic === TOPICS.ORDER_STATUS_CHANGED) {
+      await sendShippingUpdate(payload);
+    } else if (topic === TOPICS.STOCK_LOW) {
+      await sendLowStockAlert(payload);
+    }
+  },
+});</code></pre>
+</div>
+
+<div class="section" id="product-service">
+  <span class="eyebrow">Package</span>
+  <h2>product-service</h2>
+  <p>All database queries related to products, categories, and brands live here. Both the storefront and admin import these functions - neither app writes raw SQL.</p>
+
+  <h3>Key functions</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Function</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>getProducts()</td><td>Fetches products with optional filters (category, sort, limit). Returns products with their variants and images joined.</td></tr>
+      <tr><td>getProduct(id)</td><td>Gets a single product with all variants, images, brand, and category.</td></tr>
+      <tr><td>getCategories()</td><td>All active categories - used in the nav and category showcase.</td></tr>
+      <tr><td>getVariantStockInfo()</td><td>Checks stock levels for specific variants - called after order creation to trigger low-stock alerts.</td></tr>
+      <tr><td>createProduct()</td><td>Admin only. Inserts a new product with its initial data.</td></tr>
+      <tr><td>updateProduct()</td><td>Admin only. Updates product fields and syncs variants.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>These functions use the admin client internally so they always have DB access regardless of who's calling.</p>
+</div>
+
+<div class="section" id="order-service">
+  <span class="eyebrow">Package</span>
+  <h2>order-service</h2>
+  <p>Handles creating orders and looking them up. An order in the DB has a header row (the order itself) and multiple line items (one per product variant in the cart).</p>
+
+<span class="code-label">packages/order-service/src/index.ts - createOrder simplified</span>
+<pre><code>export async function createOrder({ customer_id, items, shipping, notes }) {
+  const supabase = createSupabaseAdminClient();
+
+  // 1. Insert the order header
+  const { data: order } = await supabase
+    .from('orders')
+    .insert({ customer_id, ...shipping, notes, status: 'pending', total })
+    .select().single();
+
+  // 2. Insert all the line items
+  await supabase.from('order_items').insert(
+    items.map(item => ({
+      order_id: order.id,
+      variant_id: item.variantId,
+      quantity: item.quantity,
+      price: item.price,
+    }))
+  );
+
+  return order;
+}</code></pre>
+
+  <h3>Other functions</h3>
+  <ul>
+    <li><strong>getOrdersByCustomer(userId)</strong> - used by the storefront to show a user their order history</li>
+    <li><strong>getAllOrders()</strong> - admin only, returns all orders with filters</li>
+    <li><strong>updateOrderStatus(id, status)</strong> - admin changes order status, triggers a Kafka event for shipping update email</li>
+  </ul>
+</div>
+
+<div class="section" id="user-service">
+  <span class="eyebrow">Package</span>
+  <h2>user-service</h2>
+  <p>Clerk handles authentication, but the app also keeps a <code>profiles</code> table in Supabase for things Clerk doesn't store - like saved addresses. This package bridges the two.</p>
+  <p>It mainly handles reading and writing user profile data. The actual user list (names, emails, profile photos) comes from Clerk's API, which the admin panel uses for the Users page.</p>
+</div>
+
+<div class="section" id="payment-service">
+  <span class="eyebrow">Package</span>
+  <h2>payment-service</h2>
+  <p>Three payment methods, three different integration styles. This package contains the server-side logic for each.</p>
+
+  <h3>Stripe</h3>
+  <p>The server creates a <strong>Checkout Session</strong> with the order details. Stripe handles the actual payment UI on their hosted page. When payment succeeds, Stripe calls a webhook to confirm it.</p>
+
+  <h3>PayPal</h3>
+  <p>PayPal uses their JavaScript SDK directly in the browser. The <code>createOrder</code> call goes client-side to PayPal's servers, they handle the popup, and the callback confirms it. No server redirect needed.</p>
+
+  <h3>PayHere</h3>
+  <p>Sri Lanka's local gateway. The user gets redirected to PayHere's page with a signed hash of the order details. PayHere calls a <code>notify_url</code> on the server when payment is done.</p>
+</div>
+
+<div class="section" id="email-service">
+  <span class="eyebrow">Package</span>
+  <h2>email-service</h2>
+  <p>Wraps the Resend API. Has four exported functions and matching HTML email templates. The email worker imports from this package - it doesn't call Resend directly.</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Function</th><th>From address</th><th>Goes to</th></tr></thead>
+    <tbody>
+      <tr><td>sendOrderConfirmation()</td><td>orders@staticwears.com</td><td>The customer</td></tr>
+      <tr><td>sendShippingUpdate()</td><td>orders@staticwears.com</td><td>The customer</td></tr>
+      <tr><td>sendLowStockAlert()</td><td>alerts@staticwears.com</td><td>Admin (from env var ADMIN_EMAIL)</td></tr>
+      <tr><td>sendContactNotification()</td><td>notifications@staticwears.com</td><td>Admin (from site_settings DB)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>The templates are hand-written HTML strings with inline CSS - so they render correctly in Gmail, Outlook, and everything else. Resend's API is called with <code>reply_to</code> (not <code>replyTo</code>) because of how the TypeScript SDK is typed.</p>
+</div>
+
+<div class="section" id="storefront">
+  <span class="eyebrow">App</span>
+  <h2>Storefront</h2>
+  <p>The customer-facing shop. Runs on port 3000 in production. Built with Next.js App Router - most pages are server components that fetch data directly from Supabase, with client components only where interactivity is needed (cart, checkout, auth forms).</p>
+
+  <h3>Route structure</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Route</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>/</td><td>Homepage - banner slider (from DB), marquee strip, featured products, category showcase, brand manifesto</td></tr>
+      <tr><td>/shop</td><td>Product listing with category filter and sort. Server-rendered with search params for filters.</td></tr>
+      <tr><td>/shop/[slug]</td><td>Product detail page. Color-based gallery, variant selector, add to cart. Client component.</td></tr>
+      <tr><td>/cart</td><td>Cart page. Reads from localStorage via cart context. Shows items, totals, checkout button.</td></tr>
+      <tr><td>/checkout</td><td>Protected route. Shipping form + payment method selector (Stripe / PayPal / PayHere).</td></tr>
+      <tr><td>/orders</td><td>Protected. Shows the logged-in user's order history from Supabase.</td></tr>
+      <tr><td>/account</td><td>Protected. Clerk's user profile component with saved addresses.</td></tr>
+      <tr><td>/login</td><td>Clerk's SignIn component, styled to match the brand.</td></tr>
+      <tr><td>/register</td><td>Clerk's SignUp component, styled to match the brand.</td></tr>
+      <tr><td>/contact</td><td>Contact form with honeypot spam protection and rate limiting.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Middleware (proxy.ts)</h3>
+  <p>Next.js runs <code>proxy.ts</code> on every request before the page renders. This is where protected routes are enforced. If someone tries to go to <code>/checkout</code> without being logged in, they get sent to <code>/login?redirect_url=/checkout</code> first.</p>
+
+<span class="code-label">apps/storefront/src/proxy.ts</span>
+<pre><code>const isProtected = createRouteMatcher([
+  '/account(.*)',
+  '/orders(.*)',
+  '/checkout(.*)',
+]);
+
+export default clerkMiddleware(async (auth, req) => {
+  if (!isProtected(req)) return;   // not a protected route - let it through
+
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      const url = new URL('/login', req.url);
+      url.searchParams.set('redirect_url', req.nextUrl.pathname);
+      return NextResponse.redirect(url);
+    }
+  } catch {
+    const url = new URL('/login', req.url);
+    url.searchParams.set('redirect_url', req.nextUrl.pathname);
+    return NextResponse.redirect(url);
+  }
+});</code></pre>
+
+  <h3>API routes</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Route</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>GET /api/orders</td><td>Returns the logged-in user's orders</td></tr>
+      <tr><td>POST /api/orders</td><td>Creates an order, publishes Kafka events</td></tr>
+      <tr><td>POST /api/contact</td><td>Validates the contact form, sends notification email to admin</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Cart state</h3>
+  <p>The cart is managed by a React Context (<code>CartProvider</code>) that stores items in <code>localStorage</code>. It's never saved to the database - it lives in the browser only. When the user places an order, the cart contents get sent to <code>/api/orders</code> and then the cart is cleared.</p>
+</div>
+
+<div class="section" id="admin">
+  <span class="eyebrow">App</span>
+  <h2>Admin Panel</h2>
+  <p>The back-office tool. Runs on port 3001. Only accessible to users whose Clerk user ID is in the <code>ADMIN_USER_IDS</code> environment variable. Everyone else gets redirected to the storefront.</p>
+
+  <h3>Pages</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Page</th><th>What you can do</th></tr></thead>
+    <tbody>
+      <tr><td>/dashboard</td><td>Stats overview - total orders, revenue, customer count, recent orders. Charts from Recharts.</td></tr>
+      <tr><td>/products</td><td>Product list with search. Add, edit, delete products. Each product has variants (color + size combinations), images per color, and a base price.</td></tr>
+      <tr><td>/orders</td><td>All orders with status filter. Click to view details, change status (which fires a Kafka event for shipping email).</td></tr>
+      <tr><td>/users</td><td>Customer list pulled from Clerk's API.</td></tr>
+      <tr><td>/categories</td><td>Manage product categories. Each category has a name and slug used in URLs.</td></tr>
+      <tr><td>/brands</td><td>Manage brands attached to products.</td></tr>
+      <tr><td>/banners</td><td>Homepage banner slider. Upload images, set heading/subtitle/CTA, toggle active/inactive, drag to reorder.</td></tr>
+      <tr><td>/settings</td><td>Store info, admin notification email, marquee text, contact page info, social links, category showcase images, payment integration status.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Auth guard</h3>
+  <p>The admin has its own middleware that checks <code>ADMIN_USER_IDS</code> on every request. Non-admins see an unauthorized page. This runs server-side before any page renders.</p>
+
+  <h3>Excel export</h3>
+  <p>The <code>/api/admin/export/orders</code> route generates a multi-sheet Excel file using ExcelJS. There's one sheet per order status (Pending, Confirmed, Processing, Shipped, Delivered, Cancelled) plus a Dashboard summary sheet and an All Items sheet. Each sheet is colour-coded to match the status.</p>
+
+  <h3>Image uploads</h3>
+  <p>The admin uses <code>/api/admin/upload</code> to upload images. It accepts a multipart form POST, stores the file in Supabase Storage under the <code>product-images</code> bucket, and returns the public URL. The Docker setup rewrites internal Supabase URLs to the public domain before returning them.</p>
+</div>
+
+<div class="section" id="auth-flow">
+  <span class="eyebrow">How it works</span>
+  <h2>Auth flow</h2>
+  <p>Clerk handles everything. The app just reads what Clerk provides - it doesn't store passwords or sessions manually.</p>
+
+  <h3>Email / password login</h3>
+  <div class="flow">
+    <div class="flow-step"><span class="step-label">User</span><span class="step-name">types email + password</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step accent-step"><span class="step-label">Clerk</span><span class="step-name">verifies credentials</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">Clerk</span><span class="step-name">sets session cookie</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">App</span><span class="step-name">reads userId from cookie</span></div>
+  </div>
+
+  <h3>Google OAuth</h3>
+  <div class="flow">
+    <div class="flow-step"><span class="step-label">User</span><span class="step-name">clicks "Continue with Google"</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step accent-step"><span class="step-label">Google</span><span class="step-name">authenticates</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">Clerk</span><span class="step-name">/login/sso-callback</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">App</span><span class="step-name">redirect_url destination</span></div>
+  </div>
+
+  <p>The <code>sso-callback</code> page reads the <code>redirect_url</code> query param and tells Clerk where to send the user after auth completes. This is how going to <code>/checkout</code> while logged out, then Google OAuth, lands back on <code>/checkout</code>.</p>
+
+  <h3>Protected routes</h3>
+  <p>The middleware (<code>proxy.ts</code>) intercepts every request. For the three protected paths (<code>/account</code>, <code>/orders</code>, <code>/checkout</code>), it calls <code>auth()</code> from Clerk. If there's no valid session, it redirects to login. If there is one, the page loads normally.</p>
+
+  <h3>Admin check</h3>
+  <p>After Clerk verifies the user, the admin middleware checks whether their Clerk user ID is in the <code>ADMIN_USER_IDS</code> env var (a comma-separated list). If it's not there, they get the unauthorized page.</p>
+</div>
+
+<div class="section" id="order-flow">
+  <span class="eyebrow">How it works</span>
+  <h2>Order flow</h2>
+  <p>This is the most important flow in the whole app. Here's exactly what happens from the moment someone clicks "Place Order" to the email landing in their inbox.</p>
+
+  <div class="flow">
+    <div class="flow-step"><span class="step-label">Browser</span><span class="step-name">POST /api/orders</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step accent-step"><span class="step-label">API Route</span><span class="step-name">auth check</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">order-service</span><span class="step-name">write to DB</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">Kafka</span><span class="step-name">publish event</span></div>
+    <div class="flow-arrow">-&gt;</div>
+    <div class="flow-step"><span class="step-label">email-worker</span><span class="step-name">send email</span></div>
+  </div>
+
+  <h3>Step by step</h3>
+
+  <h4>1. User clicks "Place Order"</h4>
+  <p>The checkout page collects the shipping form + selected payment method. It calls <code>createOrder()</code> which POSTs to <code>/api/orders</code> with the cart items, shipping details, and notes.</p>
+
+  <h4>2. API route authenticates</h4>
+  <p>The route calls <code>auth()</code> from Clerk to get the <code>userId</code>. If there's no session, it returns 401. Otherwise it continues with the userId.</p>
+
+  <h4>3. Order saved to database</h4>
+  <p>The <code>createOrder()</code> function from order-service inserts two things: one row in the <code>orders</code> table (the header), and one row per cart item in <code>order_items</code>. The total is calculated from the item prices.</p>
+
+  <h4>4. Kafka event published (fire-and-forget)</h4>
+
+<span class="code-label">apps/storefront/src/app/api/orders/route.ts - Kafka publish</span>
+<pre><code>// fire and forget - the response goes back to the user right away
+publishEvent(TOPICS.ORDER_PLACED, {
+  orderId: order.id,
+  to: clerkUser.emailAddresses[0].emailAddress,
+  customerName: clerkUser.firstName ?? 'Customer',
+  items: orderItems,
+  total: order.total,
+  shippingAddress: `${shipping.address}, ${shipping.city}`,
+}).catch(console.error);   // don't await - don't block the response</code></pre>
+
+  <h4>5. Stock check</h4>
+  <p>After publishing the order event, the route also checks the stock level of every ordered variant. If any variant's stock is at or below the threshold (default 5 units), a <code>STOCK_LOW</code> Kafka event is published, which triggers a low-stock alert email to the admin.</p>
+
+  <h4>6. Email worker picks it up</h4>
+  <p>The email-worker container is always running and consuming from Kafka. When it sees an <code>order.placed</code> message, it calls <code>sendOrderConfirmation()</code> from the email-service package, which calls the Resend API and sends the branded HTML email to the customer.</p>
+
+  <h4>7. Payment</h4>
+  <p>After the order is created in the DB, the payment flow starts separately. The order gets a payment record linked to it. Payment confirmation updates the order status from <code>pending</code> to <code>confirmed</code>.</p>
+</div>
+
+<div class="section" id="email-flow">
+  <span class="eyebrow">How it works</span>
+  <h2>Email flow</h2>
+  <p>All emails go through the same path - Kafka in the middle decouples the sender from the trigger.</p>
+
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-box orange">storefront API route</div>
+      <div class="arch-box orange">admin (status update)</div>
+    </div>
+    <div class="arch-connector">| publishEvent() |</div>
+    <div class="arch-row">
+      <div class="arch-box wide orange">Kafka (order.placed / order.status.changed / stock.low)</div>
+    </div>
+    <div class="arch-connector">| consumed by |</div>
+    <div class="arch-row">
+      <div class="arch-box wide">email-worker container</div>
+    </div>
+    <div class="arch-connector">| calls |</div>
+    <div class="arch-row">
+      <div class="arch-box">email-service package</div>
+    </div>
+    <div class="arch-connector">| calls |</div>
+    <div class="arch-row">
+      <div class="arch-box orange">Resend API</div>
+    </div>
+    <div class="arch-connector">| delivers to |</div>
+    <div class="arch-row">
+      <div class="arch-box">Customer / Admin inbox</div>
+    </div>
+  </div>
+
+  <h3>Contact form emails</h3>
+  <p>These don't go through Kafka - they're sent directly. The <code>/api/contact</code> route calls <code>sendContactNotification()</code> with the form data and the admin email (which is read from the <code>site_settings</code> table in Supabase). The admin gets an email with a "Reply to sender" button that opens their mail client with the customer's email pre-filled.</p>
+</div>
+
+<div class="section" id="payment-flow">
+  <span class="eyebrow">How it works</span>
+  <h2>Payment flow</h2>
+
+  <h3>Stripe</h3>
+  <p>Stripe uses a <strong>hosted checkout page</strong>. The server creates a session with the order ID and line items, gives the browser a URL, and the browser redirects to Stripe's page. When the user pays, Stripe sends a webhook to <code>/api/payments/stripe/webhook</code> which updates the order status. Stripe handles all the card UI - the app never touches card numbers.</p>
+
+  <h3>PayPal</h3>
+  <p>PayPal works entirely in the browser. The PayPal JS SDK renders the familiar PayPal buttons. When the user clicks Pay, a popup opens, they log into PayPal, and the SDK calls back to the app with a transaction ID. No server redirect needed. The transaction ID gets saved to the payment record.</p>
+
+  <h3>PayHere</h3>
+  <p>PayHere is redirect-based like Stripe but simpler. The app generates a signed form with the order amount, a merchant ID, and a hash of the order details. The user gets redirected to PayHere's payment page. When they pay, PayHere calls <code>/api/payments/payhere/notify</code> on the server with the result.</p>
+
+  <div class="callout">
+    <p>All three gateways end up in the same place: the order status in Supabase changes from <code>pending</code> to <code>confirmed</code>, which triggers an <code>ORDER_STATUS_CHANGED</code> Kafka event, which sends the customer a shipping update email.</p>
+  </div>
+</div>
+
+<div class="section" id="database">
+  <span class="eyebrow">Infrastructure</span>
+  <h2>Database</h2>
+  <p>Postgres 15 running inside Docker. Accessed through PostgREST (the Supabase REST layer) and Kong (the API gateway). The app never talks to Postgres directly - it goes through the Supabase client, which talks to Kong, which talks to PostgREST, which talks to Postgres.</p>
+
+  <h3>Main tables</h3>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Table</th><th>What it stores</th></tr></thead>
+    <tbody>
+      <tr><td>products</td><td>Product names, descriptions, base price, category, brand, status</td></tr>
+      <tr><td>product_variants</td><td>Each color/size combo - stock, price adjustment, SKU, links to product</td></tr>
+      <tr><td>product_images</td><td>Image URLs linked to a product and optionally to a specific color</td></tr>
+      <tr><td>categories</td><td>Category name + slug (e.g. "T-Shirts", "t-shirts")</td></tr>
+      <tr><td>brands</td><td>Brand name + optional description</td></tr>
+      <tr><td>orders</td><td>Order header - customer ID, status, shipping details, total, timestamps</td></tr>
+      <tr><td>order_items</td><td>Each line item - links order to variant, stores quantity and price at time of purchase</td></tr>
+      <tr><td>payments</td><td>Payment method, status, gateway transaction ID, links to order</td></tr>
+      <tr><td>banners</td><td>Homepage slider images - URL, title, subtitle, CTA, sort order, active flag</td></tr>
+      <tr><td>site_settings</td><td>Key-value store for dynamic config (marquee text, contact info, category images, admin email)</td></tr>
+      <tr><td>profiles</td><td>Extended user data (Clerk user ID + saved address)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>site_settings table</h3>
+  <p>This table is the most flexible one. It's just two columns - <code>key</code> and <code>value</code>. The admin settings page writes to it, and the storefront reads from it at request time. Things like the marquee text, category tile images, and admin notification email all live here.</p>
+
+<span class="code-label">example rows in site_settings</span>
+<pre><code>key                       value
+----------------------------------------------
+marquee_text              NEW DROP - FREE SHIPPING - MADE IN SRI LANKA
+admin_notification_email  chamidu@staticwears.com
+category_img_t-shirts     https://api.staticwears.com/storage/v1/...
+category_img_hoodies      https://api.staticwears.com/storage/v1/...
+contact_phone             +94 77 000 0000</code></pre>
+
+  <h3>File storage</h3>
+  <p>Product images are stored in Supabase Storage - not in the Postgres database. The DB only stores the URL string. The actual file goes to the <code>product-images</code> bucket. In Docker, this is a volume mount on the VPS disk.</p>
+</div>
+
+<div class="section" id="docker">
+  <span class="eyebrow">Infrastructure</span>
+  <h2>Docker setup</h2>
+  <p>Every service runs in its own container. They all talk to each other on an internal Docker network called <code>staticwears-net</code>. Nothing from inside the network is directly exposed to the internet - only Nginx is.</p>
+
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-box wide orange">nginx (80 / 443) - the only public entry point</div>
+    </div>
+    <div class="arch-connector">| routes to |</div>
+    <div class="arch-row">
+      <div class="arch-box">storefront :3000</div>
+      <div class="arch-box">admin :3001</div>
+      <div class="arch-box">kong :8000 (Supabase)</div>
+    </div>
+    <div class="arch-connector">internally available on staticwears-net</div>
+    <div class="arch-row">
+      <div class="arch-box">kafka :9092</div>
+      <div class="arch-box">email-worker</div>
+      <div class="arch-box">db (postgres)</div>
+    </div>
+    <div class="arch-row">
+      <div class="arch-box">auth (gotrue)</div>
+      <div class="arch-box">storage</div>
+      <div class="arch-box">imgproxy</div>
+    </div>
+  </div>
+
+  <h3>Nginx routing</h3>
+  <p>Nginx sits in front of everything and decides where each request goes:</p>
+  <ul>
+    <li><strong>staticwears.com/</strong> - forwards to the storefront container on port 3000</li>
+    <li><strong>admin.staticwears.com/</strong> - forwards to the admin container on port 3001</li>
+    <li><strong>api.staticwears.com/</strong> - forwards to Kong on port 8000 (the Supabase gateway)</li>
+  </ul>
+
+  <h3>Internal URLs</h3>
+  <p>Inside Docker, services talk to each other by container name. So when the storefront needs to call Supabase, it uses <code>http://kong:8000</code> - not the public <code>https://api.staticwears.com</code>. This is why there's a <code>SUPABASE_INTERNAL_URL</code> environment variable that the apps use for server-side queries.</p>
+
+  <h3>Volumes</h3>
+  <p>Three Docker volumes persist data between container restarts:</p>
+  <ul>
+    <li><strong>postgres-data</strong> - the actual database files</li>
+    <li><strong>storage-data</strong> - uploaded images and files</li>
+    <li><strong>kafka-data</strong> - Kafka's message log</li>
+  </ul>
+</div>
+
+<div class="section" id="deployment">
+  <span class="eyebrow">Infrastructure</span>
+  <h2>Deployment</h2>
+  <p>The VPS runs Ubuntu on DigitalOcean. The repo lives at <code>/home/deploy/staticwears</code>. GitLab CI/CD handles deployments automatically.</p>
+
+  <h3>How a deploy works</h3>
+  <p>Every time code gets pushed to the <code>main</code> branch on GitLab, the pipeline starts automatically.</p>
+
+<span class="code-label">.gitlab-ci.yml - what happens on every push</span>
+<pre><code>deploy:
+  image: alpine:latest
+  script:
+    - ssh root@api.staticwears.com bash -s &lt;&lt; 'ENDSSH'
+        cd /home/deploy/staticwears
+        git pull origin main
+        docker compose build storefront admin
+        docker compose up -d storefront admin
+        docker image prune -f
+      ENDSSH</code></pre>
+
+  <p>The pipeline uses an SSH key stored as a CI/CD variable in GitLab (<code>VPS_SSH_KEY_B64</code> - base64 encoded to avoid newline issues). On the VPS, the corresponding public key is in <code>~/.ssh/authorized_keys</code>.</p>
+
+  <h3>HTTPS / SSL</h3>
+  <p>Let's Encrypt certificates are stored in a volume and mounted into the Nginx container. Certbot renews them automatically. Nginx handles TLS termination - the apps themselves only speak plain HTTP internally.</p>
+
+  <h3>Starting fresh on the VPS</h3>
+
+<span class="code-label">manual deploy commands</span>
+<pre><code>cd /home/deploy/staticwears
+git pull origin main
+docker compose --env-file .env.supabase build
+docker compose --env-file .env.supabase up -d
+docker image prune -f</code></pre>
+</div>
+
+<div class="section" id="env">
+  <span class="eyebrow">Infrastructure</span>
+  <h2>Environment variables</h2>
+  <p>Sensitive config lives in <code>.env.supabase</code> on the VPS - never committed to the repo. Here's what each one does.</p>
+
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Variable</th><th>What it's for</th></tr></thead>
+    <tbody>
+      <tr><td>NEXT_PUBLIC_SUPABASE_URL</td><td>Public URL of the Supabase Kong gateway (https://api.staticwears.com)</td></tr>
+      <tr><td>SUPABASE_INTERNAL_URL</td><td>Internal Docker URL for server-side queries (http://kong:8000) - skips the internet</td></tr>
+      <tr><td>SUPABASE_SERVICE_ROLE_KEY</td><td>Secret Supabase key that bypasses all row-level security. Never expose this to the browser.</td></tr>
+      <tr><td>NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY</td><td>Clerk public key - safe to expose in the browser</td></tr>
+      <tr><td>CLERK_SECRET_KEY</td><td>Clerk secret key - server-side only</td></tr>
+      <tr><td>RESEND_API_KEY</td><td>Resend API key for sending emails</td></tr>
+      <tr><td>ADMIN_USER_IDS</td><td>Comma-separated Clerk user IDs allowed to access the admin panel</td></tr>
+      <tr><td>ADMIN_EMAIL</td><td>Email address for low-stock alert emails</td></tr>
+      <tr><td>KAFKA_BROKERS</td><td>Kafka broker address - inside Docker this is <code>kafka:9092</code></td></tr>
+      <tr><td>NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</td><td>Stripe public key for the client-side SDK</td></tr>
+      <tr><td>STRIPE_SECRET_KEY</td><td>Stripe secret key for creating sessions server-side</td></tr>
+      <tr><td>NEXT_PUBLIC_PAYPAL_CLIENT_ID</td><td>PayPal client ID for the JS SDK</td></tr>
+      <tr><td>NEXT_PUBLIC_PAYHERE_MERCHANT_ID</td><td>PayHere merchant account ID</td></tr>
+      <tr><td>LOW_STOCK_THRESHOLD</td><td>Units remaining before a low-stock Kafka event fires (default 5)</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout">
+    <p>Variables prefixed with <code>NEXT_PUBLIC_</code> are bundled into the browser JavaScript - anyone can see them in the page source. Never put secret keys in NEXT_PUBLIC_ variables.</p>
+  </div>
+
+  <hr>
+  <p style="font-size:0.82rem; color: var(--text-dim); font-family: 'Courier New', monospace; letter-spacing: 0.03em; margin-top: 40px;">Static Wears &nbsp;/&nbsp; built by Chamidu Jayaneththi &nbsp;/&nbsp; 2026</p>
+</div>
+
+</div>
+</main>
+</div>
+
+<script>
+const links = document.querySelectorAll('.toc-link');
+const sections = document.querySelectorAll('.section[id]');
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const active = document.querySelector('.toc-link[href="#' + entry.target.id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => obs.observe(s));
+</script>
+
+</body>
+</html>
