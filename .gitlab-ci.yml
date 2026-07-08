@@ -4,6 +4,7 @@ stages:
 deploy:
   stage: deploy
   image: alpine:latest
+  timeout: 2h
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
   before_script:
