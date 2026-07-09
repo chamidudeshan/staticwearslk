@@ -126,11 +126,19 @@ export default function SettingsPage() {
   async function handleCategoryImageUpload(slug: CategorySlug, file: File) {
     setUploadingSlug(slug);
     try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-      if (!res.ok) { toast.error('Upload failed'); return; }
-      const { url } = await res.json() as { url: string };
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      // Get a signed upload URL — browser will PUT directly to storage, skipping Node.js proxy
+      const signRes = await fetch(`/api/admin/upload/sign?ext=${ext}`);
+      if (!signRes.ok) { toast.error('Upload failed'); return; }
+      const { signedUrl, url } = await signRes.json() as { signedUrl: string; url: string };
+
+      const upload = await fetch(signedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      if (!upload.ok) { toast.error('Upload failed'); return; }
+
       setCategoryImages((prev) => ({ ...prev, [slug]: url }));
       toast.success('Image uploaded — save to apply');
     } catch {

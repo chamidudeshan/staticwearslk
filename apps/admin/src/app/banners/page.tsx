@@ -46,13 +46,24 @@ export default function BannersPage() {
 
   async function uploadImage(file: File, onDone: (url: string) => void) {
     setUploading(true);
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
-    const data = await res.json();
-    setUploading(false);
-    if (!res.ok) { toast.error(data.error ?? 'Upload failed'); return; }
-    onDone(data.url);
+    try {
+      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+      const signRes = await fetch(`/api/admin/upload/sign?ext=${ext}`);
+      if (!signRes.ok) { toast.error('Upload failed'); return; }
+      const { signedUrl, url } = await signRes.json() as { signedUrl: string; url: string };
+
+      const upload = await fetch(signedUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file,
+      });
+      if (!upload.ok) { toast.error('Upload failed'); return; }
+      onDone(url);
+    } catch {
+      toast.error('Upload failed');
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleCreate(e: React.FormEvent) {

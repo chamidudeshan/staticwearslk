@@ -6,7 +6,7 @@ import { MarqueeStrip } from '@/components/layout/marquee-strip';
 import { FeaturedProducts } from '@/components/product/featured-products';
 import { CategoryShowcase } from '@/components/product/category-showcase';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 30;
 
 async function getCategoryImages(): Promise<Record<string, string>> {
   try {

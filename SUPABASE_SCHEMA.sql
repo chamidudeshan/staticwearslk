@@ -272,3 +272,72 @@ CREATE POLICY "Users view own payments"
 -- ============================================================
 -- ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
 -- ALTER PUBLICATION supabase_realtime ADD TABLE public.product_variants;
+
+-- ============================================================
+-- STORAGE BUCKETS (self-hosted Supabase)
+-- ============================================================
+INSERT INTO storage.buckets (id, name) VALUES
+  ('product-images', 'product-images'),
+  ('banners', 'banners')
+ON CONFLICT (id) DO NOTHING;
+
+-- Mark buckets as public (required for storage-api to serve /object/public/ URLs)
+ALTER TABLE storage.buckets ADD COLUMN IF NOT EXISTS public BOOLEAN DEFAULT FALSE;
+UPDATE storage.buckets SET public = TRUE WHERE id IN ('product-images', 'banners');
+
+-- Allow public reads on both buckets
+DROP POLICY IF EXISTS "Public read product-images" ON storage.objects;
+CREATE POLICY "Public read product-images" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'product-images');
+
+DROP POLICY IF EXISTS "Public read banners" ON storage.objects;
+CREATE POLICY "Public read banners" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'banners');
+
+DROP POLICY IF EXISTS "Admin upload product-images" ON storage.objects;
+CREATE POLICY "Admin upload product-images" ON storage.objects
+  FOR INSERT TO public WITH CHECK (bucket_id IN ('product-images', 'banners'));
+
+DROP POLICY IF EXISTS "Admin delete product-images" ON storage.objects;
+CREATE POLICY "Admin delete product-images" ON storage.objects
+  FOR DELETE TO public USING (bucket_id IN ('product-images', 'banners'));
+
+-- ============================================================
+-- SITE SETTINGS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.site_settings (
+  key        TEXT PRIMARY KEY,
+  value      TEXT NOT NULL DEFAULT '',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.site_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Service role manages site settings" ON public.site_settings;
+CREATE POLICY "Service role manages site settings"
+  ON public.site_settings FOR ALL USING (TRUE) WITH CHECK (TRUE);
+
+-- ============================================================
+-- BANNERS TABLE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.banners (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  image_url  TEXT NOT NULL,
+  title      TEXT,
+  subtitle   TEXT,
+  cta_text   TEXT DEFAULT 'Shop Now',
+  cta_link   TEXT DEFAULT '/shop',
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active  BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.banners ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can view active banners" ON public.banners;
+CREATE POLICY "Anyone can view active banners"
+  ON public.banners FOR SELECT USING (is_active = TRUE);
+
+DROP POLICY IF EXISTS "Service role manages banners" ON public.banners;
+CREATE POLICY "Service role manages banners"
+  ON public.banners FOR ALL USING (TRUE) WITH CHECK (TRUE);
