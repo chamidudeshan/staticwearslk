@@ -128,7 +128,7 @@ export function ProductDetailClient({ product, related }: Props) {
 
       {/* ── Main grid ── */}
       <div className="max-w-screen-xl mx-auto px-4 sm:px-6 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_440px] gap-8 xl:gap-14 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-14 items-start max-w-3xl mx-auto lg:max-w-none">
 
           {/* ═══ IMAGE PANEL ═══ */}
           <div className="lg:sticky lg:top-24 space-y-3">
