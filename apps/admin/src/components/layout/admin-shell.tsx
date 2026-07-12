@@ -21,7 +21,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   useEffect(() => { setSidebarOpen(false); }, [pathname]);
 
   return (
-    <div className="flex min-h-screen bg-[#060608]">
+    <div className="flex h-screen overflow-hidden bg-[#060608]">
 
       {/* ── Desktop sidebar ── */}
       <div className="hidden md:block">
