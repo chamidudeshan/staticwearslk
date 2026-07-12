@@ -116,7 +116,7 @@ export function ProductDetailClient({ product, related }: Props) {
     <div className="min-h-screen bg-[#060608]">
 
       {/* ── Breadcrumb ── */}
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 pt-24 pb-4">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-4">
         <Link
           href="/shop"
           className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#444] hover:text-[#ff6b35] transition-colors"
@@ -127,8 +127,8 @@ export function ProductDetailClient({ product, related }: Props) {
       </div>
 
       {/* ── Main grid ── */}
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-14 items-start max-w-3xl mx-auto lg:max-w-none">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
           {/* ═══ IMAGE PANEL ═══ */}
           <div className="lg:sticky lg:top-24 space-y-3">
