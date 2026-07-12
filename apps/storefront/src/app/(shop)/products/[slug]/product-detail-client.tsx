@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { ShoppingBag, ChevronLeft, Plus, Minus } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, Minus, Plus } from 'lucide-react';
 import Link from 'next/link';
 import type { Product, ProductVariant } from '@static-wears/shared';
 import { useCart } from '@/context/cart-context';
@@ -40,225 +40,226 @@ export function ProductDetailClient({ product, related }: Props) {
   }));
 
   const uniqueColors = Array.from(new Set(allVariants.map((v) => v.color))).filter(Boolean);
-  const hasColors = uniqueColors.length > 0;
+  const hasColors    = uniqueColors.length > 0;
 
-  const [selectedColor, setSelectedColor] = useState<string>(uniqueColors[0] ?? '');
+  const [selectedColor,   setSelectedColor]   = useState<string>(uniqueColors[0] ?? '');
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(allVariants[0] ?? null);
-  const [activeIdx, setActiveIdx] = useState(0);
-  const [qty, setQty] = useState(1);
+  const [activeIdx, setActiveIdx]             = useState(0);
+  const [qty, setQty]                         = useState(1);
 
-  // ── Gallery logic (Etsy-style: gallery follows COLOR not individual variant) ──
-
-  // Build color → [unique image URLs] map from variant.image_url
+  // Gallery: color-images take priority, then product-level images
   const colorImageMap: Record<string, string[]> = {};
   for (const v of allVariants) {
     if (v.color && v.image_url) {
       if (!colorImageMap[v.color]) colorImageMap[v.color] = [];
-      if (!colorImageMap[v.color].includes(v.image_url)) {
-        colorImageMap[v.color].push(v.image_url);
-      }
+      if (!colorImageMap[v.color].includes(v.image_url)) colorImageMap[v.color].push(v.image_url);
     }
   }
-
-  // Product-level images (not color-specific, from product_images table)
   const productImgPaths = (product.images ?? []).map((img) => img.image_path);
-
-  // Active gallery = selected color's images + any product images not already shown
-  const colorPaths = selectedColor ? (colorImageMap[selectedColor] ?? []) : [];
-  const colorPathSet = new Set(colorPaths);
+  const colorPaths      = selectedColor ? (colorImageMap[selectedColor] ?? []) : [];
+  const colorPathSet    = new Set(colorPaths);
   const galleryPaths: string[] = [
     ...colorPaths,
     ...productImgPaths.filter((p) => !colorPathSet.has(p)),
   ];
-  // Fallback to demo images when no images uploaded yet
-  if (galleryPaths.length === 0) {
-    DEMO_IMAGES.forEach((_, i) => galleryPaths.push(`demo/${i}`));
-  }
+  if (galleryPaths.length === 0) DEMO_IMAGES.forEach((_, i) => galleryPaths.push(`demo/${i}`));
 
-  // ── Selectors ──
-
-  const sizesForColor = hasColors
-    ? allVariants.filter((v) => v.color === selectedColor)
-    : allVariants;
-
-  const selectedSize = selectedVariant?.size ?? null;
+  const sizesForColor  = hasColors ? allVariants.filter((v) => v.color === selectedColor) : allVariants;
+  const selectedSize   = selectedVariant?.size ?? null;
 
   function pickColor(color: string) {
     setSelectedColor(color);
-    setActiveIdx(0); // reset gallery to first image of new color
-    // Try to keep the same size across colors, otherwise pick first available
+    setActiveIdx(0);
     const v = allVariants.find((x) => x.color === color && x.size === selectedSize)
-      ?? allVariants.find((x) => x.color === color);
+           ?? allVariants.find((x) => x.color === color);
     setSelectedVariant(v ?? null);
     setQty(1);
   }
 
   function pickSize(v: ProductVariant) {
     setSelectedVariant(v);
-    // Intentionally do NOT change activeIdx — gallery stays on current color
     setQty(1);
   }
 
-  // ── Price ──
-
-  const lowestPrice = hasVariants
+  const lowestPrice  = hasVariants
     ? Math.min(...(product.variants?.map((v) => v.price_adj) ?? [product.base_price]))
     : product.base_price;
   const displayPrice = selectedVariant
     ? (hasVariants ? selectedVariant.price_adj : product.base_price)
     : lowestPrice;
-  const showFrom = hasVariants && !selectedVariant;
 
   const isOutOfStock = selectedVariant ? selectedVariant.stock_qty === 0 : false;
-  const maxQty = selectedVariant?.stock_qty ?? 0;
-
-  // Cart image: use first image of selected color, or fallback to first product image
+  const maxQty       = selectedVariant?.stock_qty ?? 0;
   const cartImagePath = colorPaths[0] ?? productImgPaths[0] ?? 'demo/0';
 
   function handleAddToCart() {
-    if (hasVariants && !selectedVariant) { alert('Please select a size'); return; }
+    if (hasVariants && !selectedVariant) return;
     if (isOutOfStock) return;
     dispatch({
       type: 'ADD_ITEM',
       payload: {
-        product_id: product.id,
-        variant_id: selectedVariant?.id ?? '',
+        product_id:   product.id,
+        variant_id:   selectedVariant?.id ?? '',
         product_name: product.name,
         variant_desc: selectedVariant
           ? `${selectedVariant.size}${selectedVariant.color ? ` / ${selectedVariant.color}` : ''}`
           : '',
-        image_path: cartImagePath,
-        unit_price: displayPrice,
-        quantity: qty,
+        image_path:   cartImagePath,
+        unit_price:   displayPrice,
+        quantity:     qty,
       },
     });
     openCart();
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+    <div className="min-h-screen bg-[#060608]">
 
-        <div className="py-6">
-          <Link href="/shop" className="font-mono text-xs text-[#555] hover:text-[#ff6b35] transition-colors flex items-center gap-2">
-            <ChevronLeft size={14} /> Back to shop
-          </Link>
-        </div>
+      {/* ── Breadcrumb ── */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 pt-24 pb-4">
+        <Link
+          href="/shop"
+          className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#444] hover:text-[#ff6b35] transition-colors"
+        >
+          <ChevronLeft size={12} strokeWidth={2} />
+          Shop
+        </Link>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_480px] gap-12 xl:gap-20">
+      {/* ── Main grid ── */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_440px] gap-8 xl:gap-14 items-start">
 
-          {/* ── IMAGE COLUMN ── */}
-          <div className="flex gap-3">
-            {/* Thumbnail strip — shown when more than 1 image */}
-            {galleryPaths.length > 1 && (
-              <div className="flex flex-col gap-2 shrink-0">
-                {galleryPaths.map((path, i) => (
-                  <button
-                    key={`${path}-${i}`}
-                    onClick={() => setActiveIdx(i)}
-                    className={`relative w-14 h-[72px] overflow-hidden border-2 shrink-0 transition-colors ${
-                      activeIdx === i
-                        ? 'border-[#ff6b35]'
-                        : 'border-[#2a2a2a] hover:border-[#555]'
-                    }`}
-                  >
-                    <Image src={imgSrc(path, i)} alt="" fill className="object-cover" sizes="56px" />
-                  </button>
-                ))}
-              </div>
-            )}
+          {/* ═══ IMAGE PANEL ═══ */}
+          <div className="space-y-3">
 
             {/* Main image */}
-            <div className="relative flex-1 aspect-[4/5] overflow-hidden bg-[#111]">
+            <div className="relative w-full aspect-[4/5] bg-[#0f0f0f] overflow-hidden">
               <Image
                 key={`${selectedColor}-${activeIdx}`}
                 src={imgSrc(galleryPaths[activeIdx] ?? 'demo/0', activeIdx)}
                 alt={product.name}
                 fill
                 priority
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 55vw"
+                className="object-contain"
+                sizes="(max-width: 1024px) 100vw, 60vw"
               />
-              {selectedVariant && selectedVariant.stock_qty > 0 && selectedVariant.stock_qty <= 3 && (
-                <div className="absolute top-4 left-4 bg-[#ff6b35] text-black font-mono font-bold text-[10px] uppercase tracking-widest px-2.5 py-1">
-                  Only {selectedVariant.stock_qty} left
+              {/* Stock badge */}
+              {selectedVariant && selectedVariant.stock_qty > 0 && selectedVariant.stock_qty <= 5 && (
+                <div className="absolute top-3 left-3 bg-[#ff6b35] text-black font-mono font-bold text-[9px] uppercase tracking-[0.2em] px-2 py-1">
+                  {selectedVariant.stock_qty} LEFT
                 </div>
               )}
               {isOutOfStock && selectedVariant && (
-                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-                  <span className="font-mono text-xs tracking-widest text-[#888] uppercase border border-[#333] px-4 py-2">
+                <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                  <span className="font-mono text-[11px] tracking-[0.3em] text-[#666] uppercase border border-[#2a2a2a] px-5 py-2.5">
                     Out of Stock
                   </span>
                 </div>
               )}
             </div>
+
+            {/* Thumbnail row — horizontal */}
+            {galleryPaths.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto pb-1">
+                {galleryPaths.map((path, i) => (
+                  <button
+                    key={`${path}-${i}`}
+                    onClick={() => setActiveIdx(i)}
+                    className={`relative shrink-0 w-16 h-20 overflow-hidden border transition-all duration-150 ${
+                      activeIdx === i
+                        ? 'border-[#ff6b35]'
+                        : 'border-[#1e1e28] hover:border-[#444]'
+                    }`}
+                  >
+                    <Image
+                      src={imgSrc(path, i)}
+                      alt=""
+                      fill
+                      className="object-contain bg-[#0f0f0f]"
+                      sizes="64px"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* ── INFO COLUMN ── */}
-          <div className="space-y-6">
+          {/* ═══ INFO PANEL ═══ */}
+          <div className="lg:sticky lg:top-24 space-y-5">
+
             {/* Brand */}
-            {product.brand && (
-              <p className="font-mono text-xs text-[#ff6b35] uppercase tracking-widest">
+            {product.brand ? (
+              <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#ff6b35]">
                 {product.brand.name}
+              </p>
+            ) : (
+              <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#ff6b35]">
+                Static Wears
               </p>
             )}
 
-            {/* Title */}
-            <h1 className="font-display text-4xl xl:text-5xl text-white leading-tight">
+            {/* Name */}
+            <h1 className="font-display text-[clamp(2rem,4vw,3rem)] text-white leading-[1] tracking-tight">
               {product.name.toUpperCase()}
             </h1>
 
-            {/* Variant description */}
+            {/* Variant short desc */}
             {selectedVariant?.description && (
-              <p className="font-mono text-xs text-[#666] border-l-2 border-[#ff6b35]/30 pl-3 -mt-2">
+              <p className="font-mono text-[11px] text-[#555] leading-relaxed">
                 {selectedVariant.description}
               </p>
             )}
 
             {/* Price */}
-            <div className="flex items-baseline gap-2">
-              {showFrom && (
-                <span className="font-mono text-sm text-[#555] uppercase tracking-widest">From</span>
-              )}
-              <span className="font-mono text-3xl font-bold text-[#ff6b35]">
+            <div className="flex items-baseline gap-3">
+              <span className="font-mono text-2xl font-bold text-[#ff6b35] tracking-tight">
                 {formatPrice(displayPrice)}
               </span>
+              {hasVariants && !selectedVariant && (
+                <span className="font-mono text-xs text-[#444] uppercase tracking-widest">from</span>
+              )}
             </div>
 
-            <div className="border-t border-[#1e1e1e]" />
+            <div className="h-px bg-[#1a1a22]" />
 
-            {/* ── Color selector ── */}
+            {/* ── Colour selector ── */}
             {hasColors && (
-              <div className="space-y-3">
-                <p className="font-mono text-xs uppercase tracking-widest text-[#555]">
-                  Colour: <span className="text-[#e8e8f0]">{selectedColor}</span>
+              <div className="space-y-2.5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#555]">
+                  Colour — <span className="text-[#ccc]">{selectedColor}</span>
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   {uniqueColors.map((color) => {
-                    const hex = COLOR_HEX[color.toLowerCase()];
-                    const hasImg = (colorImageMap[color]?.length ?? 0) > 0;
+                    const hex    = COLOR_HEX[color.toLowerCase()];
+                    const imgUrl = colorImageMap[color]?.[0];
+                    const active = selectedColor === color;
                     return (
                       <button
                         key={color}
                         onClick={() => pickColor(color)}
-                        className={`relative flex items-center gap-1.5 px-3 py-1.5 border font-mono text-xs uppercase tracking-wider transition-all ${
-                          selectedColor === color
-                            ? 'border-[#ff6b35] text-[#ff6b35] bg-[#ff6b35]/10'
-                            : 'border-[#2a2a2a] text-[#888] hover:border-[#ff6b35] hover:text-[#ff6b35]'
+                        title={color}
+                        className={`relative w-10 h-10 overflow-hidden border-2 transition-all ${
+                          active ? 'border-[#ff6b35]' : 'border-[#1e1e28] hover:border-[#555]'
                         }`}
                       >
-                        {hex ? (
-                          <span
-                            className="w-3 h-3 rounded-full border border-white/20 shrink-0"
-                            style={{ backgroundColor: hex }}
+                        {imgUrl ? (
+                          <Image
+                            src={imgSrc(imgUrl)}
+                            alt={color}
+                            fill
+                            className="object-contain bg-[#0f0f0f]"
+                            sizes="40px"
                           />
-                        ) : hasImg ? (
-                          /* Tiny thumbnail preview for colors without a known hex */
-                          <span className="relative w-3 h-3 rounded-full overflow-hidden shrink-0 border border-white/20">
-                            <Image src={imgSrc(colorImageMap[color][0])} alt="" fill className="object-cover" sizes="12px" />
-                          </span>
-                        ) : null}
-                        {color}
+                        ) : (
+                          <span
+                            className="absolute inset-0"
+                            style={{ backgroundColor: hex ?? '#333' }}
+                          />
+                        )}
+                        {active && (
+                          <span className="absolute inset-0 ring-1 ring-inset ring-[#ff6b35]" />
+                        )}
                       </button>
                     );
                   })}
@@ -268,32 +269,28 @@ export function ProductDetailClient({ product, related }: Props) {
 
             {/* ── Size selector ── */}
             {sizesForColor.length > 0 && (
-              <div className="space-y-3">
-                <p className="font-mono text-xs uppercase tracking-widest text-[#555]">Size</p>
+              <div className="space-y-2.5">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#555]">Size</p>
                 <div className="flex gap-2 flex-wrap">
                   {sizesForColor.map((v) => {
                     const inStock = v.stock_qty > 0;
                     const selected = selectedVariant?.id === v.id;
-                    const price = hasVariants ? v.price_adj : product.base_price;
                     return (
                       <button
                         key={v.id}
                         onClick={() => inStock && pickSize(v)}
                         disabled={!inStock}
-                        className={`relative px-4 py-3 font-mono text-xs uppercase tracking-wider border transition-all ${
+                        className={`relative min-w-[3rem] px-3 py-2.5 font-mono text-xs uppercase tracking-wider border transition-all ${
                           selected
-                            ? 'border-[#ff6b35] bg-[#ff6b35]/10 text-[#ff6b35]'
+                            ? 'border-[#ff6b35] bg-[#ff6b35]/10 text-white'
                             : inStock
-                            ? 'border-[#2a2a2a] text-[#888] hover:border-[#ff6b35] hover:text-[#ff6b35]'
-                            : 'border-[#1a1a1a] text-[#333] line-through cursor-not-allowed'
+                            ? 'border-[#1e1e28] text-[#777] hover:border-[#555] hover:text-[#ccc]'
+                            : 'border-[#111] text-[#2a2a2a] line-through cursor-not-allowed'
                         }`}
                       >
-                        <span className="block">{v.size}</span>
-                        {hasVariants && (
-                          <span className="block text-[9px] mt-0.5 opacity-70">{formatPrice(price)}</span>
-                        )}
+                        {v.size}
                         {!inStock && (
-                          <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#333] rounded-full" />
+                          <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-[#333] rounded-full" />
                         )}
                       </button>
                     );
@@ -302,36 +299,31 @@ export function ProductDetailClient({ product, related }: Props) {
               </div>
             )}
 
-            {/* No-variant stock */}
+            {/* No-variant availability */}
             {!hasVariants && (
-              <p className="font-mono text-xs text-[#555]">
-                {(product.variants?.[0]?.stock_qty ?? 0) > 0
-                  ? `${product.variants?.[0]?.stock_qty} units available`
-                  : 'Out of stock'}
+              <p className="font-mono text-[11px] text-[#555] uppercase tracking-widest">
+                {(product.variants?.[0]?.stock_qty ?? 0) > 0 ? 'In stock' : 'Out of stock'}
               </p>
             )}
 
             {/* ── Quantity ── */}
             {selectedVariant && !isOutOfStock && (
-              <div className="space-y-2">
-                <p className="font-mono text-xs uppercase tracking-widest text-[#555]">Quantity</p>
-                <div className="flex items-center gap-0 border border-[#2a2a2a] w-fit">
-                  <button
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center text-[#888] hover:text-[#ff6b35] hover:bg-[#ff6b35]/5 transition-colors"
-                  >
-                    <Minus size={13} />
-                  </button>
-                  <span className="w-10 h-10 flex items-center justify-center font-mono text-sm text-[#e8e8f0]">
-                    {qty}
-                  </span>
-                  <button
-                    onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
-                    className="w-10 h-10 flex items-center justify-center text-[#888] hover:text-[#ff6b35] hover:bg-[#ff6b35]/5 transition-colors"
-                  >
-                    <Plus size={13} />
-                  </button>
-                </div>
+              <div className="flex items-center gap-0 border border-[#1e1e28] w-fit">
+                <button
+                  onClick={() => setQty((q) => Math.max(1, q - 1))}
+                  className="w-9 h-9 flex items-center justify-center text-[#555] hover:text-[#ff6b35] transition-colors"
+                >
+                  <Minus size={12} />
+                </button>
+                <span className="w-9 h-9 flex items-center justify-center font-mono text-sm text-[#e8e8f0] border-x border-[#1e1e28]">
+                  {qty}
+                </span>
+                <button
+                  onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+                  className="w-9 h-9 flex items-center justify-center text-[#555] hover:text-[#ff6b35] transition-colors"
+                >
+                  <Plus size={12} />
+                </button>
               </div>
             )}
 
@@ -339,49 +331,52 @@ export function ProductDetailClient({ product, related }: Props) {
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock || (hasVariants && !selectedVariant)}
-              className="w-full bg-[#ff6b35] text-black font-mono font-bold text-sm uppercase tracking-widest
-                         py-5 flex items-center justify-center gap-3
-                         hover:bg-[#e8ff59] transition-colors
-                         disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99]"
+              className="w-full bg-[#ff6b35] text-black font-mono font-bold text-xs uppercase tracking-[0.25em]
+                         py-4 flex items-center justify-center gap-2.5
+                         hover:bg-[#e8ff59] active:scale-[0.99]
+                         transition-all duration-200
+                         disabled:opacity-30 disabled:cursor-not-allowed"
             >
-              <ShoppingBag size={16} />
+              <ShoppingBag size={14} />
               {isOutOfStock
                 ? 'Out of Stock'
                 : hasVariants && !selectedVariant
                 ? 'Select a Size'
-                : 'Add to Cart'}
+                : `Add to Cart${qty > 1 ? ` — ${formatPrice(displayPrice * qty)}` : ''}`}
             </button>
-
-            {qty > 1 && selectedVariant && (
-              <p className="font-mono text-xs text-[#555] text-center">
-                Total: {formatPrice(displayPrice * qty)}
-              </p>
-            )}
 
             {/* Description */}
             {product.description && (
-              <div className="border-t border-[#1e1e1e] pt-6 space-y-2">
-                <p className="font-mono text-xs uppercase tracking-widest text-[#555]">Description</p>
-                <p className="font-mono text-sm text-[#888] leading-relaxed">{product.description}</p>
+              <div className="pt-2 space-y-2 border-t border-[#1a1a22]">
+                <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#444]">Details</p>
+                <p className="font-mono text-[12px] text-[#555] leading-relaxed">
+                  {product.description}
+                </p>
               </div>
             )}
 
+            {/* SKU */}
             {selectedVariant?.sku && (
-              <p className="font-mono text-[10px] text-[#333]">SKU: {selectedVariant.sku}</p>
+              <p className="font-mono text-[9px] text-[#2a2a2a] uppercase tracking-widest pt-1">
+                SKU: {selectedVariant.sku}
+              </p>
             )}
           </div>
         </div>
+      </div>
 
-        {/* Related */}
-        {related.length > 0 && (
-          <section className="mt-24">
-            <h2 className="font-display text-4xl text-white mb-8">YOU MIGHT ALSO LIKE</h2>
+      {/* ── Related ── */}
+      {related.length > 0 && (
+        <section className="border-t border-[#111] py-20">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
+            <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#ff6b35] mb-3">You might also like</p>
+            <h2 className="font-display text-4xl text-white mb-10 leading-none">MORE DROPS</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {related.map((p, i) => <ProductCard key={p.id} product={p} index={i} />)}
             </div>
-          </section>
-        )}
-      </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
