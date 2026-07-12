@@ -122,6 +122,8 @@ CREATE TABLE IF NOT EXISTS public.product_variants (
   stock_qty   INTEGER NOT NULL DEFAULT 0 CHECK (stock_qty >= 0),
   price_adj   NUMERIC(10,2) NOT NULL DEFAULT 0,
   sku         TEXT UNIQUE,
+  image_url   TEXT,
+  description TEXT,
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
