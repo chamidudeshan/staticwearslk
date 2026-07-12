@@ -47,7 +47,6 @@ export function ProductDetailClient({ product, related }: Props) {
   const [activeIdx, setActiveIdx]             = useState(0);
   const [qty, setQty]                         = useState(1);
 
-  // Gallery: color-images take priority, then product-level images
   const colorImageMap: Record<string, string[]> = {};
   for (const v of allVariants) {
     if (v.color && v.image_url) {
@@ -64,8 +63,8 @@ export function ProductDetailClient({ product, related }: Props) {
   ];
   if (galleryPaths.length === 0) DEMO_IMAGES.forEach((_, i) => galleryPaths.push(`demo/${i}`));
 
-  const sizesForColor  = hasColors ? allVariants.filter((v) => v.color === selectedColor) : allVariants;
-  const selectedSize   = selectedVariant?.size ?? null;
+  const sizesForColor = hasColors ? allVariants.filter((v) => v.color === selectedColor) : allVariants;
+  const selectedSize  = selectedVariant?.size ?? null;
 
   function pickColor(color: string) {
     setSelectedColor(color);
@@ -88,9 +87,11 @@ export function ProductDetailClient({ product, related }: Props) {
     ? (hasVariants ? selectedVariant.price_adj : product.base_price)
     : lowestPrice;
 
-  const isOutOfStock = selectedVariant ? selectedVariant.stock_qty === 0 : false;
-  const maxQty       = selectedVariant?.stock_qty ?? 0;
+  const isOutOfStock  = selectedVariant ? selectedVariant.stock_qty === 0 : false;
+  const maxQty        = selectedVariant?.stock_qty ?? 0;
   const cartImagePath = colorPaths[0] ?? productImgPaths[0] ?? 'demo/0';
+
+  const activeImgSrc = imgSrc(galleryPaths[activeIdx] ?? 'demo/0', activeIdx);
 
   function handleAddToCart() {
     if (hasVariants && !selectedVariant) return;
@@ -116,7 +117,7 @@ export function ProductDetailClient({ product, related }: Props) {
     <div className="min-h-screen bg-[#060608]">
 
       {/* ── Breadcrumb ── */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-24 pb-4">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-8 pt-24 pb-6">
         <Link
           href="/shop"
           className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.2em] text-[#444] hover:text-[#ff6b35] transition-colors"
@@ -126,81 +127,96 @@ export function ProductDetailClient({ product, related }: Props) {
         </Link>
       </div>
 
-      {/* ── Main grid ── */}
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      {/* ── Main grid: left thumbnails + main image | right info ── */}
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-8 pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10 xl:gap-16 items-start">
 
-          {/* ═══ IMAGE PANEL ═══ */}
-          <div className="lg:sticky lg:top-24 space-y-3">
+          {/* ═══ LEFT: thumbnail strip + main image ═══ */}
+          <div className="lg:sticky lg:top-24 flex gap-3">
 
-            {/* Main image — square */}
-            <div className="relative w-full aspect-square bg-[#0f0f0f] overflow-hidden">
+            {/* Vertical thumbnail strip */}
+            {galleryPaths.length > 1 && (
+              <div className="flex flex-col gap-2 shrink-0">
+                {galleryPaths.map((path, i) => (
+                  <button
+                    key={`${path}-${i}`}
+                    onClick={() => setActiveIdx(i)}
+                    className={`relative w-[72px] h-[72px] shrink-0 overflow-hidden border transition-all duration-150 ${
+                      activeIdx === i
+                        ? 'border-[#ff6b35]'
+                        : 'border-[#1e1e28] hover:border-[#555]'
+                    }`}
+                  >
+                    {/* blurred bg fill */}
+                    <div
+                      className="absolute inset-0 scale-110 blur-sm"
+                      style={{
+                        backgroundImage: `url(${imgSrc(path, i)})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        opacity: 0.35,
+                      }}
+                    />
+                    <Image
+                      src={imgSrc(path, i)}
+                      alt=""
+                      fill
+                      className="object-contain relative z-10"
+                      sizes="72px"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Main image */}
+            <div className="relative flex-1 aspect-square overflow-hidden bg-[#111]">
+              {/* Blurred background of same image for smart fill */}
+              <div
+                key={`bg-${selectedColor}-${activeIdx}`}
+                className="absolute inset-0 scale-110 blur-xl"
+                style={{
+                  backgroundImage: `url(${activeImgSrc})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  opacity: 0.25,
+                }}
+              />
               <Image
                 key={`${selectedColor}-${activeIdx}`}
-                src={imgSrc(galleryPaths[activeIdx] ?? 'demo/0', activeIdx)}
+                src={activeImgSrc}
                 alt={product.name}
                 fill
                 priority
-                className="object-contain"
-                sizes="(max-width: 1024px) 100vw, 60vw"
+                className="object-contain relative z-10"
+                sizes="(max-width: 1024px) 100vw, 55vw"
               />
-              {/* Stock badge */}
+              {/* Low stock badge */}
               {selectedVariant && selectedVariant.stock_qty > 0 && selectedVariant.stock_qty <= 5 && (
-                <div className="absolute top-3 left-3 bg-[#ff6b35] text-black font-mono font-bold text-[9px] uppercase tracking-[0.2em] px-2 py-1">
+                <div className="absolute top-3 left-3 z-20 bg-[#ff6b35] text-black font-mono font-bold text-[9px] uppercase tracking-[0.2em] px-2 py-1">
                   {selectedVariant.stock_qty} LEFT
                 </div>
               )}
               {isOutOfStock && selectedVariant && (
-                <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+                <div className="absolute inset-0 z-20 bg-black/70 flex items-center justify-center">
                   <span className="font-mono text-[11px] tracking-[0.3em] text-[#666] uppercase border border-[#2a2a2a] px-5 py-2.5">
                     Out of Stock
                   </span>
                 </div>
               )}
             </div>
-
-            {/* Thumbnail row — horizontal */}
-            {galleryPaths.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {galleryPaths.map((path, i) => (
-                  <button
-                    key={`${path}-${i}`}
-                    onClick={() => setActiveIdx(i)}
-                    className={`relative shrink-0 w-16 h-20 overflow-hidden border transition-all duration-150 ${
-                      activeIdx === i
-                        ? 'border-[#ff6b35]'
-                        : 'border-[#1e1e28] hover:border-[#444]'
-                    }`}
-                  >
-                    <Image
-                      src={imgSrc(path, i)}
-                      alt=""
-                      fill
-                      className="object-contain bg-[#0f0f0f]"
-                      sizes="64px"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* ═══ INFO PANEL ═══ */}
+          {/* ═══ RIGHT: info panel ═══ */}
           <div className="space-y-5">
 
             {/* Brand */}
-            {product.brand ? (
-              <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#ff6b35]">
-                {product.brand.name}
-              </p>
-            ) : (
-              <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#ff6b35]">
-                Static Wears
-              </p>
-            )}
+            <p className="font-mono text-[10px] uppercase tracking-[0.35em] text-[#ff6b35]">
+              {product.brand?.name ?? 'Static Wears'}
+            </p>
 
             {/* Name */}
-            <h1 className="font-display text-[clamp(2rem,4vw,3rem)] text-white leading-[1] tracking-tight">
+            <h1 className="font-display text-[clamp(1.75rem,3.5vw,2.75rem)] text-white leading-[1] tracking-tight">
               {product.name.toUpperCase()}
             </h1>
 
@@ -244,22 +260,28 @@ export function ProductDetailClient({ product, related }: Props) {
                         }`}
                       >
                         {imgUrl ? (
-                          <Image
-                            src={imgSrc(imgUrl)}
-                            alt={color}
-                            fill
-                            className="object-contain bg-[#0f0f0f]"
-                            sizes="40px"
-                          />
+                          <>
+                            <div
+                              className="absolute inset-0 scale-110 blur-sm"
+                              style={{
+                                backgroundImage: `url(${imgSrc(imgUrl)})`,
+                                backgroundSize: 'cover',
+                                backgroundPosition: 'center',
+                                opacity: 0.4,
+                              }}
+                            />
+                            <Image
+                              src={imgSrc(imgUrl)}
+                              alt={color}
+                              fill
+                              className="object-contain relative z-10"
+                              sizes="40px"
+                            />
+                          </>
                         ) : (
-                          <span
-                            className="absolute inset-0"
-                            style={{ backgroundColor: hex ?? '#333' }}
-                          />
+                          <span className="absolute inset-0" style={{ backgroundColor: hex ?? '#333' }} />
                         )}
-                        {active && (
-                          <span className="absolute inset-0 ring-1 ring-inset ring-[#ff6b35]" />
-                        )}
+                        {active && <span className="absolute inset-0 ring-1 ring-inset ring-[#ff6b35] z-20" />}
                       </button>
                     );
                   })}
@@ -273,7 +295,7 @@ export function ProductDetailClient({ product, related }: Props) {
                 <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#555]">Size</p>
                 <div className="flex gap-2 flex-wrap">
                   {sizesForColor.map((v) => {
-                    const inStock = v.stock_qty > 0;
+                    const inStock  = v.stock_qty > 0;
                     const selected = selectedVariant?.id === v.id;
                     return (
                       <button
@@ -289,9 +311,7 @@ export function ProductDetailClient({ product, related }: Props) {
                         }`}
                       >
                         {v.size}
-                        {!inStock && (
-                          <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-[#333] rounded-full" />
-                        )}
+                        {!inStock && <span className="absolute top-0.5 right-0.5 w-1 h-1 bg-[#333] rounded-full" />}
                       </button>
                     );
                   })}
@@ -308,19 +328,19 @@ export function ProductDetailClient({ product, related }: Props) {
 
             {/* ── Quantity ── */}
             {selectedVariant && !isOutOfStock && (
-              <div className="flex items-center gap-0 border border-[#1e1e28] w-fit">
+              <div className="flex items-center border border-[#1e1e28] w-fit">
                 <button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
-                  className="w-9 h-9 flex items-center justify-center text-[#555] hover:text-[#ff6b35] transition-colors"
+                  className="w-10 h-10 flex items-center justify-center text-[#555] hover:text-[#ff6b35] transition-colors"
                 >
                   <Minus size={12} />
                 </button>
-                <span className="w-9 h-9 flex items-center justify-center font-mono text-sm text-[#e8e8f0] border-x border-[#1e1e28]">
+                <span className="w-10 h-10 flex items-center justify-center font-mono text-sm text-[#e8e8f0] border-x border-[#1e1e28]">
                   {qty}
                 </span>
                 <button
                   onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
-                  className="w-9 h-9 flex items-center justify-center text-[#555] hover:text-[#ff6b35] transition-colors"
+                  className="w-10 h-10 flex items-center justify-center text-[#555] hover:text-[#ff6b35] transition-colors"
                 >
                   <Plus size={12} />
                 </button>
@@ -368,7 +388,7 @@ export function ProductDetailClient({ product, related }: Props) {
       {/* ── Related ── */}
       {related.length > 0 && (
         <section className="border-t border-[#111] py-20">
-          <div className="max-w-screen-xl mx-auto px-4 sm:px-6">
+          <div className="max-w-screen-xl mx-auto px-4 sm:px-8">
             <p className="font-mono text-[10px] uppercase tracking-[0.4em] text-[#ff6b35] mb-3">You might also like</p>
             <h2 className="font-display text-4xl text-white mb-10 leading-none">MORE DROPS</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
