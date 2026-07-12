@@ -131,10 +131,10 @@ export function ProductDetailClient({ product, related }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] xl:grid-cols-[1fr_440px] gap-8 xl:gap-14 items-start">
 
           {/* ═══ IMAGE PANEL ═══ */}
-          <div className="space-y-3">
+          <div className="lg:sticky lg:top-24 space-y-3">
 
-            {/* Main image */}
-            <div className="relative w-full aspect-[4/5] bg-[#0f0f0f] overflow-hidden">
+            {/* Main image — square */}
+            <div className="relative w-full aspect-square bg-[#0f0f0f] overflow-hidden">
               <Image
                 key={`${selectedColor}-${activeIdx}`}
                 src={imgSrc(galleryPaths[activeIdx] ?? 'demo/0', activeIdx)}
@@ -186,7 +186,7 @@ export function ProductDetailClient({ product, related }: Props) {
           </div>
 
           {/* ═══ INFO PANEL ═══ */}
-          <div className="lg:sticky lg:top-24 space-y-5">
+          <div className="space-y-5">
 
             {/* Brand */}
             {product.brand ? (
