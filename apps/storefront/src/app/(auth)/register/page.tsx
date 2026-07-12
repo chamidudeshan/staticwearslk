@@ -15,7 +15,7 @@ function RegisterInner() {
 
   return (
     <SignUp
-      fallbackRedirectUrl={redirectTo}
+      forceRedirectUrl={redirectTo}
       appearance={{
         variables: {
           colorPrimary: '#ff6b35',
