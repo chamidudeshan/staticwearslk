@@ -83,7 +83,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('sw-cart');
+    const saved = localStorage.getItem('sw-cart');
     if (saved) {
       try {
         dispatch({ type: 'HYDRATE', payload: JSON.parse(saved) });
@@ -92,7 +92,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    sessionStorage.setItem('sw-cart', JSON.stringify(cart.items));
+    localStorage.setItem('sw-cart', JSON.stringify(cart.items));
   }, [cart]);
 
   return (
