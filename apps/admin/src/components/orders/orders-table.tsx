@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Search, FileSpreadsheet, Loader2, ChevronDown, ChevronUp, MapPin, Phone, User, Package, StickyNote } from 'lucide-react';
+import { Search, FileSpreadsheet, Loader2, ChevronDown, ChevronUp, MapPin, Phone, User, Package, StickyNote, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Order, OrderStatus } from '@static-wears/shared';
 import { formatPrice, formatDate } from '@/lib/utils';
@@ -176,6 +176,20 @@ function OrderRow({
                     </div>
                   </div>
                 )}
+
+                {/* Print button */}
+                <div className="pt-3 border-t border-[#1e1e28]">
+                  <a
+                    href={`/orders/${order.id}/print`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#0e0e12] border border-[#1e1e28] hover:border-[#ff6b35] hover:text-[#ff6b35] text-[#888] font-mono text-[10px] uppercase tracking-widest transition-colors"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Printer size={12} />
+                    Print / Save Bill
+                  </a>
+                </div>
 
                 {/* Payment info */}
                 {order.payment && (
