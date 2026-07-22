@@ -15,16 +15,16 @@ export default function SettingsPage() {
 
   // Store settings
   const [storeName, setStoreName] = useState('Static Wears');
-  const [storeEmail, setStoreEmail] = useState('hello@staticwears.lk');
+  const [storeEmail, setStoreEmail] = useState('hello@staticwears.com');
   const [adminNotifEmail, setAdminNotifEmail] = useState('');
   const [currency, setCurrency] = useState('LKR');
   const [orderNotif, setOrderNotif] = useState(true);
   const [lowStockNotif, setLowStockNotif] = useState(true);
-  const [lowStockThreshold, setLowStockThreshold] = useState('5');
+  const [lowStockThreshold, setLowStockThreshold] = useState('1');
 
   // Homepage settings
   const [marqueeText, setMarqueeText] = useState('NEW DROP AVAILABLE · FREE SHIPPING OVER LKR 5,000 · MADE IN SRI LANKA · LIMITED STOCK');
-  const [contactEmail, setContactEmail] = useState('hello@staticwears.lk');
+  const [contactEmail, setContactEmail] = useState('hello@staticwears.com');
   const [contactPhone, setContactPhone] = useState('+94 77 000 0000');
   const [contactAddress, setContactAddress] = useState('Colombo, Sri Lanka');
 
